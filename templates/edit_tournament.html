@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}Advanced Edit | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Набор революционных стилей для Ultra-Premium формы редактирования -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #0f172a;
+        --glass-panel: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(226, 232, 240, 0.8);
+    }
+
+    .glass-edit-card {
+        background: var(--glass-panel) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 20px !important;
+        padding: 40px !important;
+        box-shadow: 0 20px 40px -20px rgba(15, 23, 42, 0.06);
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-edit-card:hover {
+        border-color: rgba(14, 165, 233, 0.25) !important;
+        box-shadow: 0 25px 50px -20px rgba(14, 165, 233, 0.08) !important;
+    }
+
+    .glass-edit-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(600px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.04), transparent 40%);
+        pointer-events: none;
+    }
+
+    /* Модернизация полей ввода */
+    .premium-input-field {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        background: rgba(255, 255, 255, 0.6);
+        font-size: 1rem;
+        color: var(--brand-dark);
+        box-sizing: border-box;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .premium-input-field:focus {
+        outline: none;
+        background: white;
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12), 0 4px 12px rgba(14, 165, 233, 0.05);
+    }
+
+    /* Селекторы языков в виде тегов */
+    .lang-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        user-select: none;
+        transition: all 0.2s ease;
+        color: #475569;
+    }
+
+    .lang-checkbox-label:hover {
+        border-color: var(--brand-blue);
+        background: rgba(14, 165, 233, 0.02);
+    }
+
+    .lang-checkbox-input:checked + .lang-text-node {
+        color: var(--brand-blue);
+    }
+
+    .lang-checkbox-label:has(.lang-checkbox-input:checked) {
+        border-color: var(--brand-blue) !important;
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+    }
+
+    /* iOS-like свитч */
+    .switch-toggle:checked + .slider-toggle {
+        background-color: var(--brand-blue) !important;
+    }
+    .slider-toggle:before {
+        position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+        background-color: white; border-radius: 50%; transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .switch-toggle:checked + .slider-toggle:before {
+        transform: translateX(20px);
+    }
+
+    /* Кастомный фикс стрелок Chrome */
+    .chrome-arrows-fix::-webkit-outer-spin-button,
+    .chrome-arrows-fix::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+
+    .btn-action-modern {
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<section class="edit-tournament-section" style="padding: 50px 0; background: radial-gradient(80% 50% at 50% 0%, rgba(14, 165, 233, 0.02), transparent);">
+    <div class="container" style="max-width: 800px; padding: 0 20px;">
+
+        <!-- EDITOR HEADER -->
+        <div style="margin-bottom: 35px;">
+            <a href="/tournaments{% if tournament %}/{{ tournament.id }}{% endif %}" style="color: var(--brand-blue); text-decoration: none; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                ← Cancel & Go Back
+            </a>
+            <h1 style="font-size: 2.6rem; font-weight: 900; margin: 15px 0 6px 0; color: var(--brand-dark); letter-spacing: -1px;">
+                Advanced Tournament Editor
+            </h1>
+            <p style="color: #64748b; font-size: 1.05rem; margin: 0; font-weight: 500;">
+                Manage core metadata, event track lifecycle statuses, and roster settings.
+            </p>
+        </div>
+
+        <!-- REVOLUTION GLASS CONTAINER -->
+        <div class="glass-edit-card">
+            <form method="POST" style="display: flex; flex-direction: column; gap: 28px; margin: 0;">
+
+                <!-- Title Node -->
+                <div>
+                    <label style="display: block; font-weight: 800; margin-bottom: 10px; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Tournament Title</label>
+                    <input type="text" name="title" class="premium-input-field" value="{{ tournament.title if tournament and tournament.title else (tournament.name if tournament and tournament.name else '') }}" required>
+                </div>
+
+                <!-- Deep configuration toggle -->
+                <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid #e2e8f0; padding: 20px 24px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                    <div>
+                        <h4 style="margin: 0 0 4px 0; font-size: 1rem; font-weight: 800; color: var(--brand-dark); letter-spacing: -0.2px;">Unlock Deep Lobby Settings</h4>
+                        <p style="margin: 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;">Enable this controller to manually override maximum entry slots, registration types, and match timing metrics.</p>
+                    </div>
+                    <label style="position: relative; display: inline-block; width: 44px; height: 24px; margin: 0; cursor: pointer; flex-shrink: 0;">
+                        <!-- Умная проверка: если это главный турнир (ID <= 3) ИЛИ если у кастомного уже переопределены параметры, включаем свитч по умолчанию -->
+                        <input type="checkbox" id="toggle-advanced-options" class="switch-toggle" style="opacity: 0; width: 0; height: 0;"
+                               {% if tournament and (tournament.id <= 3 or tournament.status != 'upcoming' or tournament.league_type != 'additional') %}checked{% endif %}>
+                        <span class="slider-toggle" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; border-radius: 24px; transition: .3s cubic-bezier(0.16, 1, 0.3, 1);"></span>
+                    </label>
+                </div>
+
+                <!-- DEEP OPTIONS INPUT MATRIX -->
+                <!-- Синхронизируем начальное отображение контейнера с состоянием свитча -->
+                <div id="advanced-settings-block" style="{% if tournament and (tournament.id <= 3 or tournament.status != 'upcoming' or tournament.league_type != 'additional') %}display: flex;{% else %}display: none;{% endif %} flex-direction: column; gap: 28px;">
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+                        <div>
+                            <label style="display: block; font-weight: 800; margin-bottom: 10px; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Current Status</label>
+                            <select name="status" class="premium-input-field" style="background-image: none; font-weight: 700; cursor: pointer;">
+                                <option value="upcoming" {% if tournament and tournament.status == 'upcoming' %}selected{% endif %}>Locked / Upcoming</option>
+                                <option value="live" {% if tournament and tournament.status == 'live' %}selected{% endif %}>Active / Live</option>
+                                <option value="completed" {% if tournament and tournament.status == 'completed' %}selected{% endif %}>Finished / Past</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-weight: 800; margin-bottom: 10px; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Registration Format</label>
+                            <select name="league_type" class="premium-input-field" style="background-image: none; font-weight: 700; cursor: pointer;">
+                                <option value="open" {% if tournament and tournament.league_type == 'open' %}selected{% endif %}>Open Registration (All Teams)</option>
+                                <option value="qualification" {% if tournament and tournament.league_type == 'qualification' %}selected{% endif %}>By Qualification Stage</option>
+                                <option value="promotion" {% if tournament and tournament.league_type == 'promotion' %}selected{% endif %}>🔒 Promotion Only Track</option>
+                                <option value="additional" {% if tournament and tournament.league_type == 'additional' %}selected{% endif %}>Open Additional Cup</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-weight: 800; margin-bottom: 10px; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Match Language</label>
+                            <div style="display: flex; gap: 8px; align-items: center; height: 50px; box-sizing: border-box;">
+                                {% set lang_list = tournament.language.split(',') if tournament and tournament.language else ['ru'] %}
+
+                                <label class="lang-checkbox-label">
+                                    <input type="checkbox" name="languages" value="ru" class="lang-checkbox-input" {% if 'ru' in lang_list %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--brand-blue); margin:0;">
+                                    <span class="lang-text-node">RU</span>
+                                </label>
+
+                                <label class="lang-checkbox-label">
+                                    <input type="checkbox" name="languages" value="kg" class="lang-checkbox-input" {% if 'kg' in lang_list %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--brand-blue); margin:0;">
+                                    <span class="lang-text-node">KG</span>
+                                </label>
+
+                                <label class="lang-checkbox-label">
+                                    <input type="checkbox" name="languages" value="en" class="lang-checkbox-input" {% if 'en' in lang_list %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--brand-blue); margin:0;">
+                                    <span class="lang-text-node">ENG</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inner metrics dash wrap -->
+                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; background: rgba(14, 165, 233, 0.02); border: 1px dashed rgba(14, 165, 233, 0.25); padding: 24px; border-radius: 12px; margin-top: 4px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label style="display: block; font-weight: 800; margin-bottom: 10px; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Lobby Slot Limit</label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button type="button" onclick="stepTeams(-1)" style="background: white; border: 1px solid #cbd5e1; width: 44px; height: 44px; border-radius: 8px; font-weight: 900; font-size: 1.2rem; cursor: pointer; color: #475569; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;">-</button>
+                                <input type="number" id="teams-count-input" name="teams_count" value="{{ tournament.teams_count if tournament and tournament.teams_count else 16 }}" min="1" max="128" class="chrome-arrows-fix premium-input-field" style="width: 75px; height: 44px; text-align: center; font-weight: 900; font-family: monospace; font-size: 1.2rem; padding: 0;" required>
+                                <button type="button" onclick="stepTeams(1)" style="background: white; border: 1px solid #cbd5e1; width: 44px; height: 44px; border-radius: 8px; font-weight: 900; font-size: 1.2rem; cursor: pointer; color: #475569; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;">+</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-weight: 800; margin-bottom: 10px; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Exact Match Date & Time</label>
+                            <input type="datetime-local" name="exact_date" class="premium-input-field" value="{% if tournament and tournament.date %}{{ tournament.date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" style="font-weight: 700; cursor: text;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Textarea Segment -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <label style="font-weight: 800; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">Rules & Information Block</label>
+                        <span id="char-counter" style="font-size: 0.8rem; color: #94a3b8; font-family: monospace; font-weight: 800; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">0 / 500 chars</span>
+                    </div>
+                    <textarea id="desc-textarea" name="text" rows="6" maxlength="500" class="premium-input-field" style="line-height: 1.6; font-family: inherit; resize: vertical;" required>{{ tournament.text if tournament and tournament.text else (tournament.desc if tournament and tournament.desc else '') }}</textarea>
+                </div>
+
+                <!-- Action Triggers -->
+                <div style="display: flex; gap: 12px; border-top: 1px solid rgba(226, 232, 240, 0.6); padding-top: 24px;">
+                    <button type="submit" class="btn-action-modern" style="background: var(--brand-blue); color: white; border: none; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);">
+                        Save Matrix Changes
+                    </button>
+                    <a href="/tournaments{% if tournament %}/{{ tournament.id }}{% endif %}" class="btn-action-modern" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</section>
+
+<!-- Интеллектуальный JS блок трекинга Reveal-свойств и инпут-счетчиков -->
+<script>
+    document.querySelector('.glass-edit-card').addEventListener('mousemove', e => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        e.currentTarget.style.setProperty('--x', `${x}px`);
+        e.currentTarget.style.setProperty('--y', `${y}px`);
+    });
+
+    const textarea = document.getElementById('desc-textarea');
+    const counter = document.getElementById('char-counter');
+
+    if (textarea && counter) {
+        function updateCounter() {
+            const currentLength = textarea.value.length;
+            counter.innerText = `${currentLength} / 500 chars`;
+            if (currentLength >= 450) { counter.style.background = '#fee2e2'; counter.style.color = '#ef4444'; }
+            else if (currentLength >= 350) { counter.style.background = '#fef3c7'; counter.style.color = '#d97706'; }
+            else { counter.style.background = '#f1f5f9'; counter.style.color = '#94a3b8'; }
+        }
+        textarea.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+
+    function stepTeams(step) {
+        const input = document.getElementById('teams-count-input');
+        if (input) {
+            let currentVal = parseInt(input.value) || 16;
+            let newVal = currentVal + step;
+            if (newVal < 1) newVal = 1;
+            if (newVal > 128) newVal = 128;
+            input.value = newVal;
+        }
+    }
+
+    const toggleSwitch = document.getElementById('toggle-advanced-options');
+    const advancedBlock = document.getElementById('advanced-settings-block');
+
+    if (toggleSwitch && advancedBlock) {
+        toggleSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                advancedBlock.style.display = 'flex';
+                advancedBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                advancedBlock.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile | {{ user.name }}{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #38bdf8;
+        --brand-dark: #0b111e;
+        --brand-slate: #94a3b8;
+        --brand-muted: #475569;
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --bg-clean-light: #ffffff;
+    }
+
+    .edit-profile-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px;
+        background: var(--bg-clean-light);
+        min-height: calc(100vh - 70px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    .form-card {
+        width: 100%;
+        max-width: 550px;
+        background: var(--brand-dark);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 45px;
+        box-sizing: border-box;
+        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.3);
+    }
+
+    .form-header {
+        margin-bottom: 35px;
+    }
+
+    .form-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #f8fafc;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .form-header p {
+        color: var(--brand-slate);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .styled-form {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* СЕКЦИЯ РЕДАКТИРОВАНИЯ АВАТАРА */
+    .avatar-edit-section {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        flex-wrap: wrap;
+    }
+
+    .current-avatar-wrapper {
+        position: relative;
+        border-radius: 50%;
+        padding: 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* Выставляем фирменный синий градиент вокруг аватарки */
+        background: linear-gradient(135deg, #38bdf8, #0284c7);
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    #imagePreview {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #0b111e;
+        background: #1e293b;
+    }
+
+    .file-input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: max-content;
+        padding: 10px 18px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .file-input-wrapper input[type="file"] {
+        display: none;
+    }
+
+    .file-input-wrapper small {
+        color: var(--brand-slate);
+        font-size: 0.75rem;
+    }
+
+    /* ПОЛЯ ВВОДА */
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .input-group label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .field-input-modern {
+        width: 100%;
+        padding: 14px 16px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: #f8fafc;
+        box-sizing: border-box;
+        transition: all 0.25s ease;
+    }
+
+    .field-input-modern:focus {
+        outline: none;
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    .disabled-input {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px dashed rgba(255, 255, 255, 0.05) !important;
+        color: var(--brand-slate) !important;
+        cursor: not-allowed;
+    }
+
+    .input-group small {
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: var(--brand-muted);
+    }
+
+    /* ЗНАЧОК УНИВЕРСИТЕТА */
+    .university-locked-badge {
+        font-family: monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        background: rgba(56, 189, 248, 0.06);
+        border: 1px solid rgba(56, 189, 248, 0.15);
+        padding: 10px 14px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+    }
+
+    /* КНОПКИ ДЕЙСТВИЯ */
+    .form-actions {
+        margin-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 14px;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px;
+        background: transparent;
+        color: var(--brand-slate);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.02);
+        color: #ffffff;
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 28px;
+        background: #ffffff;
+        color: var(--brand-dark);
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+        background: var(--brand-blue);
+        color: #ffffff;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 480px) {
+        .avatar-edit-section { flex-direction: column; align-items: flex-start; }
+        .form-actions { flex-direction: column; }
+        .btn-cancel, .btn-submit { width: 100%; }
+    }
+</style>
+
+<div class="edit-profile-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Edit Your Profile</h1>
+            <p>Обновите вашу персональную информацию и аватар в системе лиги</p>
+        </div>
+
+        <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data" class="styled-form">
+
+            <div class="avatar-edit-section">
+                <div class="current-avatar-wrapper">
+                    <img src="{{ url_for('static', filename='profile_pics/' + user.avatar) }}" alt="Current Avatar" id="imagePreview">
+                </div>
+                <div class="file-input-wrapper">
+                    <label for="avatar" class="btn-secondary">Change Photo</label>
+                    <input type="file" name="avatar" id="avatar" accept="image/*" onchange="previewImage(this)">
+                    <small>Рекомендуется: Квадратное изображение, от 250x250px</small>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="name">Display Name</label>
+                <input type="text" name="name" id="name" class="field-input-modern" value="{{ user.name }}" required placeholder="Enter your name">
+            </div>
+
+            <div class="input-group">
+                <label>Login (Username)</label>
+                <input type="text" value="{{ user.login }}" disabled class="field-input-modern disabled-input">
+                <small>Уникальный системный идентификатор не может быть изменен</small>
+            </div>
+
+            <div class="input-group">
+                <label>University Delegation</label>
+                {% if user.university_id and user.uni_profile %}
+                    <div class="university-locked-badge">
+                        🏛️ {{ user.uni_profile.name | upper }} LINKED
+                    </div>
+                    <small style="margin-top: 4px;">Ваша академическая квота зафиксирована для корректного распределения очков</small>
+                {% else %}
+                    <div class="university-locked-badge" style="color: var(--brand-slate); background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
+                        🏛️ ВНЕ ЛИГИ / ДРУГОЙ ВУЗ
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('my_profile') }}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Скрипт для мгновенного предпросмотра выбранного фото
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}

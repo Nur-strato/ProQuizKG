@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Our Mission | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<div class="about-room-container" style="max-width: 900px; margin: 50px auto; padding: 0 20px; font-family: sans-serif;">
+
+    <!-- Главный блок миссии -->
+    <div style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.08); padding: 40px; border-radius: var(--radius); margin-bottom: 30px; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 15px;">🎯</div>
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--navy); margin-bottom: 20px;">Our Mission</h1>
+        <p style="font-size: 1.2rem; line-height: 1.8; color: var(--text-color); max-width: 750px; margin: 0 auto;">
+            We aim to develop the culture of intellectual competitions among the student community of Kyrgyzstan.
+            Our goal is to create a powerful intercollegiate ecosystem where erudition, logic, and team spirit become the main trends among today's progressive youth.
+        </p>
+    </div>
+
+    <!-- Блок ключевых ценностей (Сетка из 3-х карточек) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
+
+        <div style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.06); padding: 25px; border-radius: var(--radius); text-align: center; transition: transform 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">💡</div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 10px;">Intellectual Growth</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color); margin: 0;">Popularizing knowledge, sharp logic, and fast thinking beyond the standard university curriculum.</p>
+        </div>
+
+        <div style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.06); padding: 25px; border-radius: var(--radius); text-align: center; transition: transform 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🤝</div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 10px;">Unity & Collaboration</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color); margin: 0;">Building tight bridges between different universities in Bishkek, creating a strong youth community.</p>
+        </div>
+
+        <div style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.06); padding: 25px; border-radius: var(--radius); text-align: center; transition: transform 0.2s;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🏆</div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 10px;">Fair Play</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color); margin: 0;">Ensuring a transparent and honest championship system where every single point is earned through pure intellect.</p>
+        </div>
+
+    </div>
+
+    <!-- Блок со списком стратегических целей -->
+    <div style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.08); padding: 35px 40px; border-radius: var(--radius);">
+        <h2 style="font-size: 1.75rem; font-weight: 700; color: var(--navy); margin-bottom: 20px;">Our Strategic Goals</h2>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 1.05rem; line-height: 1.8; color: var(--text-color);">
+            <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                <span style="color: var(--primary-color); margin-right: 10px; font-weight: bold;">✔</span>
+                To unite students from at least 8 leading universities of the Kyrgyz Republic within a single multi-league tournament system.
+            </li>
+            <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                <span style="color: var(--primary-color); margin-right: 10px; font-weight: bold;">✔</span>
+                To digitize the intellectual sports sector by launching user profiles, live stats, and dynamic leaderboards.
+            </li>
+            <li style="display: flex; align-items: flex-start;">
+                <span style="color: var(--primary-color); margin-right: 10px; font-weight: bold;">✔</span>
+                To organize a grand intercollegiate final with high-profile guest support, highlighting the prestige of smart youth.
+            </li>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}

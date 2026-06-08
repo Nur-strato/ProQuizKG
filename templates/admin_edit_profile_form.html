@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать профиль {{ university.name }} | Панель админа{% endblock %}
+
+{% block body %}
+<div style="max-width: 600px; margin: 40px auto; padding: 30px; background: var(--card-bg); border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.08);">
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('university_detail', id=university.id) }}" style="color: #0083e4; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+            ← Отмена и возврат в профиль
+        </a>
+    </div>
+
+    <h1 style="color: var(--navy); font-size: 1.8rem; margin-bottom: 25px; font-weight: 800;">⚙️ Редактирование профиля {{ university.name }}</h1>
+
+    <form method="POST">
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Название университета:</label>
+            <input type="text" name="name" value="{{ university.name }}" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Город:</label>
+            <input type="text" name="city" value="{{ university.city }}" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Полное детальное описание вуза в профиле:</label>
+            <textarea name="description" rows="6" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; resize: vertical; font-family: inherit;">{{ university.description if university.description else '' }}</textarea>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Official Website URL (например, https://auca.kg):</label>
+            <input type="url" name="website" value="{{ university.website if university.website else '' }}" placeholder="https://example.edu" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <button type="submit" style="background: #0083e4; color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 700; border-radius: 6px; cursor: pointer; width: 100%;">
+            Сохранить профиль вуза
+        </button>
+    </form>
+</div>
+{% endblock %}

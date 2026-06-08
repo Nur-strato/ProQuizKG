@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>{% block title %}{% endblock %} | ProQuiz.kg</title>
+</head>
+<body>
+
+<div class="dynamic-island-container">
+  <div class="dynamic-island" id="dynamicIsland" onclick="toggleIsland(event)">
+        <div class="island-compact">
+            <span class="island-logo brand-btn-home">PQ</span>
+            <span class="island-arrow">▾</span>
+        </div>
+
+        <div class="island-content">
+            <ul class="mobile-nav-links">
+                <li><a href="{{ url_for('index') }}" class="mobile-brand brand-btn-home">ProQuizKG</a></li>
+                <hr class="island-hr">
+
+                <li><a href="{{ url_for('tournaments') }}">Tournaments</a></li>
+                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                <li><a href="{{ url_for('hall_of_fame') }}">Hall of Fame</a></li>
+                <li><a href="{{ url_for('universities') }}">Universities</a></li>
+
+                <hr class="island-hr">
+                <li class="mobile-about-wrapper">
+                    <a href="#" class="mobile-about-toggle" onclick="toggleMobileAbout(event)">About <span class="about-arrow">▾</span></a>
+                    <ul class="mobile-about-dropdown" id="mobileAboutDropdown">
+                        <li><a href="{{ url_for('about_mission') }}" class="mobile-about-sub">Mission</a></li>
+                        <li><a href="{{ url_for('about_partners') }}" class="mobile-about-sub">Partners</a></li>
+                        <li><a href="{{ url_for('about_organizers') }}" class="mobile-about-sub">Organizers</a></li>
+                        <li><a href="{{ url_for('about_faq') }}" class="mobile-about-sub">FAQ & Rules</a></li>
+                    </ul>
+                </li>
+                <hr class="island-hr">
+
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('my_profile') }}" class="mobile-user-name">👤 {{ current_user.name }}</a></li>
+                    <li><a href="{{ url_for('logout') }}" class="mobile-btn-logout">Log Out</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Log In</a></li>
+                    <li><a href="{{ url_for('register') }}" class="mobile-btn-signup">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<header class="navbar desktop-navbar">
+    <div class="container nav-container">
+        <nav>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="brand-btn-home" style="font-weight: 700; font-size: 1.2rem; margin-right: 15px; letter-spacing: 0.5px;">ProQuizKG</a></li>
+
+                <li><a href="{{ url_for('tournaments') }}">Tournaments</a></li>
+                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                <li><a href="{{ url_for('hall_of_fame') }}">Hall of Fame</a></li>
+                <li><a href="{{ url_for('universities') }}">Universities</a></li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" onclick="return false;">About</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('about_mission') }}"> Mission</a></li>
+                        <li><a href="{{ url_for('about_partners') }}"> Partners</a></li>
+                        <li><a href="{{ url_for('about_organizers') }}"> Organizers</a></li>
+                        <li><a href="{{ url_for('about_faq') }}"> FAQ & Rules</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-divider">|</li>
+
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('my_profile') }}" class="user-name">{{ current_user.name }}</a></li>
+                    <li><a href="{{ url_for('logout') }}" class="btn-logout">Log Out</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Log In</a></li>
+                    <li><a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main class="container content">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block body %}{% endblock %}
+</main>
+
+<footer class="main-footer">
+    <div class="container footer-content">
+        <p>&copy; 2026 ProQuiz.kg. Все права защищены.</p>
+
+        <a href="{{ url_for('index') }}" class="footer-logo-link">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ProQuiz.kg Logo" class="footer-logo">
+        </a>
+
+        <div class="footer-socials">
+            <a href="https://t.me/NurRay0" target="_blank">Telegram</a>
+            <a href="https://www.instagram.com/auca_quiz_club/" target="_blank">Instagram</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+function toggleIsland(event) {
+    const island = document.getElementById('dynamicIsland');
+
+    if (event && event.target.closest('a') && !event.target.closest('.mobile-about-toggle')) return;
+
+    island.classList.toggle('active');
+}
+
+function toggleMobileAbout(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const toggleLink = event.currentTarget;
+    const dropdown = document.getElementById('mobileAboutDropdown');
+
+    toggleLink.classList.toggle('active');
+    dropdown.classList.toggle('open');
+}
+
+document.addEventListener('click', function(event) {
+    const island = document.getElementById('dynamicIsland');
+    const container = document.querySelector('.dynamic-island-container');
+
+    if (island && container && !container.contains(event.target) && island.classList.contains('active')) {
+        island.classList.remove('active');
+        document.getElementById('mobileAboutDropdown').classList.remove('open');
+        const aboutToggle = document.querySelector('.mobile-about-toggle');
+        if (aboutToggle) aboutToggle.classList.remove('active');
+    }
+});
+</script>
+
+</body>
+</html>

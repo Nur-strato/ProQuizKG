@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Club — Home{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #0f172a;
+        --brand-slate: #475569;
+        --brand-muted: #64748b;
+        --border-clean: #e2e8f0;
+        --bg-panel: #ffffff;
+    }
+
+    /* БЛОК НАВИГАЦИИ ПО ВКЛАДКАМ */
+    .tabs-navigation-wrapper {
+        max-width: 800px;
+        margin: 40px auto 20px auto;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 24px;
+    }
+
+    .tab-nav-btn {
+        flex: 1;
+        padding: 14px 20px;
+        background: #ffffff;
+        border: 1px solid var(--border-clean);
+        border-radius: 8px;
+        color: var(--brand-slate);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .tab-nav-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--brand-dark);
+    }
+
+    .tab-nav-btn.active-tab-trigger {
+        background: var(--brand-dark);
+        border-color: var(--brand-dark);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(30, 41, 59, 0.08);
+    }
+
+    /* ОБОЛОЧКА ДЛЯ КОНТЕНТА ВКЛАДОК */
+    .tabs-content-container {
+        max-width: 800px;
+        margin: 0 auto 60px auto;
+        padding: 0 24px;
+        box-sizing: border-box;
+    }
+
+    .single-tab-content {
+        display: none; /* По умолчанию скрываем все вкладки */
+        background: var(--bg-panel) !important;
+        border: 1px solid var(--border-clean) !important;
+        border-radius: 12px !important;
+        padding: 35px !important;
+        box-shadow: 0 1px 3px rgba(30, 41, 59, 0.02), 0 4px 12px rgba(30, 41, 59, 0.01);
+        animation: fadeInTab 0.3s ease;
+    }
+
+    /* ИСПРАВЛЕНО: Теперь первая активная вкладка корректно отображается при старте */
+    .single-tab-content.active-tab-content {
+        display: block;
+    }
+
+    @keyframes fadeInTab {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-content-title {
+        margin: 0 0 12px 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        letter-spacing: -0.4px;
+    }
+
+    /* Виджет квот вузов для третьей вкладки Teams */
+    .mini-quota-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 18px 0 24px 0;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
+    }
+
+    .mini-quota-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--brand-slate);
+        font-weight: 500;
+    }
+
+    .mini-quota-tag {
+        font-family: monospace;
+        font-weight: 700;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        color: var(--brand-dark);
+        font-size: 0.8rem;
+        border: 1px solid var(--border-clean);
+    }
+
+    /* Кнопка перехода */
+    .btn-tab-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        background: var(--brand-dark);
+        color: white;
+        border: 1px solid var(--brand-dark);
+    }
+
+    .btn-tab-action:hover {
+        background: #111827;
+        border-color: #111827;
+    }
+
+    /* СТИЛИ ХОВЕРА ДЛЯ СВЕЖЕЙ КНОПКИ ПОИСКА ИГРОКОВ */
+    .btn-home-search-hero {
+        background: linear-gradient(135deg, #0b172a 0%, #1e293b 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3) !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .btn-home-search-hero:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #0083e4 0%, #0ea5e9 100%) !important;
+        box-shadow: 0 12px 30px -5px rgba(14, 165, 233, 0.4) !important;
+    }
+    .btn-home-search-hero:hover .arrow-matrix {
+        transform: translateX(4px);
+    }
+</style>
+
+<div class="mj-hero-wrapper">
+    <div class="crt-overlay"></div>
+
+    <div class="matrix-space"></div>
+
+    <div class="mj-content">
+        <h1 class="mj-logo">ProQuizKG</h1>
+
+        <div class="mj-btn-group">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="mj-btn btn-signup">
+                    <span class="btn-icon">👤+</span> Sign Up
+                </a>
+                <a href="{{ url_for('login') }}" class="mj-btn btn-login">
+                    <span class="btn-icon">➔</span> Log In
+                </a>
+         {% else %}
+                <!-- ИСПРАВЛЕНО: Стрелка убрана, теги и кавычки полностью закрыты -->
+                <a href="{{ url_for('players_hub') }}" class="mj-btn btn-home-search-hero">
+                    <span class="btn-icon">🔍</span> Find Players
+                </a>
+            {% endif %}
+
+            <!-- Кнопка тренировки остается на месте -->
+            <a href="/practice" class="mj-btn btn-explore">
+                <span class="btn-icon">🎓</span> Practice
+            </a>
+        </div>
+    </div>
+</div>
+
+<section class="container" style="max-width: 1200px; padding: 0;">
+
+    <div class="tabs-navigation-wrapper">
+        <button class="tab-nav-btn active-tab-trigger" onclick="switchMainHubTab(event, 'tab-main-league')">
+            🏆 Main League
+        </button>
+        <button class="tab-nav-btn" onclick="switchMainHubTab(event, 'tab-biography')">
+            📖 Biography
+        </button>
+        <button class="tab-nav-btn" onclick="switchMainHubTab(event, 'tab-teams')">
+            👥 Teams Matrix
+        </button>
+    </div>
+
+    <div class="tabs-content-container">
+
+        <div id="tab-main-league" class="single-tab-content active-tab-content">
+            <h3 class="tab-content-title">Main League Hierarchy</h3>
+            <p style="color: var(--brand-slate); font-size: 1rem; line-height: 1.6; margin: 0 0 24px 0; font-weight: 400;">
+                Короткое описание: Раздел содержит официальную информацию о Высшей Лиге чемпионата. Здесь вы можете изучить регламент проведения главных кубковых этапов, структуру продвижения по сезону и актуальную сетку арен интеллекта.
+            </p>
+            <a href="/main-league" class="btn-tab-action">View Rewards & Regulations</a>
+        </div>
+
+        <div id="tab-biography" class="single-tab-content">
+            <h3 class="tab-content-title">Biography of ProQuiz.kg</h3>
+            <p style="color: var(--brand-slate); font-size: 1rem; line-height: 1.6; margin: 0 0 24px 0; font-weight: 400;">
+                История создания масштабного интеллектуального движения. Узнайте, как локальная инициатива Quiz Club переросла в полноценную цифровую экосистему, объединяющую ведущие институты и лучшие умы регионов.
+            </p>
+            <a href="/biography" class="btn-tab-action">Read Our Story</a>
+        </div>
+
+        <div id="tab-teams" class="single-tab-content">
+            <h3 class="tab-content-title">Institutional Teams Registry</h3>
+            <p style="color: var(--brand-slate); font-size: 1rem; line-height: 1.6; margin: 0; font-weight: 400;">
+                Официальная матрица межвузовских команд. В рамках текущего соревновательного сезона установлено строго фиксированное ограничение в 14 слотов, распределенных в виде квот между университетами-участниками.
+            </p>
+
+            <div class="mini-quota-list">
+                <div class="mini-quota-item">
+                    <span>АУЦА (AUCA) / АЛА-ТОО (Ala-Too)</span>
+                    <span class="mini-quota-tag">по 3 команды</span>
+                </div>
+                <div class="mini-quota-item">
+                    <span>МАНАС (Manas) / КРСУ (KRSU)</span>
+                    <span class="mini-quota-tag">по 2 команды</span>
+                </div>
+                <div class="mini-quota-item">
+                    <span>ОБСЕ / КНУ / БГУ / Салымбеков</span>
+                    <span class="mini-quota-tag">по 1 команде</span>
+                </div>
+            </div>
+            <a href="/teams" class="btn-tab-action">View Full Rosters</a>
+        </div>
+
+    </div>
+</section>
+
+<script>
+    const hero = document.querySelector('.mj-hero-wrapper');
+
+    if (hero) {
+        hero.addEventListener('mousemove', (e) => {
+            const rect = hero.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+            hero.style.setProperty('--mouse-x', `${x}%`);
+            hero.style.setProperty('--mouse-y', `${y}%`);
+            hero.classList.add('flashlight-active');
+        });
+
+        hero.addEventListener('mouseleave', () => {
+            hero.classList.remove('flashlight-active');
+        });
+    }
+
+    /* Скрипт переключения вкладок */
+    function switchMainHubTab(event, tabId) {
+        document.querySelectorAll('.single-tab-content').forEach(tab => {
+            tab.classList.remove('active-tab-content');
+        });
+        document.querySelectorAll('.tab-nav-btn').forEach(btn => {
+            btn.classList.remove('active-tab-trigger');
+        });
+
+        document.getElementById(tabId).classList.add('active-tab-content');
+        event.currentTarget.classList.add('active-tab-trigger');
+    }
+</script>
+{% endblock %}

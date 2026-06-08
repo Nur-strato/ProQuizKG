@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% content %}
+<div class="container">
+    <h2>Создать новую команду</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</div>
+{% endcontent %}

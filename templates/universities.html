@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+
+{% block title %}Universities | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Neo-Bento UI Межвузовского Зачета Лиги -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --glass-panel: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .uni-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .uni-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* GLASS BENTO КАРТОЧКИ */
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ХЕДЕР ДАШБОРДА */
+    .uni-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .uni-badge {
+        background: rgba(14, 165, 233, 0.08);
+        color: var(--brand-blue);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid rgba(14, 165, 233, 0.15);
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .uni-main-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0 0 8px 0;
+        color: var(--brand-dark);
+        letter-spacing: -0.03em;
+    }
+
+    .uni-subtitle {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* КНОПКИ УПРАВЛЕНИЯ */
+    .admin-action-btn {
+        background: var(--brand-blue);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+        transition: var(--transition-premium);
+        margin-top: 16px;
+    }
+
+    .admin-action-btn:hover {
+        background: var(--brand-blue-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
+    }
+
+    /* МОДЕРНОВАЯ ТАБЛИЦА СЕЗОНА */
+    .leaderboard-table-wrapper {
+        margin-bottom: 40px;
+        overflow-x: auto;
+    }
+
+    .cyber-uni-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        text-align: left;
+    }
+
+    .cyber-uni-table th {
+        padding: 12px 20px;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .table-row-item {
+        background: #ffffff;
+        transition: var(--transition-premium);
+    }
+
+    .table-row-item td {
+        padding: 16px 20px;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        color: var(--brand-dark);
+    }
+
+    .table-row-item td:first-child {
+        border-left: 1px solid var(--border-color);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+
+    .table-row-item td:last-child {
+        border-right: 1px solid var(--border-color);
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .table-row-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -10px rgba(15, 23, 42, 0.08);
+        position: relative;
+        z-index: 5;
+    }
+
+    .table-row-item:hover td {
+        border-color: rgba(14, 165, 233, 0.3);
+    }
+
+    /* МЕДАЛЬНЫЕ МЕСТА */
+    .rank-cell {
+        font-weight: 900;
+        font-family: monospace;
+        font-size: 1.05rem;
+    }
+    .rank-1 td { background: linear-gradient(95deg, rgba(254, 240, 138, 0.15) 0%, #ffffff 100%) !important; }
+    .rank-2 td { background: linear-gradient(95deg, rgba(226, 232, 240, 0.2) 0%, #ffffff 100%) !important; }
+    .rank-3 td { background: linear-gradient(95deg, rgba(255, 237, 213, 0.2) 0%, #ffffff 100%) !important; }
+
+    .uni-link-title {
+        color: var(--brand-dark);
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.2s;
+    }
+
+    .uni-link-title:hover {
+        color: var(--brand-blue);
+    }
+
+    /* БЕЙДЖИ ТЕГОВ */
+    .status-tag {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 5px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+    .tag-host { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .tag-sponsor { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+
+    /* ГРИД КАРТОЧЕК ПРОФИЛЕЙ */
+    .uni-display-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+    }
+
+    /* КАРТОЧКА ПРОФИЛЯ ВУЗА (BENTO CARD) */
+    .bento-uni-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 20px;
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bento-uni-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(300px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.04), transparent 50%);
+        border-radius: 16px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .bento-uni-card:hover::before { opacity: 1; }
+
+    .bento-uni-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(14, 165, 233, 0.3);
+        box-shadow: 0 16px 30px -15px rgba(14, 165, 233, 0.15);
+    }
+
+    .card-top-identity {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .card-title-text {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    .card-description {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 10px 0 0 0;
+    }
+
+    .quick-edit-link {
+        color: #a855f7;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.825rem;
+        background: #f3e8ff;
+        padding: 4px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 12px;
+        transition: all 0.2s;
+    }
+    .quick-edit-link:hover {
+        background: #e9d5ff;
+        color: #7e22ce;
+    }
+
+    .card-footer-meta {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
+        font-size: 0.85rem;
+        color: var(--brand-slate);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+    }
+
+    /* ДОБАВОЧНАЯ ПЛИТКА КАРТЫ */
+    .invite-dashed-card {
+        border: 2px dashed #cbd5e1;
+        background: rgba(248, 250, 252, 0.5);
+        border-radius: 16px;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .glass-card { padding: 20px; }
+    }
+</style>
+
+<section class="uni-layout">
+    <div class="uni-container">
+
+        <!-- PREMIUM HEADER CARD -->
+        <div class="glass-card uni-header">
+            <span class="uni-badge">Лиговый Зачёт</span>
+            <h1 class="uni-main-title">🏛️ Межвузовский Зачёт Лиги</h1>
+            <p class="uni-subtitle">Общий рейтинг университетов по сумме набранных баллов всех их команд</p>
+
+            <!-- ИСПРАВЛЕНО: Безопасные права доступа — и admin, и head могут добавлять вузы -->
+            {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                <a href="{{ url_for('admin_add_university') }}" class="admin-action-btn">
+                    ➕ Добавить новый университет
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- ТАБЛИЦА ЛИДЕРБОРДА СЕЗОНА -->
+        <div class="glass-card leaderboard-table-wrapper">
+            <h2 style="font-size: 1.35rem; color: var(--brand-dark); font-weight: 800; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                🏆 Текущий зачет сезона
+            </h2>
+
+            <table class="cyber-uni-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Место</th>
+                        <th>Университет</th>
+                        <th style="width: 150px;">Город</th>
+                        <th style="width: 180px; text-align: right;">Сумма баллов</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in universities %}
+                    {% set u_obj = item.object %}
+                    <tr class="table-row-item {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
+
+                        <td class="rank-cell">
+                            {% if loop.index == 1 %}🥇 1{% elif loop.index == 2 %}🥈 2{% elif loop.index == 3 %}🥉 3{% else %}{{ loop.index }}{% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{{ url_for('university_detail', id=u_obj.id) }}" class="uni-link-title">
+                                {{ u_obj.name }}
+                            </a>
+                            {% if u_obj.is_host %}
+                                <span class="status-tag tag-host">HOST</span>
+                            {% endif %}
+                            {% if u_obj.is_sponsor %}
+                                <span class="status-tag tag-sponsor">SPONSOR</span>
+                            {% endif %}
+                        </td>
+
+                        <td style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">
+                            📍 {{ u_obj.city }}
+                        </td>
+
+                        <td style="text-align: right; font-weight: 900; color: var(--brand-blue); font-family: monospace; font-size: 1.15rem;">
+                            {{ item.total_score }}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ГРИД ТЕХНОЛОГИЧНЫХ КАРТОЧЕК УНИВЕРСИТЕТОВ -->
+        <h2 style="font-size: 1.5rem; color: var(--brand-dark); font-weight: 900; margin-bottom: 20px; letter-spacing: -0.01em;">
+            🏛️ Профили Университетов
+        </h2>
+
+        <div class="uni-display-grid">
+            {% for item in universities %}
+            {% set univ = item.object %}
+
+            <div class="bento-uni-card" data-uni-hover-card>
+                <div>
+                    <div class="card-top-identity">
+                        <h3 class="card-title-text">
+                            <a href="{{ url_for('university_detail', id=univ.id) }}" class="uni-link-title">
+                                {{ univ.name }}
+                            </a>
+                        </h3>
+                        <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                            {% if univ.is_host %}
+                                <span class="status-tag tag-host" style="margin:0;">HOST</span>
+                            {% endif %}
+                            {% if univ.is_sponsor %}
+                                <span class="status-tag tag-sponsor" style="margin:0;">SPONSOR</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="card-description">
+                        {{ univ.short_description if univ.short_description else "Короткое описание структуры вуза ещё не заполнено администрацией лиги." }}
+                    </p>
+
+                    <!-- ИСПРАВЛЕНО: Ролевая проверка для ссылки быстрого редактирования -->
+                    {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                        <a href="{{ url_for('admin_quick_edit_university', id=univ.id) }}" class="quick-edit-link">
+                            ✏️ Быстрая правка
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer-meta">
+                    <span>📍 {{ univ.city }}</span>
+                    {% if univ.is_sponsor %}
+                        <span style="color: var(--brand-blue); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Генеральный партнер</span>
+                    {% else %}
+                        <span style="color: var(--text-muted); font-family: monospace; font-weight: 800;">{{ item.total_score }} pts</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- ПЛИТКА-ПРИЗЫВ К ДЕЙСТВИЮ -->
+            <div class="invite-dashed-card">
+                <div style="font-size: 2.5rem; margin-bottom: 12px; filter: drop-shadow(0 4px 10px rgba(14,165,233,0.1));">🚀</div>
+                <h3 style="color: var(--brand-dark); font-size: 1.2rem; font-weight: 800; margin: 0 0 6px 0;">Добавь свой вуз</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 240px; margin: 0; line-height: 1.5; font-weight: 500;">
+                    Собери команду своего университета и ворвись в общий зачет лиги!
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- Интерактивный JS-трекинг свечения карт -->
+<script>
+    document.querySelectorAll('[data-uni-hover-card]').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+    });
+</script>
+{% endblock %}

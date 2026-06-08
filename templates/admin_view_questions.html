@@ -1,0 +1,503 @@
+{% extends 'base.html' %}
+
+{% block title %}Questions Hub | ProQuiz.kg Admin{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --brand-danger: #ef4444;
+        --brand-success: #10b981;
+        --glass-panel: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .admin-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        margin-bottom: 24px;
+    }
+
+    /* МЕНЮ ПЕРЕКЛЮЧЕНИЯ РАЗДЕЛОВ (BENTO TABS) */
+    .bento-tabs-nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+
+    @media (min-width: 768px) {
+        .bento-tabs-nav {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+
+    .tab-trigger {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 16px 8px;
+        cursor: pointer;
+        transition: var(--transition-premium);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        text-align: center;
+    }
+
+    .tab-trigger:hover {
+        border-color: rgba(14, 165, 233, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -8px rgba(14, 165, 233, 0.15);
+    }
+
+    .tab-trigger.active {
+        background: var(--brand-dark);
+        border-color: var(--brand-dark);
+    }
+
+    .tab-trigger.active .tab-icon { transform: scale(1.1); }
+    .tab-trigger.active .tab-name { color: #ffffff; }
+    .tab-trigger.active .tab-counter { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
+
+    .tab-icon { font-size: 1.6rem; transition: var(--transition-premium); }
+    .tab-name { font-size: 0.8rem; font-weight: 800; color: var(--brand-slate); }
+
+    .tab-counter {
+        font-size: 0.7rem;
+        font-weight: 800;
+        background: #f1f5f9;
+        color: var(--text-muted);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-family: monospace;
+    }
+
+    /* КОНТЕНТНЫЕ БЛОКИ ТЕМ */
+    .theme-content-panel {
+        display: none;
+        animation: fadeInTab 0.4s ease;
+    }
+
+    .theme-content-panel.active {
+        display: block;
+    }
+
+    @keyframes fadeInTab {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* КАРТОЧКИ ВОПРОСОВ (QUESTION CARDS) */
+    .question-panel-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        transition: var(--transition-premium);
+    }
+
+    .question-panel-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.08);
+    }
+
+    .card-header-clickable {
+        padding: 20px 24px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        user-select: none;
+    }
+
+    .question-title-wrapper {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .question-index-badge {
+        font-family: monospace;
+        font-weight: 900;
+        color: var(--brand-blue);
+        background: #f0f9ff;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .question-truncated-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--brand-dark);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .card-arrow-icon {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        transition: var(--transition-premium);
+        font-weight: bold;
+    }
+
+    .question-panel-card.opened .card-arrow-icon {
+        transform: rotate(180deg);
+        color: var(--brand-blue);
+    }
+
+    .card-body-expandable {
+        display: none;
+        padding: 0 24px 24px 24px;
+        border-top: 1px solid #f1f5f9;
+        background: #fafafa;
+        animation: slideDown 0.25s ease-out;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .meta-block-info {
+        margin-top: 16px;
+    }
+
+    .meta-label-tag {
+        font-size: 0.725rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .meta-value-text {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--brand-dark);
+        margin: 0;
+    }
+
+    /* МАРКЕРЫ ПРОИСХОЖДЕНИЯ ВОПРОСА */
+    .badge-origin {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        display: inline-block;
+        margin-top: 12px;
+    }
+    .badge-local { background: #e2e8f0; color: #475569; }
+    .badge-db { background: #e0f2fe; color: #0369a1; }
+
+    /* КНОПКИ УПРАВЛЕНИЯ */
+    .action-btn {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid var(--border-color);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        transition: var(--transition-premium);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+    .action-btn-edit:hover {
+        background: #e0f2fe;
+        color: var(--brand-blue);
+        border-color: #bae6fd;
+    }
+
+    .delete-action-btn {
+        background: #fef2f2;
+        color: var(--brand-danger);
+        border: 1px solid #fee2e2;
+    }
+
+    .delete-action-btn:hover {
+        background: var(--brand-danger);
+        color: white;
+        border-color: var(--brand-danger);
+    }
+
+    /* СТИЛИ ОВЕРЛЕЯ МОДАЛЬНОГО ОКНА */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+        display: none; justify-content: center; align-items: center; z-index: 9999;
+    }
+    .modal-window {
+        background: #ffffff; border-radius: 20px; width: 100%; max-width: 600px;
+        padding: 32px; box-shadow: 0 20px 50px -12px rgba(0,0,0,0.15);
+        animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-sizing: border-box;
+    }
+    @keyframes modalScaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { font-size: 0.75rem; font-weight: 800; color: var(--brand-dark); text-transform: uppercase; display: block; margin-bottom: 6px; letter-spacing: 0.05em; }
+    .form-control { width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: var(--transition-premium); }
+    .form-control:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+
+    /* ТОСТЫ УВЕДОМЛЕНИЙ */
+    .toast-notification { padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 10px; animation: slideInToast 0.3s ease; }
+    .toast-success { background: rgba(16, 185, 129, 0.1); color: #065f46; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .toast-danger { background: rgba(239, 68, 68, 0.1); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.2); }
+</style>
+
+<section class="admin-layout">
+    <div class="admin-container">
+
+        <!-- СИСТЕМА ФЛЭШ-УВЕДОМЛЕНИЙ -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast-notification toast-{{ category if category != 'error' else 'danger' }}">
+                        <span>{% if category == 'success' %}🎉{% else %}⚠️{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ВЕРХНИЙ ИНФО-БЛОК НАВИГАЦИИ -->
+        <div class="glass-card" style="padding: 20px 32px !important; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0; color: var(--brand-dark);">Реестр всей базы Арены</h1>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 2px 0 0 0; font-weight: 500;">Управление контентом [Встроенные паки + Облачная СУБД]</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--brand-slate); background: #f1f5f9; padding: 6px 12px; border-radius: 8px;">Всего в пуле: <strong>{{ total_count }}</strong></span>
+                <a href="{{ url_for('admin_add_practice_question') }}" class="action-btn" style="background: var(--brand-dark); color: white; border: none; padding: 10px 16px;">← К конструктору</a>
+            </div>
+        </div>
+
+        <!-- КАТЕГОРИИ ДЛЯ ВЫБОРА (BENTO ТАБЫ) -->
+        <div class="bento-tabs-nav">
+            <div class="tab-trigger active" onclick="switchThemeTab(this, 'panel-logic')">
+                <span class="tab-icon">🧠</span>
+                <span class="tab-name">Логика</span>
+                <span class="tab-counter">{{ counts.logic }}</span>
+            </div>
+            <div class="tab-trigger" onclick="switchThemeTab(this, 'panel-history')">
+                <span class="tab-icon">📜</span>
+                <span class="tab-name">История</span>
+                <span class="tab-counter">{{ counts.history }}</span>
+            </div>
+            <div class="tab-trigger" onclick="switchThemeTab(this, 'panel-science')">
+                <span class="tab-icon">🔬</span>
+                <span class="tab-name">Наука</span>
+                <span class="tab-counter">{{ counts.science }}</span>
+            </div>
+            <div class="tab-trigger" onclick="switchThemeTab(this, 'panel-geography')">
+                <span class="tab-icon">🌍</span>
+                <span class="tab-name">География</span>
+                <span class="tab-counter">{{ counts.geography }}</span>
+            </div>
+            <div class="tab-trigger" onclick="switchThemeTab(this, 'panel-culture')">
+                <span class="tab-icon">🎬</span>
+                <span class="tab-name">Культура</span>
+                <span class="tab-counter">{{ counts.culture }}</span>
+            </div>
+            <div class="tab-trigger" onclick="switchThemeTab(this, 'panel-literature')">
+                <span class="tab-icon">📚</span>
+                <span class="tab-name">Литература</span>
+                <span class="tab-counter">{{ counts.literature }}</span>
+            </div>
+        </div>
+
+        <!-- КОНТЕНТНЫЕ ПАНЕЛИ С ВОПРОСАМИ -->
+        {% for theme_key, q_list in grouped.items() %}
+        <div id="panel-{{ theme_key }}" class="theme-content-panel {% if loop.first %}active{% endif %}">
+
+            {% if q_list %}
+                {% for q in q_list %}
+                <div class="question-panel-card">
+                    <div class="card-header-clickable" onclick="toggleQuestionCollapse(this)">
+                        <div class="question-title-wrapper">
+                            <!-- Нумерация каждого вопроса -->
+                            <span class="question-index-badge">#{{ loop.index }}</span>
+                            <p class="question-truncated-text">{{ q.question_text }}</p>
+                        </div>
+                        <span class="card-arrow-icon">▼</span>
+                    </div>
+
+                    <div class="card-body-expandable">
+                        <!-- Тег происхождения вопроса -->
+                        <div>
+                            {% if q.is_local %}
+                                <span class="badge-origin badge-local">Встроенный пак</span>
+                            {% else %}
+                                <span class="badge-origin badge-db">Кастомный из СУБД</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 16px; md:grid-template-columns: 2fr 1fr;">
+                            <div>
+                                <div class="meta-block-info">
+                                    <span class="meta-label-tag">Правильный ответ</span>
+                                    <p class="meta-value-text" style="color: var(--brand-success);">{{ q.answer }}</p>
+                                </div>
+                                <div class="meta-block-info">
+                                    <span class="meta-label-tag">Разбор логики / Комментарий</span>
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--brand-slate); line-height: 1.5; font-weight: 500;">{{ q.explanation if q.explanation else "Разбор не указан." }}</p>
+                                </div>
+                                {% if not q.is_local %}
+                                <div class="meta-block-info">
+                                    <span class="meta-label-tag">Дата загрузки</span>
+                                    <span style="font-size: 0.8rem; font-family: monospace; color: var(--text-muted);">{{ q.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div style="display: flex; align-items: flex-end; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+                                {% if not q.is_local %}
+                                    <!-- Кнопка вызова модального окна редактирования -->
+                                    <button type="button" class="action-btn action-btn-edit" onclick="openEditModal('{{ q.id }}', '{{ q.question_text|e }}', '{{ q.answer|e }}', '{{ q.explanation|e }}')">✏️ Редактировать</button>
+
+                                    <form method="POST" action="{{ url_for('admin_delete_practice_question', id=q.id) }}" onsubmit="return confirm('Вы уверены, что хотите навсегда ликвидировать этот вопрос из СУБД Арены?');">
+                                        <button type="submit" class="action-btn delete-action-btn">🗑️ Удалить</button>
+                                    </form>
+                                {% else %}
+                                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500; font-style: italic;">Системные вопросы кода недоступны для изменений</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="glass-card" style="text-align: center; padding: 48px; color: var(--text-muted); font-weight: 600;">
+                    📭 В категории пока нет загруженных вопросов. Воспользуйтесь конструктором, чтобы расширить пулл темы сверху дефолтных 10 вопросов.
+                </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+    </div>
+</section>
+
+<!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ (СКРЫТО ПО ДЕФОЛТУ) -->
+<div id="editModalOverlay" class="modal-overlay" onclick="closeEditModal(event)">
+    <div class="modal-window" onclick="event.stopPropagation()">
+        <h3 style="font-size: 1.25rem; font-weight: 900; margin: 0 0 20px 0; color: var(--brand-dark);">✏️ Модификация вопроса</h3>
+
+        <form id="editQuestionForm" method="POST" action="">
+            <div class="form-group">
+                <label class="form-label" for="modal_q_text">Текст вопроса лиги</label>
+                <textarea id="modal_q_text" name="question_text" class="form-control" style="min-height: 120px;" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modal_answer">Правильный ответ</label>
+                <input type="text" id="modal_answer" name="answer" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modal_explanation">Разбор логики</label>
+                <textarea id="modal_explanation" name="explanation" class="form-control" style="min-height: 80px;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button type="button" class="action-btn" onclick="document.getElementById('editModalOverlay').style.display='none'">Отмена</button>
+                <button type="submit" class="action-btn" style="background: var(--brand-dark); color: white; border: none; padding: 10px 20px;">Сохранить изменения 🚀</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Логика работы Табов, Аккордеонов и Модального окна -->
+<script>
+    // 1. Быстрое переключение категорий (тем)
+    function switchThemeTab(tabElement, panelId) {
+        document.querySelectorAll('.tab-trigger').forEach(trigger => {
+            trigger.classList.remove('active');
+        });
+        document.querySelectorAll('.theme-content-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+
+        tabElement.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
+    }
+
+    // 2. Раскрытие карточки вопроса по клику (Спойлер/Аккордеон)
+    function toggleQuestionCollapse(headerElement) {
+        const card = headerElement.parentElement;
+        const expandableBody = card.querySelector('.card-body-expandable');
+
+        if (card.classList.contains('opened')) {
+            card.classList.remove('opened');
+            expandableBody.style.display = 'none';
+        } else {
+            card.classList.add('opened');
+            expandableBody.style.display = 'block';
+        }
+    }
+
+    // 3. Открытие модального окна изменения данных
+    function openEditModal(id, qText, answer, explanation) {
+        const form = document.getElementById('editQuestionForm');
+        // Подвязываем роут изменения из Flask
+        form.action = `/admin/practice/questions/${id}/edit`;
+
+        document.getElementById('modal_q_text').value = qText;
+        document.getElementById('modal_answer').value = answer;
+        document.getElementById('modal_explanation').value = explanation;
+
+        document.getElementById('editModalOverlay').style.display = 'flex';
+    }
+
+    function closeEditModal(event) {
+        document.getElementById('editModalOverlay').style.display = 'none';
+    }
+
+    // 4. Плавное авто-скрытие флэш тостов
+    setTimeout(() => {
+        document.querySelectorAll('.toast-notification').forEach(toast => {
+            toast.style.transition = 'all 0.4s ease';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        });
+    }, 4000);
+</script>
+{% endblock %}

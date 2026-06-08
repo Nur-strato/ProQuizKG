@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Поиск игроков{% endblock %}
+
+{% block body %}
+<style>
+    .search-mesh-container {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    .search-headline {
+        color: #0b172a;
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .search-bar-form {
+        display: flex;
+        gap: 12px;
+        background: #ffffff;
+        padding: 8px;
+        border-radius: 16px;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+    }
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 12px 16px;
+        font-size: 1rem;
+        color: #0f172a;
+        font-weight: 600;
+    }
+    .search-btn {
+        background: #0b172a;
+        color: white;
+        border: none;
+        padding: 0 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .search-btn:hover { background: #007cd8; }
+
+    .results-mesh-list {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .player-search-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-decoration: none;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .player-search-card:hover {
+        transform: translateY(-1px);
+        border-color: #007cd8;
+    }
+    .player-info-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .search-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f1f5f9;
+    }
+    .search-p-name {
+        color: #0b172a;
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin: 0;
+    }
+    .search-p-uni {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-top: 2px;
+    }
+    .view-profile-badge {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #007cd8;
+        background: #f0f9ff;
+        padding: 6px 14px;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="search-mesh-container">
+    <h1 class="search-headline">Поиск эрудитов лиги</h1>
+    
+    <form action="/players" method="GET" class="search-bar-form">
+        <input type="text" name="search" class="search-input" placeholder="Введи имя или фамилию игрока..." value="{{ search_query }}" autocomplete="off" required>
+        <button type="submit" class="search-btn">Найти</button>
+    </form>
+
+    <div class="results-mesh-list">
+        {% if search_query %}
+            {% for player in results %}
+                <a href="/profile/{{ player.id }}" class="player-search-card">
+                    <div class="player-info-meta">
+                        <img src="{{ url_for('static', filename='profile_pics/' + player.avatar) }}" class="search-avatar" alt="A">
+                        <div>
+                            <h3 class="search-p-name">{{ player.name }}</h3>
+                            <div class="search-p-uni">🏛️ {{ player.uni_profile.name if player.uni_profile else 'Лига Свободных Агентов' }}</div>
+                        </div>
+                    </div>
+                    <span class="view-profile-badge">Профиль ➔</span>
+                </a>
+            {% else %}
+                <div style="text-align: center; color: #94a3b8; font-style: italic; padding: 40px 0;">Игроков с таким именем не найдено. Попробуй ещё раз!</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Teams Matrix & Quotas — ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Ультимативный Минималистичный UI Матрицы Квот Лиги -->
+<style>
+    :root {
+        --brand-blue: #0284c7;          /* Премиальный лазурный */
+        --brand-dark: #0f172a;          /* Глубокий slate для текстов */
+        --brand-slate: #475569;
+        --brand-muted: #64748b;         /* Серый для вспомогательной разметки */
+        --border-color: rgba(15, 23, 42, 0.06); /* Notion-style ультратонкая граница */
+        --bg-matte-light: #f8fafc;      /* Чистый светлый матовый фон всей страницы */
+        --bg-pure-white: #ffffff;
+        --brand-success: #16a34a;       /* Исправлено: Насыщенный благородный зеленый */
+        --brand-danger: #dc2626;        /* Строгий красный для лимитов */
+        --transition-premium: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+        background: var(--bg-matte-light);
+        color: var(--brand-dark);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .matrix-container {
+        max-width: 850px;
+        margin: 50px auto;
+        padding: 0 24px;
+        box-sizing: border-box;
+    }
+
+    .matrix-panel {
+        background: var(--bg-pure-white);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 45px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.02);
+        animation: slideUpCard 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideUpCard {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quota-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        text-align: left;
+        margin-top: 28px;
+    }
+
+    .quota-table th {
+        padding: 12px 16px;
+        font-weight: 700;
+        color: var(--brand-muted);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+    }
+
+    .quota-table td {
+        padding: 16px 16px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.95rem;
+        color: var(--brand-dark);
+        transition: var(--transition-premium);
+    }
+
+    /* Мягкий интерактивный ховер строк */
+    .quota-table tbody tr:hover td {
+        background: #f8fafc;
+    }
+
+    .quota-tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: #f1f5f9;
+        color: var(--brand-slate);
+        padding: 5px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(15, 23, 42, 0.04);
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    /* Интерактивные статусы */
+    .status-badge {
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .status-available { color: var(--brand-success); }
+    .status-full { color: var(--brand-danger); }
+
+    .btn-link-premium {
+        color: var(--brand-muted);
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: color 0.2s;
+    }
+    .btn-link-premium:hover {
+        color: var(--brand-dark);
+    }
+</style>
+
+<div class="matrix-container">
+    <div class="matrix-panel">
+        <span style="color: var(--brand-blue); font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Allocation Registry</span>
+        <h1 style="font-size: 2rem; font-weight: 800; color: var(--brand-dark); margin: 0 0 8px 0; letter-spacing: -0.02em;">Institutional Teams Matrix</h1>
+        <p style="color: var(--brand-muted); margin: 0; font-size: 0.95rem; font-weight: 500;">Строгое квотирование фиксированных мест между университетами ProQuiz Лиги:</p>
+
+        <table class="quota-table">
+            <thead>
+                <tr>
+                    <th>University Name</th>
+                    <th>Allocated Slots</th>
+                    <th>Status Track</th>
+                </tr>
+            </thead>
+            <tbody id="matrixTableBody">
+                <!-- Контент генерируется через JS -->
+            </tbody>
+        </table>
+
+        <!-- БЕНТО-ФУТЕР ОБЩЕГО ПРЕДЕЛА -->
+        <div style="margin-top: 28px; background: #f8fafc; border: 1px dashed rgba(15, 23, 42, 0.08); padding: 16px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+            <span style="font-size: 0.85rem; color: var(--brand-slate); font-weight: 600;">Глобальный лимит лиги:</span>
+            <span style="font-size: 0.75rem; font-weight: 800; color: var(--brand-dark); background: #e2e8f0; padding: 5px 12px; border-radius: 8px; letter-spacing: 0.03em;">14 TEAMS TOTAL</span>
+        </div>
+
+        <!-- КНОПКИ НАВИГАЦИИ -->
+        <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" class="btn-link-premium">← На главную</a>
+            <a href="/register" class="btn-link-premium" style="color: var(--brand-blue);">Регистрация ростера ➔</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Имитация базы данных квот (Flask синхронизация сохранена полностью)
+    const quotaDatabase = [
+        { id: "auca", label: "АУЦА (AUCA)", maxTeams: 3, registeredUsers: 7 },
+        { id: "alatoo", label: "АЛА-ТОО (Ala-Too International University)", maxTeams: 3, registeredUsers: 3 },
+        { id: "manas", label: "МАНАС (КРТУ Манас)", maxTeams: 2, registeredUsers: 0 },
+        { id: "krsu", label: "КРСУ (им. Ельцина)", maxTeams: 2, registeredUsers: 6 },
+        { id: "osce", label: "ОБСЕ (Академия ОБСЕ)", maxTeams: 1, registeredUsers: 1 },
+        { id: "knu", label: "КНУ (им. Жусупа Баласагына)", maxTeams: 1, registeredUsers: 1 },
+        { id: "bsu", label: "БГУ (им. К. Карасаева)", maxTeams: 1, registeredUsers: 2 },
+        { id: "salymbekov", label: "Салымбеков Университет", maxTeams: 1, registeredUsers: 2 }
+    ];
+
+    function renderMatrix() {
+        const tbody = document.getElementById('matrixTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        quotaDatabase.forEach(u => {
+            const maxAllowedUsers = u.maxTeams * 3;
+            const slotsLeft = maxAllowedUsers - u.registeredUsers;
+
+            let statusHTML = '';
+            if (slotsLeft <= 0) {
+                statusHTML = `<span class="status-badge status-full">● Квота заполнена</span>`;
+            } else {
+                statusHTML = `<span class="status-badge status-available">● Доступно мест: ${slotsLeft}</span>`;
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td style="font-weight: 700; color: var(--brand-dark);">${u.label}</td>
+                <td><span class="quota-tag">${u.maxTeams} ${u.maxTeams === 1 ? 'Team' : 'Teams'}</span></td>
+                <td>${statusHTML}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderMatrix);
+</script>
+{% endblock %}

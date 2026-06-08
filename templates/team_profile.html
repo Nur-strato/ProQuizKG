@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}Team Profile | {{ team_name }}{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0284c7;          /* Премиальный лазурный */
+        --brand-dark: #0f172a;          /* Глубокий slate для заголовков и текстов */
+        --brand-slate: #94a3b8;
+        --brand-muted: #64748b;         /* Серый для вспомогательного текста */
+        --border-color: rgba(15, 23, 42, 0.06); /* Notion-style ультратонкая граница */
+        --bg-matte-light: #f8fafc;      /* Чистый светлый матовый фон всей страницы */
+        --bg-pure-white: #ffffff;
+        --transition-premium: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+        background: var(--bg-matte-light);
+        color: var(--brand-dark);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .team-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 50px 24px;
+        min-height: calc(100vh - 70px);
+        box-sizing: border-box;
+    }
+
+    /* ХЕДЕР КОМАНДЫ ПОД СТИЛЬ BENTO */
+    .team-card {
+        background: var(--bg-pure-white);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.02);
+        margin-bottom: 36px;
+        position: relative;
+    }
+
+    .team-header-layout {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .team-avatar-hub {
+        width: 84px;
+        height: 84px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        color: var(--brand-blue);
+        border: 1px solid #bae6fd;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+    }
+
+    .team-info-text h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        margin: 0 0 8px 0;
+        letter-spacing: -0.02em;
+    }
+
+    .tournament-badge-link {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        text-decoration: none;
+        background: #f0f9ff;
+        padding: 6px 14px;
+        border-radius: 8px;
+        border: 1px solid #bae6fd;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        transition: var(--transition-premium);
+    }
+
+    .tournament-badge-link:hover {
+        background: var(--brand-blue);
+        color: #ffffff;
+        border-color: var(--brand-blue);
+    }
+
+    /* СПИСОК УЧАСТНИКОВ РОСТЕРА */
+    .roster-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        margin: 40px 0 20px 0;
+        letter-spacing: -0.02em;
+    }
+
+    .member-row-card {
+        background: var(--bg-pure-white);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.01);
+        transition: var(--transition-premium);
+    }
+
+    .member-row-card:hover {
+        border-color: rgba(15, 23, 42, 0.12);
+        transform: translateY(-1px);
+    }
+
+    .member-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .member-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid rgba(15, 23, 42, 0.05);
+    }
+
+    .member-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--brand-dark);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .member-name:hover {
+        color: var(--brand-blue);
+    }
+
+    .role-tag {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 4px 10px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+    }
+
+    .role-tag.captain { background: #fffbeb; border-color: #fef3c7; color: #d97706; }
+    .role-tag.player { background: #f8fafc; border-color: #e2e8f0; color: var(--brand-muted); }
+
+    /* ПАНЕЛЬ КАПИТАНА */
+    .captain-panel {
+        background: var(--bg-pure-white);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid #d97706;
+        border-radius: 20px;
+        padding: 32px;
+        margin-top: 40px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.02);
+    }
+
+    .captain-panel h3 {
+        margin: 0 0 8px 0;
+        color: var(--brand-dark);
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    .input-pin {
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--brand-dark);
+        font-weight: 700;
+        width: 100%;
+        max-width: 180px;
+        box-sizing: border-box;
+        outline: none;
+        letter-spacing: 0.05em;
+        transition: var(--transition-premium);
+    }
+
+    .input-pin:focus {
+        border-color: var(--brand-dark);
+        background: #ffffff;
+    }
+
+    .btn-save-pin {
+        padding: 12px 24px;
+        background: var(--brand-dark);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        transition: var(--transition-premium);
+    }
+
+    .btn-save-pin:hover {
+        background: #1e293b;
+    }
+
+    /* ФЛЭШ ТОСТЫ СИСТЕМЫ */
+    .toast-notification {
+        padding: 14px 20px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInToast 0.3s ease;
+    }
+    .toast-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .toast-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+</style>
+
+<div class="team-container">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="toast-notification toast-{{ category if category != 'error' else 'danger' }}">
+                    <span>{% if category == 'success' %}🎉{% else %}⚠️{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="team-card">
+        <div class="team-header-layout">
+            <div class="team-avatar-hub">
+                {{ team_name[:1]|upper }}
+            </div>
+            <div class="team-info-text">
+                <h1>{{ team_name }}</h1>
+                <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="tournament-badge-link">
+                    🎯 Track: {{ tournament.title }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="roster-title">Текущий состав (Roster)</h2>
+
+    {% for member in members %}
+        <div class="member-row-card">
+            <div class="member-left">
+                <img src="{{ url_for('static', filename='profile_pics/' + member.user.avatar) if member.user and member.user.avatar else url_for('static', filename='profile_pics/default.png') }}" class="member-avatar" alt="User Avatar">
+                <a href="{{ url_for('profile', user_id=member.user_id) }}" class="member-name">
+                    {{ member.user.name if member.user else "Unknown Player" }}
+                </a>
+            </div>
+
+            <span class="role-tag {% if member.user_id == captain_id %}captain{% else %}player{% endif %}">
+                {% if member.user_id == captain_id %}👑 Капитан{% else %}Игрок{% endif %}
+            </span>
+        </div>
+    {% endfor %}
+
+    {% if is_captain %}
+        <div class="captain-panel">
+            <h3>Панель управления капитана</h3>
+            <p style="color: var(--brand-muted); font-size: 0.9rem; margin: 0 0 24px 0; font-weight: 500; line-height: 1.5;">
+                Вы зарегистрировались первым, поэтому назначены лидером состава. Передайте этот секретный PIN-код друзьям, чтобы они смогли войти в ваш кибер-ростер. При необходимости вы можете обновить его в поле ниже.
+            </p>
+
+            <form method="POST" action="" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+                <div>
+                    <label style="display:block; font-size:0.65rem; font-weight:800; color:var(--brand-dark); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Текущий PIN-код состава</label>
+                    <input type="text" name="team_password" class="input-pin" value="{{ current_pin if current_pin else '' }}" placeholder="4 цифры" maxlength="10" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn-save-pin">Обновить PIN</button>
+            </form>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+    // Плавное авто-скрытие флэш тостов уведомлений
+    setTimeout(() => {
+        document.querySelectorAll('.toast-notification').forEach(toast => {
+            toast.style.transition = 'all 0.4s ease';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        });
+    }, 4000);
+</script>
+{% endblock %}

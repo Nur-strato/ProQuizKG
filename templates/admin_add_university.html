@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if university %}Редактировать профиль {{ university.name }}{% else %}Добавить новый университет{% endif %} | Панель админа
+{% endblock %}
+
+{% block body %}
+<div style="max-width: 600px; margin: 40px auto; padding: 30px; background: var(--card-bg); border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.08);">
+
+    <div style="margin-bottom: 20px;">
+        {% if university %}
+            <a href="{{ url_for('university_detail', id=university.id) }}" style="color: #0083e4; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+                ← Отмена и возврат в профиль
+            </a>
+        {% else %}
+            <a href="{{ url_for('universities') }}" style="color: #0083e4; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+                ← Отмена и назад к списку
+            </a>
+        {% endif %}
+    </div>
+
+    <h1 style="color: var(--navy); font-size: 1.8rem; margin-bottom: 25px; font-weight: 800;">
+        {% if university %}⚙️ Редактирование профиля {{ university.name }}{% else %}🏢 Добавление нового университета{% endif %}
+    </h1>
+
+    <form method="POST" action="{{ url_for('admin_edit_university_profile', id=university.id) if university else url_for('admin_add_university') }}" enctype="multipart/form-data">
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Name of the university (Название вуза):</label>
+            <input type="text" name="name" value="{{ university.name if university else '' }}" {% if university %}readonly style="background: #f1f3f5; cursor: not-allowed;"{% endif %} required placeholder="Например: КРСУ, КНУ, БГУ..." style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <input type="hidden" name="city" value="Бишкек">
+
+        <div style="margin-bottom: 25px; padding: 15px; background: rgba(0,131,228,0.03); border-radius: 6px; border: 1px dashed rgba(0,131,228,0.2);">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Логотип университета (Рекомендуется квадратный PNG/JPG):</label>
+            <input type="file" name="logo" accept="image/*" style="font-size: 0.9rem; color: var(--text-color);">
+            {% if university and university.logo %}
+                <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">
+                    Текущий логотип: <span style="font-family: monospace;">{{ university.logo }}</span>
+                </p>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Полное детальное описание вуза (внутри профиля):</label>
+            <textarea name="description" rows="5" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; resize: vertical; font-family: inherit;">{{ university.description if university else '' }}</textarea>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Адрес университета (например, ул. Аалы Токомбаева, 7/6):</label>
+            <input type="text" name="address" value="{{ university.address if university and university.address else '' }}" placeholder="Улица, номер дома" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Официальный Email вуза:</label>
+            <input type="email" name="email" value="{{ university.email if university and university.email else '' }}" placeholder="example@uni.edu" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Official Website URL:</label>
+            <input type="url" name="website" value="{{ university.website if university and university.website else '' }}" placeholder="https://example.edu" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+        </div>
+
+        <div style="margin-bottom: 25px; display: flex; gap: 20px;">
+            <label style="font-weight: 700; color: var(--navy); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" name="is_host" value="true" {% if university and university.is_host %}checked{% endif %} style="transform: scale(1.2);"> Является Хостом (HOST)
+            </label>
+            <label style="font-weight: 700; color: var(--navy); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" name="is_sponsor" value="true" {% if university and university.is_sponsor %}checked{% endif %} style="transform: scale(1.2);"> Является Спонсором (SPONSOR)
+            </label>
+        </div>
+
+        <button type="submit" style="background: #0083e4; color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 700; border-radius: 6px; cursor: pointer; width: 100%;">
+            {% if university %}Сохранить изменения профиля{% else %}Создать и добавить университет{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}

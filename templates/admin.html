@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Admin Menu
+{% endblock %}
+
+{% block body %}
+<div class="admin-create-quiz" style="margin-top: 40px;">
+    <h2>Admin Menu</h2>
+    <p style="color: var(--text-muted); text-align: center; margin-bottom: 30px;">Create an announcement for an upcoming or past tournament.</p>
+
+    <form action="{{ url_for('admin') }}" method="post" class="styled-form">
+
+        <div class="form-group">
+            <label for="title">Tournament Title</label>
+            <input type="text" id="title" name="title" class="quiz-input" placeholder="Enter the title" required>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Tournament Status</label>
+            <select id="status" name="status" class="quiz-input" required>
+                <option value="upcoming" selected>Upcoming Tournament (Open Registration)</option>
+                <option value="past">Past Tournament (Archive / Results Only)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="text">Tournament Description</label>
+            <textarea id="text" name="text" class="quiz-textarea" placeholder="Enter the text details (rules, prizes, location...)" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-create-submit">Add Tournament</button>
+    </form>
+</div>
+{% endblock %}

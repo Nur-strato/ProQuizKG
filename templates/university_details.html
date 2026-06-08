@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if university and university.name %}{{ university.name }}{% else %}Профиль вуза{% endif %} | ProQuiz.kg
+{% endblock %}
+
+{% block body %}
+<!-- Ультимативный Cyber-Bento UI профиля университета -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --glass-panel: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .uni-profile-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .uni-profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* GLASS BENTO КАРТОЧКИ */
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* КНОПКА НАЗАД */
+    .back-nav-link {
+        color: var(--brand-blue);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.925rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s;
+        margin-bottom: 20px;
+    }
+
+    .back-nav-link:hover {
+        color: var(--brand-blue-hover);
+    }
+
+    /* СЕТКА ШАПКИ ПРОФИЛЯ */
+    .profile-hero-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .hero-info-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .uni-main-logo {
+        width: 84px;
+        height: 84px;
+        object-fit: contain;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        padding: 6px;
+        border-radius: 16px;
+    }
+
+    .uni-title-text {
+        font-size: 2.25rem;
+        font-weight: 900;
+        margin: 0 0 6px 0;
+        color: var(--brand-dark);
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+    }
+
+    /* БЕЙДЖИ СТАТУСОВ */
+    .status-tag {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 5px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .tag-host { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .tag-sponsor { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+
+    /* БЛОК С ОЧКАМИ */
+    .points-score-box {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 12px 24px;
+        border-radius: 14px;
+        text-align: center;
+        border: 1px solid rgba(14, 165, 233, 0.15);
+        min-width: 140px;
+    }
+
+    .points-label {
+        font-size: 0.75rem;
+        color: var(--brand-blue);
+        font-weight: 800;
+        display: block;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .points-value {
+        font-size: 2rem;
+        font-weight: 950;
+        color: #0369a1;
+        font-family: monospace;
+        line-height: 1;
+    }
+
+    /* КНОПКА РЕДАКТИРОВАНИЯ */
+    .edit-profile-btn {
+        background: #ffffff;
+        color: var(--brand-slate);
+        border: 1px solid #cbd5e1;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: var(--transition-premium);
+    }
+
+    .edit-profile-btn:hover {
+        background: #f1f5f9;
+        color: var(--brand-dark);
+        border-color: #94a3b8;
+    }
+
+    /* ИНФОРМАЦИОННЫЕ БЛОКИ */
+    .info-section-title {
+        color: var(--brand-dark);
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin: 24px 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-body-text {
+        font-size: 1rem;
+        line-height: 1.65;
+        color: var(--brand-slate);
+        margin: 0 0 24px 0;
+    }
+
+    /* КОНТАКТНЫЕ ДАННЫЕ */
+    .contact-links-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .contact-row-item {
+        font-size: 0.95rem;
+        color: var(--brand-slate);
+    }
+
+    .contact-row-item strong {
+        color: var(--brand-dark);
+    }
+
+    .uni-web-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--brand-blue);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+        transition: var(--transition-premium);
+        margin-top: 12px;
+        width: max-content;
+    }
+
+    .uni-web-btn:hover {
+        background: var(--brand-blue-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
+    }
+
+    /* ГРИД СТУДЕНТОВ */
+    .students-display-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 16px;
+    }
+
+    .student-hover-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        padding: 16px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-decoration: none;
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .student-hover-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(200px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.04), transparent 50%);
+        border-radius: 14px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .student-hover-card:hover::before { opacity: 1; }
+
+    .student-hover-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(14, 165, 233, 0.3);
+        box-shadow: 0 10px 20px -10px rgba(14, 165, 233, 0.15);
+    }
+
+    .student-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #cbd5e1;
+        flex-shrink: 0;
+    }
+
+    .student-name {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--brand-dark);
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+
+    .student-username {
+        margin: 2px 0 0 0;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-family: monospace;
+    }
+
+    /* КАРТОЧКА ПУСТОГО СОСТОЯНИЯ */
+    .dashed-empty-box {
+        border: 2px dashed #cbd5e1;
+        background: rgba(248, 250, 252, 0.5);
+        border-radius: 16px;
+        padding: 40px 24px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+        .profile-hero-flex { flex-direction: column; align-items: stretch; }
+        .points-score-box { text-align: left; padding: 14px; }
+        .uni-web-btn { width: 100%; justify-content: center; box-sizing: border-box; }
+    }
+</style>
+
+<section class="uni-profile-layout">
+    <div class="uni-profile-container">
+
+        <!-- ССЫЛКА НАЗАД -->
+        <div>
+            <a href="{{ url_for('universities') }}" class="back-nav-link">
+                ← Назад к общему зачету
+            </a>
+        </div>
+
+        <!-- ГЛАВНАЯ КАРТОЧКА ПРОФИЛЯ ВУЗА -->
+        <div class="glass-card" style="margin-bottom: 32px;">
+            <div class="profile-hero-flex">
+
+                <div class="hero-info-left">
+                    <!-- ИСПРАВЛЕНО: Безопасный рендеринг адаптивного логотипа -->
+                    <img src="{% if university.logo %}{% if university.logo.startswith('http') %}{{ university.logo }}{% else %} {{ url_for('static', filename='profile_pics/' + university.logo) }} {% endif %}{% else %}https://ui-avatars.com/api/?name={{ university.name if university else 'University' }}&background=0ea5e9&color=fff&size=128{% endif %}"
+                         alt="Logo {{ university.name }}"
+                         class="uni-main-logo">
+
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; display: block; margin-bottom: 4px; text-transform: uppercase;">University Profile</span>
+                        <h1 class="uni-title-text">
+                            {{ university.name }}
+                        </h1>
+
+                        <div style="display: flex; gap: 4px; margin-top: 6px;">
+                            {% if university.is_host %}
+                                <span class="status-tag tag-host">HOST</span>
+                            {% endif %}
+                            {% if university.is_sponsor %}
+                                <span class="status-tag tag-sponsor">SPONSOR</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- БЛОК ОБЩИХ БАЛЛОВ ВУЗА -->
+                <div class="points-score-box">
+                    <span class="points-label">Total Points</span>
+                    <span class="points-value">{{ total_score }}</span>
+                </div>
+            </div>
+
+            <!-- ИСПРАВЛЕНО: Унифицированные права доступа для админов и хэдов -->
+            {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                     <a href="{{ url_for('admin_edit_university_profile', id=university.id) }}" class="edit-profile-btn">
+                        ⚙️ Редактировать профиль вуза
+                    </a>
+                </div>
+            {% endif %}
+
+            <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;">
+
+            <!-- ОПИСАНИЕ -->
+            <h3 class="info-section-title">ℹ️ Описание университета</h3>
+            <p class="info-body-text">
+                {{ university.description if university.description else "Расширенное описание структуры учебного заведения ещё не заполнено администрацией лиги." }}
+            </p>
+
+            <!-- КОНТАКТЫ -->
+            <h3 class="info-section-title">📞 Контактные данные и ресурсы</h3>
+            <div class="contact-links-stack">
+                <div class="contact-row-item">📍 <strong>Региональное расположение:</strong> {{ university.city }}</div>
+
+                <div class="contact-row-item">🏢 <strong>Физический адрес:</strong>
+                    {% if university.address %}{{ university.address }}{% else %}<span style="color: var(--text-muted); font-style: italic;">не указан</span>{% endif %}
+                </div>
+
+                <div class="contact-row-item">✉️ <strong>Электронная почта:</strong>
+                    {% if university.email %}<a href="mailto:{{ university.email }}" style="color: var(--brand-blue); text-decoration: none; font-weight: 600;">{{ university.email }}</a>{% else %}<span style="color: var(--text-muted); font-style: italic;">не указана</span>{% endif %}
+                </div>
+
+                {% if university.website %}
+                    <a href="{{ university.website }}" target="_blank" class="uni-web-btn">
+                        🌐 Официальный веб-сайт вуза →
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- СПИСОК ЗАРЕГИСТРИРОВАННЫХ СТУДЕНТОВ -->
+        <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--brand-dark); margin-bottom: 20px; letter-spacing: -0.01em;">
+            👥 Зарегистрированные игроки вуза ({{ students|length }})
+        </h2>
+
+        {% if students %}
+            <div class="students-display-grid">
+                {% for student in students %}
+                    <a href="{{ url_for('profile', user_id=student.id) }}" class="student-hover-card" data-student-card>
+                        <img src="{{ url_for('static', filename='profile_pics/' + student.avatar) if student.avatar and student.avatar != 'default.png' else 'https://ui-avatars.com/api/?name=' + student.name + '&background=f1f5f9&color=475569' }}"
+                             alt="{{ student.name }}"
+                             class="student-avatar">
+
+                        <div>
+                            <h4 class="student-name">{{ student.name }}</h4>
+                            <p class="student-username">@{{ student.login }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="dashed-empty-box">
+                <p style="font-size: 1.1rem; margin: 0 0 6px 0; font-weight: 700; color: var(--brand-dark);">Игроков из данного вуза пока нет</p>
+                <p style="font-size: 0.875rem; margin: 0; font-weight: 500;">Укажи {{ university.name }} в настройках своего личного кабинета, чтобы стать первым представителем альма-матер!</p>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Интерактивный трекинг мыши для карт игроков -->
+<script>
+    document.querySelectorAll('[data-student-card]').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}Info | {{ tournament.title if tournament.title else tournament.name }} | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Набор премиум стилей для редизайна карточки турнира -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #0f172a;
+        --brand-black: #000000;
+        --glass-panel: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(226, 232, 240, 0.8);
+    }
+
+    /* Матовый киберспортивный дашборд */
+    .glass-info-card {
+        background: var(--glass-panel) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 16px !important;
+        padding: 32px !important;
+        box-shadow: 0 10px 40px -20px rgba(15, 23, 42, 0.05);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-info-card:hover {
+        border-color: rgba(14, 165, 233, 0.3) !important;
+        box-shadow: 0 20px 40px -15px rgba(14, 165, 233, 0.08) !important;
+    }
+
+    .glass-info-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(600px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.05), transparent 40%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .glass-info-card:hover::before {
+        opacity: 1;
+    }
+
+    /* Модернизированные вкладки управления */
+    .nav-tab-modern {
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .nav-tab-modern.inactive {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+    .nav-tab-modern.inactive:hover {
+        background: #e2e8f0;
+        color: var(--brand-dark);
+    }
+
+    .nav-tab-modern.active {
+        background: var(--brand-blue);
+        color: white;
+        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+    }
+
+    .nav-tab-modern.pulse-glow {
+        background: linear-gradient(135deg, var(--brand-blue), #0284c7);
+        color: white;
+        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);
+        animation: linkPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes linkPulse {
+        0%, 100% { box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
+        50% { box-shadow: 0 4px 25px rgba(14, 165, 233, 0.7); }
+    }
+
+    /* Строки параметров матча */
+    .param-matrix-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    .param-matrix-row:last-child { border-bottom: none; }
+
+    /* Сетка адаптивности */
+    .quiz-main-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-bottom: 40px;
+        align-items: start;
+    }
+
+    @media (max-width: 768px) {
+        .quiz-main-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<section class="tournament-info-section" style="padding: 50px 0; background: radial-gradient(80% 50% at 50% 0%, rgba(14, 165, 233, 0.02), transparent);">
+    <div class="container" style="max-width: 1200px; padding: 0 20px;">
+
+        <!-- HEADER PLATFORM CARD -->
+        <div class="glass-info-card" style="margin-bottom: 35px; padding: 35px !important;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <span class="badge" style="background: rgba(14, 165, 233, 0.08); color: var(--brand-blue); padding: 5px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(14, 165, 233, 0.15);">
+                        Tournament Core
+                    </span>
+                    <h1 style="font-size: 2.6rem; font-weight: 900; margin: 15px 0 8px 0; color: var(--brand-dark); letter-spacing: -1px; line-height: 1.1;">
+                        {{ tournament.title if tournament.title else tournament.name }}
+                    </h1>
+
+                    <p class="publish-date" style="color: #64748b; font-size: 0.9rem; margin: 0; font-weight: 500;">
+                        <!-- ИСПРАВЛЕНО: Убрана неработающая в шаблонах функция getattr, проверка заменена на валидацию типа данных -->
+                        {% if tournament.date and tournament.date.strftime %}
+                            Published on: <strong style="color: var(--brand-dark);">{{ tournament.date.strftime('%B %d, %Y') }}</strong>
+                        {% else %}
+                            Published on: <strong style="color: var(--brand-dark);">{{ tournament.date if tournament.date else 'TBA' }}</strong>
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- CONTROLS NAVIGATION TABS -->
+                <nav class="quiz-tabs" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="/tournaments/{{ tournament.id }}" class="nav-tab-modern active">Info</a>
+                    <a href="/tournaments/{{ tournament.id }}/participants" class="nav-tab-modern inactive">Participants</a>
+
+                    {% if tournament.past or tournament.status == 'completed' %}
+                        <a href="/tournaments/{{ tournament.id }}/results" class="nav-tab-modern inactive">Results</a>
+                    {% else %}
+                        {% if tournament.league_type == 'open' %}
+                            <a href="/tournaments/{{ tournament.id }}/register" class="nav-tab-modern pulse-glow">Register Now</a>
+                        {% elif tournament.league_type == 'qualification' %}
+                            <span style="background: rgba(14, 165, 233, 0.05); color: #0369a1; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px dashed rgba(14, 165, 233, 0.3); user-select: none;">🔒 By Qualification</span>
+                        {% else %}
+                            <span style="background: #f8fafc; color: #94a3b8; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px dashed #e2e8f0; user-select: none;">🔒 Promotion Only</span>
+                        {% endif %}
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+
+        <!-- MAIN SPLIT AREA -->
+        <div class="quiz-main-content">
+
+            <!-- LEFT CORE COMPONENT: TEXT & TRACKS -->
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+                {% block quiz_sections %}
+                    <div class="glass-info-card">
+                        <h3 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 18px 0; color: var(--brand-dark); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(226, 232, 240, 0.6); padding-bottom: 12px;">
+                            <span>📝</span> About this Tournament
+                        </h3>
+                        <p style="color: #4b5563; line-height: 1.75; font-size: 1.05rem; white-space: pre-line; margin: 0;">{{ tournament.text if tournament.text else tournament.desc }}</p>
+                    </div>
+                {% endblock %}
+
+                <!-- Season progression system for Premier Stages -->
+                {% if tournament.id <= 3 %}
+                <div class="glass-info-card">
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0 0 25px 0; color: var(--brand-dark); display: flex; align-items: center; gap: 10px;">
+                        <span>🎯</span> Season Track Progression
+                    </h3>
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(248, 250, 252, 0.6); padding: 24px; border-radius: 12px; border: 1px solid #f1f5f9; flex-wrap: wrap; gap: 15px;">
+                        <div style="text-align: center; flex: 1; min-width: 90px;">
+                            <div style="font-weight: 900; color: var(--brand-blue); font-size: 1.3rem; letter-spacing: -0.3px;">16 Teams</div>
+                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px;">Playoff Stage</div>
+                        </div>
+                        <div style="color: #cbd5e1; font-weight: 700; font-size: 1.2rem;">➔</div>
+
+                        <div style="text-align: center; flex: 1; min-width: 90px;">
+                            <div style="font-weight: 900; color: var(--brand-dark); font-size: 1.3rem; letter-spacing: -0.3px;">8 Teams</div>
+                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px;">Pre-Final</div>
+                        </div>
+                        <div style="color: #cbd5e1; font-weight: 700; font-size: 1.2rem;">➔</div>
+
+                        <div style="text-align: center; flex: 1; min-width: 90px;">
+                            <div style="font-weight: 900; color: var(--brand-black); font-size: 1.3rem; letter-spacing: -0.3px;">4 Teams</div>
+                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px;">Grand Final</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT COMPONENT: REALTIME DATA -->
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+
+                <!-- High-Tech Countdown Box -->
+                {% if tournament.status != 'completed' and not tournament.past %}
+                <div style="background: linear-gradient(135deg, var(--brand-dark) 0%, #020617 100%); color: white; padding: 32px 24px; border-radius: 16px; text-align: center; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(150px circle at 50% 0%, rgba(14, 165, 233, 0.15), transparent); pointer-events: none;"></div>
+                    <h4 style="margin: 0 0 20px 0; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 2px; font-family: monospace;">Match Begins In:</h4>
+
+                    <div id="countdown-timer" style="display: flex; justify-content: center; align-items: center; gap: 12px; font-family: monospace; font-size: 1.8rem; font-weight: 900;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); min-width: 55px;"><span id="days" style="color: #ffffff;">00</span><div style="font-size: 0.65rem; color: #64748b; font-weight: 500; margin-top: 4px; font-family: sans-serif;">DAYS</div></div>
+                        <div style="color: #38bdf8; animation: blinkPulse 1s infinite; font-size: 1.4rem;">:</div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); min-width: 55px;"><span id="hours" style="color: #ffffff;">00</span><div style="font-size: 0.65rem; color: #64748b; font-weight: 500; margin-top: 4px; font-family: sans-serif;">HRS</div></div>
+                        <div style="color: #38bdf8; animation: blinkPulse 1s infinite; font-size: 1.4rem;">:</div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); min-width: 55px;"><span id="minutes" style="color: #ffffff;">00</span><div style="font-size: 0.65rem; color: #64748b; font-weight: 500; margin-top: 4px; font-family: sans-serif;">MINS</div></div>
+                    </div>
+                </div>
+                <style>@keyframes blinkPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }</style>
+                {% endif %}
+
+                <!-- Lobby Configuration Matrix -->
+                <div class="glass-info-card" style="padding: 24px !important;">
+                    <h4 style="margin: 0 0 16px 0; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">Lobby Configuration</h4>
+                    <div style="display: flex; flex-direction: column; font-size: 0.95rem;">
+                        <div class="param-matrix-row">
+                            <span style="color: #64748b; font-weight: 500;">Schedule:</span>
+                            <!-- ИСПРАВЛЕНО: Безопасное форматирование даты через Jinja фильтры, если это не кастомная строка date_str -->
+                            <strong style="color: var(--brand-dark);">
+                                {% if tournament.date_str %}
+                                    {{ tournament.date_str }}
+                                {% elif tournament.date and tournament.date.strftime %}
+                                    {{ tournament.date.strftime('%d.%m.%Y в %H:%M') }}
+                                {% else %}
+                                    {{ tournament.date }}
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="param-matrix-row">
+                            <span style="color: #64748b; font-weight: 500;">Lobby Limit:</span>
+                            <strong style="color: var(--brand-dark);">{{ tournament.teams_count if tournament.teams_count else 16 }} slots</strong>
+                        </div>
+                        <div class="param-matrix-row">
+                            <span style="color: #64748b; font-weight: 500;">Language:</span>
+                            <div style="display: flex; gap: 4px;">
+                                {% set lang_list = tournament.language.split(',') if tournament.language else ['ru'] %}
+                                {% for lang in lang_list %}
+                                    <strong style="text-transform: uppercase; font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #334155; border: 1px solid #e2e8f0; font-size: 0.8rem;">
+                                        {% if lang == 'kg' %}KG{% elif lang == 'en' %}ENG{% else %}RU{% endif %}
+                                    </strong>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="param-matrix-row">
+                            <span style="color: #64748b; font-weight: 500;">Access State:</span>
+                            {% if tournament.past or tournament.status == 'completed' %}
+                                <strong style="color: #ef4444;">Closed</strong>
+                            {% else %}
+                                <strong style="color: #16a34a;">Open</strong>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTROL PANEL FOR HEAD AND ADMINS -->
+        {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+            <div class="moderator-control-panel" style="margin-top: 40px; padding: 28px; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border: 1px solid #fecdd3; border-radius: 16px; box-shadow: 0 10px 30px -15px rgba(225, 29, 72, 0.05);">
+                <div class="moderator-badge" style="font-size: 0.75rem; font-weight: 900; color: #be123c; margin-bottom: 18px; letter-spacing: 1px; font-family: monospace; text-transform: uppercase;">ADMIN INTERACTIVE AREA</div>
+                <div class="moderator-actions-row" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    {% if tournament.id > 3 or current_user.status == 'head' %}
+                        <a href="/tournaments/{{ tournament.id }}/edit" class="nav-tab-modern inactive" style="background: white;">✏️ Advanced Settings</a>
+                    {% else %}
+                        <span style="background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: not-allowed; display: inline-flex; align-items: center; gap: 6px;" title="Only the Club Head can edit the Main League stages">🔒 Main Stage (Head Only)</span>
+                    {% endif %}
+                    <a href="{{ url_for('admin_set_results', id=tournament.id) }}" class="nav-tab-modern" style="background: var(--brand-blue); color: white; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);">🏆 Close & Post Results</a>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Скрипт расчета координат Reveal-свечения матовых карт -->
+<script>
+    document.querySelectorAll('.glass-info-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+    });
+
+    // Безопасный запуск синхронизированного таймера
+    let targetDateStr = "{{ js_target_date }}";
+    if (targetDateStr && targetDateStr.trim() !== "" && targetDateStr !== "None") {
+        let targetDate = new Date(targetDateStr).getTime();
+        const daysEl = document.getElementById("days");
+        const hoursEl = document.getElementById("hours");
+        const minutesEl = document.getElementById("minutes");
+
+        if (daysEl && hoursEl && minutesEl && !isNaN(targetDate)) {
+            const timerInterval = setInterval(function() {
+                let now = new Date().getTime();
+                let distance = targetDate - now;
+
+                if (distance > 0) {
+                    daysEl.innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                    hoursEl.innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                    minutesEl.innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                } else {
+                    clearInterval(timerInterval);
+                    const containerTimer = document.getElementById("countdown-timer");
+                    if (containerTimer) {
+                        containerTimer.innerHTML = "<div style='font-size: 1.05rem; color: #0ea5e9; font-weight: 800; width: 100%; text-align: center; font-family: monospace; letter-spacing: 0.5px;'>[ MATCH IN PROGRESS / REGISTRATION CLOSED ]</div>";
+                    }
+                }
+            }, 1000);
+        }
+    } else {
+        const containerTimer = document.getElementById("countdown-timer");
+        if (containerTimer) {
+            containerTimer.innerHTML = "<div style='font-size: 0.85rem; color: #94a3b8; font-weight: 600; width: 100%; text-align: center; padding: 5px 0;'>Date and countdown will activate upon official announcement</div>";
+        }
+    }
+</script>
+{% endblock %}

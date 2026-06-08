@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard | Champions Chronicles{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-dark: #0b172a;
+        --brand-blue: #0083e4;
+        --text-muted: #64748b;
+        --radius-lg: 16px;
+        --radius-sm: 8px;
+    }
+
+    .leaderboard-page {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    .leaderboard-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+    .leaderboard-header h1 {
+        color: var(--brand-dark);
+        font-size: 2.4rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 8px;
+    }
+    .leaderboard-header p {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+    }
+
+    /* PREMIUM СТРОКА ПОИСКА */
+    .search-box {
+        margin-bottom: 35px;
+    }
+    .search-bar-form {
+        display: flex;
+        gap: 12px;
+        background: #ffffff;
+        padding: 6px;
+        border-radius: var(--radius-lg);
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+    }
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 12px 16px;
+        font-size: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+    }
+    .search-btn {
+        background: var(--brand-dark);
+        color: white;
+        border: none;
+        padding: 0 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .search-btn:hover {
+        background: var(--brand-blue);
+    }
+    .clear-search-btn {
+        background: #f1f5f9;
+        color: var(--text-muted);
+        border: 1px solid #cbd5e1;
+        padding: 0 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .clear-search-btn:hover {
+        background: #e2e8f0;
+        color: var(--brand-dark);
+    }
+
+    /* БЛОК РЕЗУЛЬТАТОВ ПОИСКА */
+    .search-results {
+        background: rgba(248, 250, 252, 0.8);
+        border: 1px dashed #cbd5e1;
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 35px;
+    }
+    .search-results h3 {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin: 0 0 15px 0;
+        font-family: monospace;
+    }
+    .search-results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .search-item {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+    .search-item:hover {
+        border-color: var(--brand-blue);
+        transform: translateY(-1px);
+    }
+    .player-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .player-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #f1f5f9;
+    }
+    .player-name-link {
+        color: var(--brand-dark);
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 1rem;
+    }
+    .player-name-link:hover {
+        color: var(--brand-blue);
+    }
+    .player-sub-uni {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-top: 2px;
+    }
+    .profile-badge {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        background: #f0f9ff;
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+    }
+
+    /* ТАБЛИЦА ЛИДЕРБОРДА */
+    .table-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.01);
+    }
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .leaderboard-table th {
+        text-align: left;
+        padding: 12px 16px;
+        color: var(--text-muted);
+        font-family: monospace;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .leaderboard-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        color: var(--brand-dark);
+        vertical-align: middle;
+    }
+    .rank-cell {
+        font-weight: 800;
+        font-size: 1.05rem;
+    }
+    .trend-up { color: #10b981; font-weight: 700; }
+    .trend-down { color: #ef4444; font-weight: 700; }
+    .trend-new { color: #0ea5e9; font-weight: 800; font-size: 0.8rem; }
+    .trend-steady { color: #94a3b8; }
+
+    .uni-badge {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .score-cell {
+        font-family: monospace;
+        font-size: 1.1rem;
+        text-align: right;
+    }
+</style>
+
+<div class="leaderboard-page">
+    <div class="leaderboard-header">
+        <h1>Рейтинг Эрудитов</h1>
+        <p>Our champions ranked by total points and recent shifts</p>
+    </div>
+
+    <!-- ФОРМА ПОИСКА -->
+    <div class="search-box">
+        <form action="{{ url_for('leaderboard') }}" method="GET" class="search-bar-form">
+            <input type="text" name="search" class="search-input" placeholder="Найти игрока лиги по имени..." value="{{ search_query or '' }}" autocomplete="off" required>
+            <button type="submit" class="search-btn">Найти</button>
+            {% if search_query %}
+                <a href="{{ url_for('leaderboard') }}" class="clear-search-btn">Сбросить</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- РЕЗУЛЬТАТЫ ПОИСКА -->
+    {% if search_query %}
+        <div class="search-results">
+            <h3>🔍 Результаты поиска:</h3>
+            <div class="search-results-list">
+                {% for player in search_results %}
+                    <div class="search-item">
+                        <div class="player-meta">
+                            <img src="{{ url_for('static', filename='profile_pics/' + player.avatar) if player.avatar else 'https://ui-avatars.com/api/?name=' + player.name }}" class="player-avatar" alt="A">
+                            <div>
+                                <a href="{{ url_for('profile', user_id=player.id) }}" class="player-name-link">{{ player.name }}</a>
+                                <div class="player-sub-uni">🏛️ {{ player.uni_profile.name if player.uni_profile else 'Лига свободных агентов' }}</div>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('profile', user_id=player.id) }}" class="profile-badge">Профиль ➔</a>
+                    </div>
+                {% else %}
+                    <p style="text-align: center; color: var(--text-muted); font-style: italic; margin: 10px 0;">Игроки с таким именем не найдены.</p>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- ОСНОВНОЙ ЛИДЕРБОРД -->
+    <div class="table-container">
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">Rank</th>
+                    <th style="width: 15%;">Trend</th>
+                    <th>Participant</th>
+                    <th style="width: 25%;">University</th>
+                    <th style="width: 18%; text-align: right;">Total Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in top_participants %}
+                <tr>
+                    <td class="rank-cell">
+                        {% if loop.index == 1 %} 🥇 1
+                        {% elif loop.index == 2 %} 🥈 2
+                        {% elif loop.index == 3 %} 🥉 3
+                        {% else %} #{{ loop.index }}
+                        {% endif %}
+                    </td>
+                    <td class="trend-cell">
+                        {% if item.trend == 'up' %}
+                            <span class="trend-up" title="Up in rank">▲ +{{ item.trend_value }}</span>
+                        {% elif item.trend == 'down' %}
+                            <span class="trend-down" title="Down in rank">▼ -{{ item.trend_value }}</span>
+                        {% elif item.trend == 'new' %}
+                            <span class="trend-new" title="New entry">NEW 🔥</span>
+                        {% else %}
+                            <span class="trend-steady" title="No change">●</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="player-meta">
+                            <img src="{{ url_for('static', filename='profile_pics/' + item.user.avatar) if item.user.avatar else 'https://ui-avatars.com/api/?name=' + item.user.name }}" class="player-avatar" alt="A">
+                            <a href="{{ url_for('profile', user_id=item.user.id) }}" style="color: var(--brand-dark); font-weight: 700; text-decoration: none;">
+                                {{ item.user.name }}
+                            </a>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="uni-badge">
+                            {{ item.user.uni_profile.name if item.user.uni_profile else 'Свободный агент' }}
+                        </span>
+                    </td>
+                    <td class="score-cell" style="text-align: right;"><strong>{{ item.total_score }}</strong> <span style="font-size: 0.8rem; color: var(--text-muted);">pts</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px 0; font-style: italic;">No leaderboard entries available yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

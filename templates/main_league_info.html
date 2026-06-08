@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Main League Information — ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #1e293b;
+        --brand-slate: #475569;
+        --brand-muted: #64748b;
+        --border-clean: #e2e8f0;
+        --prize-gold: #d97706;
+    }
+
+    .league-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 0 24px;
+    }
+
+    .league-panel {
+        background: #ffffff !important;
+        border: 1px solid var(--border-clean) !important;
+        border-radius: 12px !important;
+        padding: 40px !important;
+        box-shadow: 0 1px 3px rgba(30, 41, 59, 0.02);
+    }
+
+    .league-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        letter-spacing: -0.8px;
+        margin: 0 0 14px 0;
+    }
+
+    /* Карточка призового фонда */
+    .money-pool-card {
+        background: #f8fafc;
+        border-left: 4px solid var(--brand-blue);
+        padding: 24px;
+        border-radius: 0 8px 8px 0;
+        margin: 28px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .money-amount {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: var(--brand-dark);
+        font-family: monospace;
+        letter-spacing: -0.5px;
+    }
+
+    .spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 30px 0;
+    }
+
+    .spec-item {
+        padding: 20px;
+        background: #f8fafc;
+        border: 1px solid var(--border-clean);
+        border-radius: 8px;
+    }
+
+    .spec-item h4 {
+        margin: 0 0 6px 0;
+        color: var(--brand-dark);
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .spec-item p {
+        margin: 0;
+        color: var(--brand-slate);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Блоки условий наград */
+    .reward-condition-row {
+        display: flex;
+        gap: 20px;
+        padding: 20px 0;
+        border-bottom: 1px solid #f1f5f9;
+        align-items: start;
+    }
+
+    .reward-condition-row:last-child {
+        border-bottom: none;
+    }
+
+    .reward-icon-box {
+        background: #f1f5f9;
+        border: 1px solid var(--border-clean);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 1.3rem;
+        line-height: 1;
+    }
+</style>
+
+<div class="league-container">
+    <div class="league-panel">
+        <span style="color: var(--brand-blue); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Official Track & Regulations</span>
+        <h1 class="league-title">Main League Hierarchy</h1>
+        <p style="color: var(--brand-slate); line-height: 1.6; font-size: 1.05rem;">
+            Высшая Лига — это главный соревновательный дивизион ProQuiz.kg, где разворачивается битва за звание абсолютного интеллектуального чемпиона среди сильнейших университетских сборных.
+        </p>
+
+        <div class="money-pool-card">
+            <div>
+                <h4 style="margin: 0 0 4px 0; color: var(--brand-slate); font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Championship Money Pool</h4>
+                <p style="margin: 0; color: var(--brand-muted); font-size: 0.9rem;">Гран-при выплачивается команде, занявшей 1-е место в гранд-финале сезона.</p>
+            </div>
+            <div class="money-amount">50 000 KGS</div>
+        </div>
+
+        <div style="margin-top: 35px;">
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 15px;">🏆 Награды и Трофеи</h3>
+
+            <div class="reward-condition-row">
+                <div class="reward-icon-box">🥇</div>
+                <div>
+                    <h4 style="margin: 0 0 6px 0; color: var(--brand-dark); font-size: 1.05rem; font-weight: 800;">Personal Championship Trophies</h4>
+                    <p style="margin: 0; color: var(--brand-slate); font-size: 0.95rem; line-height: 1.5;">
+                        Каждый участник победившей команды получает **персональный кубок чемпиона Высшей Лиги** в личную коллекцию наград.
+                    </p>
+                </div>
+            </div>
+
+            <div class="reward-condition-row">
+                <div class="reward-icon-box" style="color: var(--prize-gold);">🏛️</div>
+                <div>
+                    <h4 style="margin: 0 0 6px 0; color: var(--brand-dark); font-size: 1.05rem; font-weight: 800;">Perpetual University Challenge Cup</h4>
+                    <p style="margin: 0; color: var(--brand-slate); font-size: 0.95rem; line-height: 1.5;">
+                        Главный монументальный кубок заносится в ведомость университета победителей. Этот трофей является **строго переходящим** — он передается из рук в руки новому лидеру по итогам каждого сезона.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; border-top: 1px solid #f1f5f9; padding-top: 30px;">
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 20px;">📊 Параметры Лиги</h3>
+            <div class="spec-grid">
+                <div class="spec-item">
+                    <h4>Strict Regulation</h4>
+                    <p>Все игры проходят по жестким регламентам с фиксированным таймингом и автоматическим подсчетом очков.</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Season Progression</h4>
+                    <p>Команды двигаются по иерархической лестнице от отборочных кубков до масштабного Grand Final.</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 35px; border-top: 1px solid #f1f5f9; padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" style="color: var(--brand-slate); font-weight: 700; text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">← На главную</a>
+            <a href="/tournaments" style="background: var(--brand-dark); color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Explore Tournaments</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

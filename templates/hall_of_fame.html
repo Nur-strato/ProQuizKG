@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+
+{% block title %}Hall of Fame — ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Ультимативный Cyber-Bento UI Зала Славы Лиги (С фокусом на фото) -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --brand-danger: #ef4444;
+        --brand-success: #10b981;
+        --glass-panel: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hof-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .hof-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        margin-bottom: 32px;
+    }
+
+    /* ФОРМА АДМИНКИ */
+    .admin-split-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+        .admin-split-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+        background: #ffffff;
+        color: var(--brand-dark);
+        outline: none;
+        transition: var(--transition-premium);
+    }
+
+    .form-control:focus {
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+    }
+
+    .input-file-wrapper {
+        border: 2px dashed #cbd5e1;
+        padding: 20px;
+        border-radius: 14px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: var(--transition-premium);
+    }
+
+    .input-file-wrapper:hover {
+        border-color: var(--brand-blue);
+        background: #f0f9ff;
+    }
+
+    .submit-btn {
+        background: var(--brand-dark);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        transition: var(--transition-premium);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .submit-btn:hover {
+        background: var(--brand-slate);
+        transform: translateY(-2px);
+    }
+
+    /* СЕТКА ЧЕМПИОНОВ */
+    .hof-bento-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 28px;
+        margin-top: 40px;
+    }
+
+    .hof-premium-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--transition-premium);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .hof-premium-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(14, 165, 233, 0.3);
+        box-shadow: 0 20px 35px -15px rgba(15, 23, 42, 0.12);
+    }
+
+    .hof-headline-banner {
+        background: #f8fafc;
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px 20px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--brand-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+ /* РАМА ФОТОГРАФИИ: Эстетика Галереи */
+    .hof-image-frame {
+        position: relative;
+        width: 100%;
+        padding-top: 75%; /* Киношный формат 4:3 */
+        overflow: hidden;
+        background: #f1f5f9; /* Чистый нейтральный фон, если фото вдруг не загрузится */
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .hof-image-frame img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* COVER гарантирует отсутствие полос. Лишние края обрежутся,
+           но фотка будет выглядеть как цельный блок */
+        object-fit: cover;
+        /* Центрируем фокус на лицах */
+        object-position: center;
+        transition: var(--transition-premium);
+    }
+
+    /* Эффект при наведении */
+    .hof-premium-card:hover .hof-image-frame img {
+        transform: scale(1.05); /* Плавное увеличение */
+    }
+
+    /* Эффект при наведении на карточку */
+    .hof-premium-card:hover .hof-image-frame img {
+        transform: scale(1.02); /* Легкое элегантное приближение без потери качества */
+    }
+
+    /* ИНФОРМАЦИОННЫЙ БЛОК (ВЫНЕСЕН ИЗ ФОТОГРАФИИ ВНИЗ) */
+    .hof-card-content {
+        padding: 20px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .hof-team-name {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--brand-dark);
+        margin: 0;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+
+    .hof-univer-name {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .status-season-container {
+        margin-top: 4px;
+    }
+
+    .status-season-badge {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .hof-comment-footer {
+        padding: 14px 20px;
+        font-size: 0.85rem;
+        color: #475569;
+        line-height: 1.5;
+        font-weight: 500;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    /* УПРАВЛЕНИЕ УДАЛЕНИЕМ */
+    .hof-delete-trigger {
+        position: absolute;
+        top: 12px; right: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        color: var(--brand-danger);
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none;
+        font-weight: bold;
+        transition: var(--transition-premium);
+        z-index: 10;
+        border: 1px solid rgba(239, 68, 68, 0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .hof-delete-trigger:hover {
+        background: var(--brand-danger);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    /* ТОСТЫ */
+    .toast-notification { padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 10px; animation: slideInToast 0.3s ease; }
+    .toast-success { background: rgba(16, 185, 129, 0.1); color: #065f46; border: 1px solid rgba(16, 185, 129, 0.2); }
+</style>
+
+<div class="hof-layout">
+    <div class="hof-container">
+
+        <!-- ДИНАМИЧЕСКИЕ ТОСТЫ -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast-notification toast-{{ category if category != 'error' else 'danger' }}">
+                        <span>🎉</span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ХЕДЕР СТРАНИЦЫ -->
+        <div class="glass-card" style="text-align: center; padding: 40px 32px;">
+            <span class="faq-badge" style="background: rgba(14, 165, 233, 0.08); color: var(--brand-blue); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(14, 165, 233, 0.15); display: inline-block; margin-bottom: 12px;">
+                Elite Board
+            </span>
+            <h1 style="font-size: 2.5rem; font-weight: 900; margin: 0 0 6px 0; color: var(--brand-dark); letter-spacing: -0.03em;">
+                Hall of Fame
+            </h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem; margin: 0; font-weight: 500;">
+                Интеллектуальная элита и триумфаторы межвузовских сезонов ProQuiz Лиги
+            </p>
+        </div>
+
+        <!-- КАРТОЧКА АДМИНИСТРАТОРА (ФОРМА ЗАГРУЗКИ) -->
+        {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+        <div class="glass-card" style="border-color: #cbd5e1;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                <span style="background: var(--brand-dark); color: white; font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Admin Panel</span>
+                <h2 style="font-size: 1.2rem; font-weight: 900; margin: 0; color: var(--brand-dark);">Загрузить нового триумфатора в Зал Славы</h2>
+            </div>
+
+            <form action="{{ url_for('upload_hof_entry') }}" method="POST" enctype="multipart/form-data">
+                <div class="admin-split-grid">
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label" for="winner_name">Название команды-победителя</label>
+                            <input type="text" id="winner_name" name="winner_name" class="form-control" placeholder="Например: Сборная КРСУ" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="university">Университет (ВУЗ)</label>
+                            <input type="text" id="university" name="university" class="form-control" placeholder="Например: КРСУ им. Б. Ельцина" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="season">Статус награды / Сезон</label>
+                            <input type="text" id="season" name="season" class="form-control" placeholder="Например: Абсолютный Чемпион Сезона" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="form-group">
+                            <label class="form-label" for="top_text">Заголовок карточки (Headline)</label>
+                            <input type="text" id="top_text" name="top_text" class="form-control" placeholder="Например: ТОП-1 ТУРНИРА">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="bottom_text">Комментарии / Описание достижений</label>
+                            <input type="text" id="bottom_text" name="bottom_text" class="form-control" placeholder="Например: Закрыли финал со счетом 10/10">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Фотография триумфаторов</label>
+                            <label class="input-file-wrapper">
+                                <input type="file" name="photo" required style="display: none;" onchange="updateFileLabel(this)">
+                                <span id="file-upload-placeholder" style="font-size: 0.85rem; font-weight: 700; color: var(--brand-slate);">📸 Выбрать медиафайл JPG/PNG</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                    <button type="submit" class="submit-btn">Зафиксировать триумф в системе 🚀</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- СЕТКА КАРТОЧЕК ЗАЛА СЛАВЫ -->
+        <div class="hof-bento-grid">
+            {% for entry in hof_entries %}
+            <div class="hof-premium-card">
+
+                <!-- Верхний заголовок-баннер (если задан) -->
+                {% if entry.top_text %}
+                    <div class="hof-headline-banner">{{ entry.top_text }}</div>
+                {% endif %}
+
+                <!-- Чистая зона изображения -->
+                <div class="hof-image-frame">
+                    <img src="{{ url_for('static', filename='profile_pics/' + entry.filename) }}" alt="Champion" style="cursor: zoom-in;" onclick="openLightbox(this.src)">
+
+                    <!-- Админ-удаление -->
+                    {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                    <a href="{{ url_for('delete_hof_entry', id=entry.id) }}" class="hof-delete-trigger" title="Удалить запись из Зала Славы" onclick="return confirm('Вы уверены, что хотите навсегда ликвидировать эту победную карточку из истории Зала Славы?');">
+                        🗑️
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- ДАННЫЕ О КОМАНДЕ (Вынесены вниз, под фотку!) -->
+                <div class="hof-card-content">
+                    <h3 class="hof-team-name">{{ entry.winner_name }}</h3>
+                    <p class="hof-univer-name">🏢 {{ entry.university }}</p>
+                    <div class="status-season-container">
+                        <span class="status-season-badge">🏆 {{ entry.season }}</span>
+                    </div>
+                </div>
+
+                <!-- Нижние комментарии лиги (если заданы) -->
+                {% if entry.bottom_text %}
+                    <div class="hof-comment-footer">
+                        <strong>Заметка Лиги:</strong> {{ entry.bottom_text }}
+                    </div>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+   // 3. Полноэкранный просмотр фотографий (Lightbox)
+    function openLightbox(imageSrc) {
+        const overlay = document.getElementById('lightboxOverlay');
+        const img = document.getElementById('lightboxImage');
+
+        img.src = imageSrc;
+        overlay.style.display = 'flex';
+
+        // Небольшая задержка для плавного масштабирования картинки
+        setTimeout(() => {
+            img.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    function closeLightbox() {
+        const overlay = document.getElementById('lightboxOverlay');
+        const img = document.getElementById('lightboxImage');
+
+        img.style.transform = 'scale(0.95)';
+        overlay.style.display = 'none';
+    }
+</script>
+
+<!-- КИНЕМАТОГРАФИЧНЫЙ ПРОСМОТР ФОТО (LIGHTBOX OVERLAY) -->
+<div id="lightboxOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 11000; cursor: zoom-out;" onclick="closeLightbox()">
+    <img id="lightboxImage" src="" alt="Enlarged Champion" style="max-width: 90%; max-height: 85%; border-radius: 16px; box-shadow: 0 25px 60px -15px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default;" onclick="event.stopPropagation()">
+
+    <!-- Кнопка закрытия в углу -->
+    <div style="position: absolute; top: 24px; right: 24px; color: white; font-size: 2rem; cursor: pointer; user-select: none; font-weight: 300; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">&times;</div>
+</div>
+
+{% endblock %}

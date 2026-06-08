@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}Tournament Registration | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #0b111e;
+        --brand-slate: #94a3b8;
+        --brand-muted: #475569;
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    .reg-wrapper {
+        min-height: calc(100vh - 70px);
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 24px;
+    }
+
+    .reg-card {
+        width: 100%;
+        max-width: 500px;
+        background: var(--brand-dark);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 45px;
+        box-sizing: border-box;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.3);
+    }
+
+    .reg-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #f8fafc;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .reg-subtitle {
+        color: var(--brand-slate);
+        font-size: 0.95rem;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    .info-node-badge {
+        background: rgba(14, 165, 233, 0.06);
+        border: 1px solid rgba(14, 165, 233, 0.15);
+        color: #38bdf8;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .label-clean {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #cbd5e1;
+        margin-bottom: 8px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .select-clean, .input-clean {
+        width: 100%;
+        padding: 14px 16px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: #f8fafc;
+        box-sizing: border-box;
+        transition: all 0.25s ease;
+    }
+
+    .select-clean {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+    }
+
+    .select-clean option {
+        background: #0f172a;
+        color: #ffffff;
+    }
+
+    .select-clean:focus, .input-clean:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+    }
+
+    .btn-submit-reg {
+        width: 100%;
+        padding: 15px;
+        background: #ffffff;
+        color: var(--brand-dark);
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 10px;
+    }
+
+    .btn-submit-reg:hover:not(:disabled) {
+        background: #38bdf8;
+        color: #ffffff;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit-reg:disabled {
+        background: #1e293b;
+        color: #475569;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="reg-wrapper">
+    <div class="reg-card">
+
+        <h1 class="reg-title">Tournament Entry</h1>
+        <p class="reg-subtitle">Регистрация участия в боевом слоте турнира: <br><strong style="color: white;">{{ tournament.title }}</strong></p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 12px 14px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 20px; font-weight: 600;">
+                        ⚠️ {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if already_registered %}
+            <div class="info-node-badge" style="background: rgba(16, 185, 129, 0.06); border-color: rgba(16, 185, 129, 0.2); color: #10b981;">
+                ✓ Вы уже успешно задеплоены на этот турнир.
+            </div>
+            <a href="{{ url_for('my_profile') }}" class="btn-submit-reg" style="text-align: center; text-decoration: none; display: block;">Перейти в профиль управления</a>
+        {% else %}
+
+            <div class="info-node-badge">
+                🏛️ DELEGATION LOCK: {{ user_uni | upper }}
+            </div>
+
+            <form method="POST" action="">
+
+                <div class="form-group">
+                    <label class="label-clean">Выберите доступный состав</label>
+                    <select name="team_name" id="teamSelect" class="select-clean" onchange="handleTeamSelectionChange()" required>
+                        <option value="" disabled selected>-- ВЫБЕРИТЕ КОМАНДУ --</option>
+                        {% for team in available_teams %}
+                            <option value="{{ team.name }}" data-passworded="{{ 'yes' if team.has_password else 'no' }}">
+                                {{ team.name }} (Свободно мест: {{ team.slots_left }}/3)
+                            </option>
+                        {% else %}
+                            <option value="" disabled>[ВСЕ КВОТЫ ВАШЕГО ВУЗа ЗАПОЛНЕНЫ]</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" id="passwordGroup" style="display: none;">
+                    <label class="label-clean" id="passwordLabel">PIN-код состава</label>
+                    <input type="text" name="team_password" id="teamPasswordInput" class="input-clean" placeholder="4-значный цифровой код (например: 5543)" maxlength="3">
+                </div>
+
+                <div class="form-group">
+                    <label class="label-clean">Контактный телефон (Telegram)</label>
+                    <input type="text" name="phone_number" class="input-clean" placeholder="+996 (XXX) XX-XX-XX" required>
+                </div>
+
+                <button type="submit" id="regSubmitBtn" class="btn-submit-reg" {% if not available_teams %}disabled{% endif %}>
+                    Занять слот эрудита ➔
+                </button>
+            </form>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    function handleTeamSelectionChange() {
+        const select = document.getElementById('teamSelect');
+        const pGroup = document.getElementById('passwordGroup');
+        const pLabel = document.getElementById('passwordLabel');
+        const pInput = document.getElementById('teamPasswordInput');
+
+        const selectedOption = select.options[select.selectedIndex];
+        const isPassworded = selectedOption.getAttribute('data-passworded');
+
+        if (isPassworded === 'yes') {
+            // Команда занята друзьями — просим ввести существующий код
+            pGroup.style.display = 'block';
+            pLabel.innerText = "🔒 ВВЕДИТЕ PIN-КОД ДЛЯ ВХОДА В СОСТАВ";
+            pInput.placeholder = "Введите пин-код, созданный вашим другом";
+            pInput.required = true;
+        } else if (isPassworded === 'no') {
+            // Команда абсолютно пустая — юзер создает её и придумывает код
+            pGroup.style.display = 'block';
+            pLabel.innerText = "🗨 ВЫ ПЕРВЫЙ. ПРИДУМАЙТЕ PIN-КОД ДЛЯ КОМАНДЫ";
+            pInput.placeholder = "Придумайте 3 цифры и передайте команде";
+            pInput.required = true;
+        } else {
+            pGroup.style.display = 'none';
+            pInput.required = false;
+        }
+    }
+</script>
+{% endblock %}

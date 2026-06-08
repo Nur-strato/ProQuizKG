@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Question | Practice Arena Admin | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --brand-danger: #ef4444;
+        --brand-success: #10b981;
+        --glass-panel: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .admin-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .admin-split-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .form-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.775rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+        background: #ffffff;
+        color: var(--brand-dark);
+        outline: none;
+        transition: var(--transition-premium);
+    }
+
+    .form-control:focus {
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.5;
+    }
+
+    .submit-btn {
+        background: var(--brand-dark);
+        color: white;
+        padding: 16px 32px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        transition: var(--transition-premium);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .submit-btn:hover {
+        background: var(--brand-slate);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.2);
+    }
+
+    .btn-secondary-light {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary-light:hover {
+        background: #e2e8f0;
+        color: var(--brand-dark);
+        transform: translateY(-2px);
+    }
+
+    /* УВЕДОМЛЕНИЯ (TOASTS SYSTEM) */
+    .toast-notification {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(10px);
+    }
+    .toast-success { background: rgba(16, 185, 129, 0.1); color: #065f46; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .toast-danger { background: rgba(239, 68, 68, 0.1); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    @keyframes slideInToast {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* СТАТИСТИКА */
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--brand-slate);
+        transition: var(--transition-premium);
+    }
+
+    .stat-row:hover {
+        border-color: #cbd5e1;
+        transform: translateX(4px);
+    }
+
+    .stat-counter {
+        background: #f1f5f9;
+        color: var(--brand-dark);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-family: monospace;
+        font-weight: 800;
+        font-size: 0.85rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .live-status-dot {
+        width: 8px; height: 8px;
+        background: var(--brand-success);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 10px var(--brand-success);
+    }
+
+    @media (max-width: 850px) { .admin-split-grid { grid-template-columns: 1fr; } }
+</style>
+
+<section class="admin-layout">
+    <div class="admin-container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast-notification toast-{{ category if category != 'error' else 'danger' }}">
+                        <span>{% if category == 'success' %}🎉{% else %}⚠️{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="glass-card" style="padding: 20px 32px !important; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0; color: var(--brand-dark);">Arena Questions Constructor</h1>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 2px 0 0 0; font-weight: 500;">Проектирование и загрузка инкрементальных пулов вопросов</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <a href="{{ url_for('admin_view_practice_questions') }}" class="submit-btn btn-secondary-light" style="padding: 12px 20px; font-size: 0.8rem;">📋 База вопросов</a>
+                <a href="/practice" class="submit-btn" style="background: var(--brand-blue); color: white; padding: 12px 20px; font-size: 0.8rem;">🎮 На Арену</a>
+            </div>
+        </div>
+
+        <div class="admin-split-grid">
+
+            <div class="glass-card">
+                <h2 style="font-size: 1.25rem; font-weight: 900; color: var(--brand-dark); margin: 0 0 24px 0;">➕ Добавить новый вопрос</h2>
+
+                <form method="POST" action="{{ url_for('admin_add_practice_question') }}">
+                    <div class="form-group">
+                        <label class="form-label" for="theme">
+                            <span>Категория (Тема) Арены</span>
+                            <span style="color: var(--brand-blue); font-size: 0.7rem; font-family: monospace;">[theme_key]</span>
+                        </label>
+                        <select id="theme" name="theme" class="form-control" style="cursor: pointer;">
+                            <option value="logic">🧠 Логика и Аналогии</option>
+                            <option value="history">📜 Мировая История</option>
+                            <option value="science">🔬 Наука и Технологии</option>
+                            <option value="geography">🌍 География и Страны</option>
+                            <option value="culture">🎬 Поп-культура и Кино</option>
+                            <option value="literature">📚 Литература и Арт</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="question_text">
+                            <span>Текст вопроса лиги</span>
+                            <span id="char-count-q" style="color: var(--text-muted); font-size: 0.7rem; font-family: monospace; font-weight: 500;">0 симв.</span>
+                        </label>
+                        <textarea id="question_text" name="question_text" class="form-control" placeholder="Введите полный текст вопроса. Используйте маркеры 'ОН', 'ОНА', 'ОНО'..." required oninput="updateCharCounter('question_text', 'char-count-q')"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="answer">Правильный ответ</label>
+                        <input type="text" id="answer" name="answer" class="form-control" placeholder="Точный ответ" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="explanation">
+                            <span>Разбор логики вопроса</span>
+                            <span style="color: var(--text-muted); font-size: 0.7rem; text-transform: none; font-weight: 500;">Необязательно</span>
+                        </label>
+                        <textarea id="explanation" name="explanation" class="form-control" placeholder="Напишите краткую цепочку рассуждений..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Сохранить в базу СУБД 🚀</button>
+                </form>
+            </div>
+
+            <div class="glass-card" style="height: max-content;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 900; color: var(--brand-dark); margin: 0;">📊 Наполнение СУБД</h2>
+                    <span class="live-status-dot" title="СУБД подключена"></span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 24px 0; font-weight: 500;">Распределение кастомных вопросов</p>
+
+                <div class="stat-row" style="background: var(--brand-dark); border-color: var(--brand-dark); margin-bottom: 16px;">
+                    <span style="color: white;">Всего вопросов в базе:</span>
+                    <span class="stat-counter" style="background: rgba(255,255,255,0.15); color: white; border: none; font-size: 0.95rem;">{{ total_count }}</span>
+                </div>
+
+                <div class="stat-row"><span>🧠 Логика и Аналогии:</span><span class="stat-counter">{{ stats.logic }}</span></div>
+                <div class="stat-row"><span>📜 Мировая История:</span><span class="stat-counter">{{ stats.history }}</span></div>
+                <div class="stat-row"><span>🔬 Наука и Технологии:</span><span class="stat-counter">{{ stats.science }}</span></div>
+                <div class="stat-row"><span>🌍 География и Страны:</span><span class="stat-counter">{{ stats.geography }}</span></div>
+                <div class="stat-row"><span>🎬 Поп-культура и Кино:</span><span class="stat-counter">{{ stats.culture }}</span></div>
+                <div class="stat-row"><span>📚 Литература и Арт:</span><span class="stat-counter">{{ stats.literature }}</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function updateCharCounter(textareaId, counterId) {
+        const textLength = document.getElementById(textareaId).value.length;
+        document.getElementById(counterId).innerText = `${textLength} симв.`;
+    }
+    // Автоматическое скрытие уведомлений через 4 секунды
+    setTimeout(() => {
+        document.querySelectorAll('.toast-notification').forEach(toast => {
+            toast.style.transition = 'all 0.4s ease';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => toast.remove(), 400);
+        });
+    }, 4000);
+</script>
+{% endblock %}

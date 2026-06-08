@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Biography — ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #1e293b;
+        --brand-slate: #475569;
+        --brand-muted: #64748b;
+        --border-clean: #e2e8f0;
+    }
+
+    .bio-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 0 24px;
+    }
+
+    .bio-panel {
+        background: #ffffff !important;
+        border: 1px solid var(--border-clean) !important;
+        border-radius: 12px !important;
+        padding: 40px !important;
+        box-shadow: 0 1px 3px rgba(30, 41, 59, 0.02);
+    }
+
+    .bio-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        letter-spacing: -0.8px;
+        margin: 0 0 24px 0;
+    }
+
+    .bio-text {
+        color: var(--brand-slate);
+        font-size: 1.05rem;
+        line-height: 1.75;
+        font-weight: 400;
+    }
+
+    .bio-timeline {
+        margin-top: 35px;
+        border-left: 2px solid var(--border-clean);
+        padding-left: 20px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -27px;
+        top: 6px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--brand-blue);
+    }
+</style>
+
+<div class="bio-container">
+    <div class="bio-panel">
+        <span style="color: var(--brand-blue); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">The Genesis</span>
+        <h1 class="bio-title">Biography of ProQuiz.kg</h1>
+        
+        <div class="bio-text">
+            <p>
+                Интеллектуальная экосистема ProQuiz.kg зародилась как амбициозная студенческая инициатива, движимая идеей объединить лучшие умы под эгидой Quiz Club. То, что начиналось как локальные встречи единомышленников, быстро переросло в масштабную цифровую платформу межвузовского уровня.
+            </p>
+            <p>
+                Наша миссия — создание авторитетной цифровой арены для развития аналитического мышления, выявления талантов и формирования сильного академического комьюнити, где каждый студент и университет может заявить о своем интеллектуальном превосходстве.
+            </p>
+        </div>
+
+        <div class="bio-timeline">
+            <div class="timeline-item">
+                <strong style="color: var(--brand-dark);">Основание клуба</strong>
+                <p style="margin: 4px 0 0 0; color: var(--brand-muted); font-size: 0.9rem;">Запуск первых пилотных игр и формирование ядра организаторов.</p>
+            </div>
+            <div class="timeline-item">
+                <strong style="color: var(--brand-dark);">Масштабирование на ВУЗы</strong>
+                <p style="margin: 4px 0 0 0; color: var(--brand-muted); font-size: 0.9rem;">Подключение ведущих университетов Бишкека и запуск системы фиксированных квот.</p>
+            </div>
+            <div class="timeline-item">
+                <strong style="color: var(--brand-dark);">Цифровая революция ProQuiz</strong>
+                <p style="margin: 4px 0 0 0; color: var(--brand-muted); font-size: 0.9rem;">Переход на собственную автономную Web-платформу для автоматического трекинга матчей.</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 35px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+            <a href="/" style="color: var(--brand-dark); font-weight: 700; text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">← На главную</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

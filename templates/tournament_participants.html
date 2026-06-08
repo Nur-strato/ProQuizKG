@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+
+{% block title %}Participants | {{ tournament.title if tournament.title else tournament.name }} | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Кардинально новый Cyber-Bento UI с интерактивной распашкой -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --glass-panel: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .participants-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .participants-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* GLASS BENTO КАРТОЧКИ */
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* СЕТКА ПАНЕЛИ УПРАВЛЕНИЯ */
+    .dashboard-split-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    /* ХЕДЕР И ТАБЫ */
+    .header-flex-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .header-badge {
+        background: rgba(14, 165, 233, 0.08);
+        color: var(--brand-blue);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid rgba(14, 165, 233, 0.15);
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .header-main-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0 0 6px 0;
+        color: var(--brand-dark);
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+    }
+
+    .tabs-nav-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn-modern {
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.875rem;
+        transition: var(--transition-premium);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid transparent;
+    }
+
+    .tab-btn-modern.inactive {
+        background: #f8fafc;
+        color: #475569;
+        border-color: var(--border-color);
+    }
+
+    .tab-btn-modern.inactive:hover {
+        background: #f1f5f9;
+        color: var(--brand-dark);
+        border-color: #cbd5e1;
+    }
+
+    .tab-btn-modern.active {
+        background: var(--brand-dark);
+        color: white;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+    }
+
+    /* ПОИСК */
+    .search-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .search-field {
+        padding: 14px 16px 14px 44px;
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+        background: #ffffff;
+        color: var(--brand-dark);
+        transition: var(--transition-premium);
+        outline: none;
+    }
+
+    .search-field:focus {
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+    }
+
+    .search-icon-placeholder {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.05rem;
+    }
+
+    .layout-trigger {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .layout-trigger.active {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-color: #7dd3fc;
+        font-weight: 700;
+    }
+
+    /* МЕТРИКИ ЗАПОЛНЕННОСТИ */
+    .lobby-status-title {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .progress-bar-track {
+        width: 100%;
+        background: #e2e8f0;
+        height: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+        background: linear-gradient(90deg, var(--brand-blue), var(--brand-blue-hover));
+        height: 100%;
+        border-radius: 6px;
+    }
+
+    /* СЕТКА РОСТЕРОВ */
+    .teams-display-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 24px;
+        align-items: start; /* Важно: предотвращает деформацию соседей при раскрытии аккордеона */
+    }
+
+    /* КАРДИНАЛЬНО НОВАЯ КАРТОЧКА С АППАРАТНЫМ СВЕЧЕНИЕМ */
+    .premium-team-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer; /* Вся карточка теперь открывает распашку */
+    }
+
+    .premium-team-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(320px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.06), transparent 50%);
+        border-radius: 20px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .premium-team-card:hover::before {
+        opacity: 1;
+    }
+
+    .premium-team-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(14, 165, 233, 0.35);
+        box-shadow: 0 20px 35px -15px rgba(14, 165, 233, 0.15);
+    }
+
+    /* ШАПКА КАРТОЧКИ КОМАНДЫ */
+    .team-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        z-index: 2;
+    }
+
+    .team-main-clickable-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .team-avatar-box {
+        width: 50px;
+        height: 50px;
+        background: #f0f9ff;
+        color: #0369a1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        font-weight: 900;
+        border: 1px solid #e0f2fe;
+        transition: var(--transition-premium);
+        flex-shrink: 0;
+    }
+
+    .premium-team-card:hover .team-avatar-box {
+        background: var(--brand-blue);
+        color: white;
+        border-color: var(--brand-blue);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+    }
+
+    .team-title-text {
+        margin: 0 0 3px 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        letter-spacing: -0.01em;
+    }
+
+    /* Кнопка перехода в профиль (изолированная) */
+    .go-to-profile-btn {
+        font-size: 0.75rem;
+        color: var(--brand-blue);
+        font-weight: 700;
+        background: rgba(14, 165, 233, 0.05);
+        padding: 4px 8px;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-inline-flex;
+        align-items: center;
+    }
+    .go-to-profile-btn:hover {
+        background: var(--brand-blue);
+        color: white;
+    }
+
+    /* Стрелка аккордеона */
+    .accordion-toggle-arrow {
+        width: 32px;
+        height: 32px;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: bold;
+        transition: var(--transition-premium);
+        flex-shrink: 0;
+    }
+
+    .premium-team-card.active-accordion .accordion-toggle-arrow {
+        transform: rotate(180deg);
+        background: var(--brand-dark);
+        color: white;
+        border-color: var(--brand-dark);
+    }
+
+    /* АППАРАТНАЯ РАСПАШКА ОКНА ИГРОКОВ (ACCORDION ACTION) */
+    .team-accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        width: 100%;
+        transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 2;
+        will-change: max-height;
+    }
+
+    .roster-inner-box {
+        padding-top: 18px;
+        margin-top: 16px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .player-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        padding: 12px 14px;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+
+    .player-row:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+
+    /* Капитанский маркер */
+    .captain-row-highlight {
+        border-left: 3px solid var(--brand-blue) !important;
+        background: rgba(14, 165, 233, 0.01);
+    }
+
+    .player-left-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+    }
+
+    .player-avatar-mini {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #cbd5e1;
+    }
+
+    .player-name-text {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--brand-slate);
+    }
+
+    .player-left-meta:hover .player-name-text {
+        color: var(--brand-blue);
+    }
+
+    .player-uni-tag {
+        font-family: monospace;
+        font-size: 0.725rem;
+        font-weight: 700;
+        color: #475569;
+        background: #e2e8f0;
+        padding: 3px 8px;
+        border-radius: 5px;
+    }
+
+    /* Layout View: Strict List */
+    .flat-list-view {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    /* ПУСТЫЕ СОСТОЯНИЯ */
+    .empty-state-card {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--text-muted);
+        font-size: 1rem;
+        border: 1px dashed #cbd5e1;
+        border-radius: 16px;
+        background: rgba(248, 250, 252, 0.5);
+        font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+        .dashboard-split-grid { grid-template-columns: 1fr; gap: 20px; }
+    }
+</style>
+
+<section class="participants-layout">
+    <div class="participants-container">
+
+        <!-- ГЛАВНАЯ ПАНЕЛЬ ТУРНИРА -->
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <div class="header-flex-wrapper">
+                <div>
+                    <span class="header-badge">Team Rosters</span>
+                    <h1 class="header-main-title">
+                        {{ tournament.title if tournament.title else tournament.name }}
+                    </h1>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; font-weight: 500;">
+                        Event Date: <strong style="color: var(--brand-slate); font-weight: 600;">{{ formatted_date_str if formatted_date_str else 'To be announced soon' }}</strong>
+                    </p>
+                </div>
+
+                <nav class="tabs-nav-group">
+                    <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="tab-btn-modern inactive">Overview</a>
+                    <a href="{{ url_for('tournament_participants', id=tournament.id) }}" class="tab-btn-modern active">Participants</a>
+
+                    {% if tournament.past or tournament.status == 'completed' %}
+                        <a href="{{ url_for('tournament_results', id=tournament.id) }}" class="tab-btn-modern inactive">Leaderboard</a>
+                    {% else %}
+                        {% if tournament.league_type == 'open' %}
+                            <a href="{{ url_for('tournament_register', id=tournament.id) }}" class="tab-btn-modern" style="background: var(--brand-blue); color: white; font-weight:700;">Register Now</a>
+                        {% elif tournament.league_type == 'qualification' %}
+                            <span class="tab-badge-lock">🔒 By Qualification</span>
+                        {% else %}
+                            <span class="tab-badge-lock">🔒 Stage Qualified Only</span>
+                        {% endif %}
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+
+        {% if teams %}
+            <!-- ПАНЕЛЬ ФИЛЬТРОВ И МЕТРИК ЛОББИ -->
+            <div class="dashboard-split-grid">
+                <div class="glass-card" style="padding: 20px 24px !important; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon-placeholder">🔍</span>
+                        <input type="text" id="team-search" class="search-field" placeholder="Search by team name...">
+                    </div>
+
+                    <div class="layout-controls-row">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Layout View:</span>
+                        <button id="view-grid-btn" class="layout-trigger active">🎚️ Cards Grid</button>
+                        <button id="view-list-btn" class="layout-trigger">📋 Strict List</button>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 20px 24px !important; display: flex; flex-direction: column; justify-content: center;">
+                    {% set max_teams = tournament.teams_count if tournament and tournament.teams_count else 16 %}
+                    {% set percentage = (teams|length / max_teams) * 100 %}
+                    <div class="lobby-status-title">
+                        <span>Lobby Teams Filled:</span>
+                        <span style="color: var(--brand-blue); font-family: monospace; font-size: 0.95rem;">{{ teams|length }} / {{ max_teams }}</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" style="width: {{ percentage }}%;"></div>
+                    </div>
+                    <small style="color: #94a3b8; font-size: 0.775rem; font-weight: 500;">Remaining team slots: <strong>{{ max_teams - teams|length if max_teams - teams|length >= 0 else 0 }}</strong></small>
+                </div>
+            </div>
+
+            <!-- СЕТКА С КОМАНДНЫМИ КАРТОЧКАМИ С РАСПАШКОЙ -->
+            <div id="teams-grid" class="teams-display-grid">
+                {% for team in teams %}
+                    <!-- Клик по карточке плавно раскрывает игроков внутри неё -->
+                    <div class="premium-team-card" data-team-card onclick="toggleTeamAccordion(this)">
+
+                        <!-- Шапка карточки -->
+                        <div class="team-card-header">
+                            <div class="team-main-clickable-info">
+                                <div class="team-avatar-box">
+                                    {{ team.name[:1]|upper if team.name else '?' }}
+                                </div>
+                                <div>
+                                    <h3 class="team-title-text" data-search-target>{{ team.name }}</h3>
+                                    <!-- Ссылка на профиль изолирована и не мешает открытию спойлера -->
+                                    <a href="/tournaments/{{ tournament.id }}/team/{{ team.name }}" class="go-to-profile-btn" onclick="event.stopPropagation();">
+                                        Профиль ➔
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="accordion-toggle-arrow">▼</div>
+                        </div>
+
+                        <!-- РАСПАХИВАЮЩЕЕСЯ ОКНО С ИГРОКАМИ КОМАНДЫ -->
+                        <div class="team-accordion-content">
+                            <div class="roster-inner-box">
+                                {% for p in team.players %}
+                                    <div class="player-row {% if loop.first %}captain-row-highlight{% endif %}">
+                                        <!-- Клик по игроку ведёт на его страницу и изолирован от карточки -->
+                                        <a href="{{ url_for('profile', user_id=p.user_id) }}" class="player-left-meta" onclick="event.stopPropagation();">
+                                            <img src="{% if p.user and p.user.avatar and p.user.avatar != 'default.png' %}{{ url_for('static', filename='profile_pics/' + p.user.avatar) }}{% else %}https://ui-avatars.com/api/?name={{ p.user.name if p.user else 'Unknown' }}&background=f1f5f9&color=475569{% endif %}" class="player-avatar-mini" alt="User">
+                                            <span class="player-name-text">
+                                                {{ p.user.name if p.user else "Unknown Player" }}
+                                                {% if loop.first %}<span style="color: var(--brand-blue); font-size: 0.75rem; font-weight:800; margin-left:4px;">(C)</span>{% endif %}
+                                            </span>
+                                        </a>
+                                        <span class="player-uni-tag">
+                                            🏛️ {% if p.user and p.user.uni_profile and p.user.uni_profile.name %}{{ p.user.uni_profile.name | upper }}{% else %}GUEST{% endif %}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Заглушка при неудачном поиске -->
+            <div id="no-search-results" class="empty-state-card" style="display: none; padding: 40px 20px;">
+                🔍 No registered teams found matching that criteria.
+            </div>
+
+        {% else %}
+            <!-- ПУСТОЕ СОСТОЯНИЕ ТУРНИРА -->
+            <div class="empty-state-card">
+                <div style="font-size: 2.5rem; margin-bottom: 16px;">👥</div>
+                <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: var(--brand-dark); font-weight: 800;">Roster is Currently Empty</h4>
+                <p style="color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.95rem; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500;">No teams have secured their entry slots for this tournament track segment yet.</p>
+                <a href="{{ url_for('tournament_register', id=tournament.id) }}" class="tab-btn-modern" style="background: var(--brand-blue); color: white; padding: 12px 24px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); text-decoration: none;">Be the First to Register</a>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Фронтенд-логика аппаратной распашки и фильтрации -->
+<script>
+    // Высокопроизводительный трекинг мыши для эффекта неонового Glow
+    function initRevealTracking() {
+        document.querySelectorAll('[data-team-card]').forEach(card => {
+            card.removeEventListener('mousemove', trackMouse);
+            card.addEventListener('mousemove', trackMouse);
+        });
+    }
+
+    function trackMouse(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        this.style.setProperty('--x', `${x}px`);
+        this.style.setProperty('--y', `${y}px`);
+    }
+
+    initRevealTracking();
+
+    // Функция плавной распашки окна игроков
+    function toggleTeamAccordion(cardElement) {
+        cardElement.classList.toggle('active-accordion');
+        const content = cardElement.querySelector('.team-accordion-content');
+
+        if (cardElement.classList.contains('active-accordion')) {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            content.style.maxHeight = "0px";
+        }
+    }
+
+    // Живой поиск и переключение макетов вида
+    const searchInput = document.getElementById('team-search');
+    const teamsGrid = document.getElementById('teams-grid');
+    const noResults = document.getElementById('no-search-results');
+
+    const gridBtn = document.getElementById('view-grid-btn');
+    const listBtn = document.getElementById('view-list-btn');
+
+    if (searchInput && teamsGrid) {
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value.toLowerCase();
+            const cards = document.querySelectorAll('[data-team-card]');
+            let hasVisibleCards = false;
+
+            cards.forEach(card => {
+                const teamNameTitle = card.querySelector('[data-search-target]');
+                const teamName = teamNameTitle ? teamNameTitle.innerText.toLowerCase() : '';
+
+                if (teamName.includes(filter)) {
+                    card.style.display = 'flex';
+                    hasVisibleCards = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = hasVisibleCards ? 'none' : 'block';
+        });
+
+        // Переключения Grid / List с мгновенным перерасчетом раскрытых окон
+        gridBtn.addEventListener('click', function() {
+            teamsGrid.classList.remove('flat-list-view');
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+
+            document.querySelectorAll('.premium-team-card.active-accordion .team-accordion-content').forEach(c => {
+                c.style.maxHeight = c.scrollHeight + "px";
+            });
+        });
+
+        listBtn.addEventListener('click', function() {
+            teamsGrid.classList.add('flat-list-view');
+            listBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+
+            document.querySelectorAll('.premium-team-card.active-accordion .team-accordion-content').forEach(c => {
+                c.style.maxHeight = c.scrollHeight + "px";
+            });
+        });
+    }
+</script>
+{% endblock %}

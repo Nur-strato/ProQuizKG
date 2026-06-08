@@ -1,0 +1,2610 @@
+/* ==========================================================================
+   1. ПЕРЕМЕННЫЕ И СИТЕМНЫЕ НАСТРОЙКИ
+   ========================================================================== */
+:root {
+    /* --- ФОН И КАРТОЧКИ --- */
+    --bg-color: #f8fafc;          /* Светлый приятный фон сайта */
+    --card-bg: #ffffff;           /* Чистые белоснежные карточки */
+    --radius: 16px;               /* Оптимальное скругление углов */
+    --border-radius: 12px;
+
+    /* --- ТЕКСТЫ --- */
+    --text-color: #334155;        /* Основной текст интерфейса */
+    --text-muted: #00102e;        /* Второстепенный текст и подписи */
+
+    /* --- АКЦЕНТЫ --- */
+    --primary-color: #51b4ff;     /* Главный сочный синий цвет для кнопок */
+    --primary-dark: #006ec4;      /* Насыщенный синий при наведении (hover) */
+    --navy: #00102e;              /* Фирменный темный контраст для шапки/футера */
+
+    /* --- СТАТУСЫ И ПЛАШКИ --- */
+    --success-color: #10b981;
+    --admin-color: #ef4444;
+    --gold: #f59e0b;
+    --blue-accent: rgba(0, 130, 228, 0.08); /* Полупрозрачный синий акцент */
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+/* Все заголовки централизованно берут самый темный брендовый цвет */
+h1, h2, h3, .card-title, .winner-name-big, .hero-title, .group-title, .auth-header h1 {
+    color: var(--navy);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.content {
+    padding: 0;
+    min-height: calc(100vh - 160px);
+}
+
+/* ==========================================================================
+   2. ШАПКА САЙТА (NAVBAR)
+   ========================================================================== */
+.navbar {
+    z-index: 9999;
+    background: var(--navy);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--bg-color);
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links .user-name:hover {
+    color: var(--primary-color);
+}
+
+.nav-divider {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-signup, .btn-logout {
+    background: var(--primary-color);
+    color: #ffffff !important;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-signup:hover, .btn-logout:hover {
+    background: var(--primary-dark);
+}
+
+.btn-admin {
+    border: 1px solid var(--admin-color);
+    color: var(--admin-color);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-admin:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ==========================================================================
+   3. СЕКЦИЯ ТУРНИРОВ (QUIZZES) И КАРТОЧКИ
+   ========================================================================== */
+.quizzes-section {
+    padding: 20px 0;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+.section-header p {
+    color: var(--text-muted);
+}
+
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.quiz-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.quiz-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.quiz-card.upcoming::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-color), #a855f7);
+}
+
+.quiz-card.past {
+    background-color: var(--bg-color);
+    opacity: 0.8;
+}
+
+.card-content {
+    padding: 28px;
+    flex-grow: 1;
+}
+
+.card-header-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-date {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.card-footer {
+    padding: 0 28px 28px;
+    background: transparent;
+}
+
+.btn-read-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    background: var(--primary-color);
+    color: #ffffff;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-read-more:hover {
+    background: var(--primary-dark);
+    transform: scale(1.02);
+}
+
+.btn-outline-small {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    width: 100%;
+    height: 48px;
+    background: var(--bg-color);
+    color: var(--navy);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.btn-outline-small:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   4. СТРАНИЦА ОДНОГО КВИЗА И РЕГИСТРАЦИЯ
+   ========================================================================== */
+.quiz-container {
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.quiz-header-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 40px;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.publish-date {
+    color: var(--text-muted);
+    margin-top: 10px;
+}
+
+.quiz-main-content {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    border-radius: var(--radius);
+    line-height: 1.8;
+}
+
+.quiz-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 20px;
+}
+
+.tab-link {
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.tab-link:hover {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.btn-reg {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+.btn-reg:hover {
+    background: var(--primary-dark);
+}
+
+.registration-container {
+    max-width: 500px;
+    margin: 60px auto;
+}
+
+.registration-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 40px;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.quiz-name {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+/* ==========================================================================
+   5. ГАЛЕРЕЯ / HALL OF FAME
+   ========================================================================== */
+.gallery-page {
+    padding-bottom: 80px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+}
+
+.gallery-card {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-color);
+    aspect-ratio: 4 / 3;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.gallery-card:hover {
+    transform: translateY(-10px);
+}
+
+.image-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.gallery-card:hover img {
+    transform: scale(1.1);
+}
+
+.image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-card:hover .image-overlay {
+    opacity: 1;
+}
+
+.caption-text {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+    transform: translateY(10px);
+    transition: transform 0.3s ease;
+}
+
+.gallery-card:hover .caption-text {
+    transform: translateY(0);
+}
+
+.hof-top-text {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+.hof-bottom-text {
+    text-align: left;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-style: italic;
+}
+
+.hof-card {
+    height: auto;
+    background: transparent;
+    border: none;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--admin-color);
+    color: #ffffff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 24px;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.gallery-card:hover .delete-btn,
+.hof-card:hover .delete-btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* ==========================================================================
+   6. ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ И ЛИДЕРБОРДЫ
+   ========================================================================== */
+.profile-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding-bottom: 50px;
+}
+
+.profile-header {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius);
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile-main-info {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.profile-avatar {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.stat-card.highlight {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #7c3aed 100%);
+    color: #ffffff;
+}
+
+.stat-card.highlight .stat-value {
+    color: #ffffff;
+}
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--navy);
+}
+
+.styled-table, .participants-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.styled-table th, .participants-table th {
+    background: var(--bg-color);
+    padding: 18px;
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.styled-table td, .participants-table td {
+    padding: 15px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    vertical-align: middle;
+}
+
+.winner-row {
+    background-color: #fef9c3;
+}
+
+.badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge.winner, .winner-tag { background: #fef3c7; color: #92400e; }
+.badge.participant, .participant-tag { background: var(--bg-color); color: var(--text-color); }
+.status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
+.status-badge.admin { background: #fee2e2; color: var(--admin-color); }
+.status-badge.user { background: #e0f2fe; color: var(--primary-color); }
+
+.winners-page { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+.winner-card { background: var(--card-bg); border-radius: 25px; padding: 30px; border: 1px solid rgba(0, 0, 0, 0.08); transition: transform 0.3s ease; }
+.winner-card:hover { transform: translateY(-5px); }
+.winner-main-info { display: flex; align-items: center; gap: 30px; }
+.avatar-large img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid var(--gold); }
+.winner-name-big { font-size: 1.8rem; font-weight: 800; text-decoration: none; color: var(--navy); }
+.winner-name-big:hover { color: var(--primary-color); }
+.winner-score-box { background: var(--navy); color: #ffffff; padding: 15px 25px; border-radius: 20px; text-align: center; min-width: 100px; }
+.score-val-big { display: block; font-size: 2rem; font-weight: 900; }
+
+/* ==========================================================================
+   7. ФОРМЫ (ЛОГИН, РЕГИСТРАЦИЯ, АДМИНКА)
+   ========================================================================== */
+.auth-container { max-width: 550px; margin: 60px auto; padding: 0 20px; }
+.auth-card, .form-card { background: var(--card-bg); border: 1px solid rgba(0, 0, 0, 0.08); padding: 50px; border-radius: var(--radius); }
+.styled-form { text-align: left; }
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-color); }
+.form-input { width: 100%; padding: 12px 15px; border: 2px solid rgba(0, 0, 0, 0.08); background: var(--bg-color); border-radius: 10px; font-size: 1rem; color: var(--navy); transition: all 0.2s; box-sizing: border-box; }
+.form-input:focus { border-color: var(--primary-color); outline: none; background: var(--card-bg); }
+.btn-submit, .btn-auth-submit { width: 100%; background: var(--primary-color); color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-submit:hover, .btn-auth-submit:hover { background: var(--primary-dark); }
+.admin-panel { margin-top: 40px; border: 2px dashed var(--admin-color); border-radius: 15px; padding: 20px; background: #fee2e2; }
+
+/* ==========================================================================
+   8. ГЛАВНАЯ СЕКЦИЯ (HERO SECTION)
+   ========================================================================== */
+.hero-section {
+    background: radial-gradient(circle at top right, #1e293b, var(--navy));
+    color: #ffffff;
+    padding: 100px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius);
+    margin: 40px 20px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.hero-title .accent {
+    color: var(--primary-color);
+    background: linear-gradient(90deg, #10b981, var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #cbd5e0;
+    margin-bottom: 40px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.btn-primary-lg, .btn-secondary-lg {
+    padding: 16px 32px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-primary-lg {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+.btn-primary-lg:hover {
+    background: var(--primary-dark);
+    transform: translateY(-3px);
+}
+
+.btn-secondary-lg {
+    background: var(--card-bg);
+    color: var(--navy);
+}
+
+.btn-secondary-lg:hover {
+    opacity: 0.9;
+}
+
+/* ==========================================================================
+   9. ПОДВАЛ САЙТА (FOOTER) И СОЦСЕТИ
+   ========================================================================== */
+.main-footer {
+    background: var(--navy);
+    color: var(--text-muted);
+    padding: 60px 0 30px;
+    margin-top: 100px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-logo {
+    height: 40px !important;  /* Сделали логотип аккуратным, 40px вместо 120px */
+    width: auto !important;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.footer-logo:hover {
+    transform: scale(1.05);
+}
+
+.footer-socials .footer-label {
+    color: #ffffff;
+    font-weight: bold;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.social-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.social-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+}
+
+.social-item[title="Telegram"]:hover { background-color: #0088cc; transform: scale(1.1); }
+.social-item[title="Instagram"]:hover { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); transform: scale(1.1); }
+.social-item[title="Email"]:hover { background-color: #ea4335; transform: scale(1.1); }
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 40px;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   10. АДМИНКА: ФОРМА ДОБАВЛЕНИЯ КВИЗА
+   ========================================================================== */
+.admin-create-quiz {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 40px;
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius);
+}
+
+.admin-create-quiz h2 {
+    font-size: 2rem;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.quiz-input, .quiz-textarea {
+    width: 100%;
+    padding: 14px 18px;
+    font-family: inherit;
+    background: var(--bg-color);
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    color: var(--navy);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.quiz-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.quiz-input:focus, .quiz-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: var(--card-bg);
+}
+
+.btn-create-submit:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================================================
+   11. ТАБЛИЦА СУПЕР-ЛИДЕРБОРДА (ОБНОВЛЕННАЯ, БЕЗ ПРОЕМОВ)
+   ========================================================================== */
+.table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius);
+    margin-top: 30px;
+}
+
+.leaderboard-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0;
+    padding: 0;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 14px 16px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-sizing: border-box !important;
+}
+
+.leaderboard-table th {
+    background: var(--bg-color) !important;
+    color: var(--text-muted) !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+}
+
+/* Выравнивание крайних ячеек для красоты */
+.rank-cell {
+    text-align: center !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.score-cell {
+    text-align: right !important;
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding-right: 25px !important;
+}
+
+/* Стилизация трендов (динамики) */
+.trend-cell {
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.trend-up { color: #0083e4; }
+.trend-down { color: #e83c3c; }
+.trend-steady { color: #909dae; font-size: 1.2rem; padding-left: 6px; }
+.trend-new {
+    background: linear-gradient(90deg, #00102e, #007fdf);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+/* Ссылки на профиль */
+.user-link {
+    text-decoration: none;
+    color: var(--navy);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+.user-link:hover { color: var(--primary-color); }
+
+/* Университетский бэдж */
+.uni-badge {
+    background-color: #f3f3f3;
+    color: #093781;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+/* Бэдж для имени участника */
+.name-badge {
+    background-color: #f3f3f3;
+    padding: 5px 7px;
+    border-radius: 4px;
+    display: inline-block;
+    transition: background-color 0.5s ease;
+}
+
+.name-badge .user-link {
+    color: #093781;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.97rem;
+}
+
+.name-badge:hover {
+    background-color: #e0f2fe;
+}
+
+.pts-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
+.empty-leaderboard { text-align: center; color: var(--text-muted); padding: 40px !important; }
+
+/* Ховер-эффект на строки таблицы */
+.leaderboard-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+.leaderboard-table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ==========================================================================
+   14. ВЫПАДАЮЩЕЕ МЕНЮ ДЛЯ ABOUT (4 ПУНКТА)
+   ========================================================================== */
+.nav-links .dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: var(--navy);
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    list-style: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 99999;
+}
+
+.nav-links .dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 0.65rem 1.2rem;
+    color: #cbd5e1 !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.dropdown-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #0083e4 !important;
+    padding-left: 1.4rem;
+}
+
+.dropdown-toggle::after {
+    content: ' ▾';
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s;
+}
+
+.dropdown:hover .dropdown-toggle::after {
+    color: #0083e4;
+}
+
+/* ==========================================================================
+   15. CSS ДЛЯ DYNAMIC ISLAND (УЛЬТРА-АДАПТИВНЫЙ И СЦЕНТРИРОВАННЫЙ)
+   ========================================================================== */
+.dynamic-island-container {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 50%;               /* Сдвигаем контейнер строго на центр экрана */
+    transform: translateX(-50%); /* Центрируем его по оси X */
+    width: 100%;
+    max-width: 100vw;        /* Защита от вылетов за границы мобильного экрана */
+    z-index: 9999;
+    pointer-events: none;    /* Пропускает клики сквозь пустую зону контейнера */
+    box-sizing: border-box;
+}
+
+.dynamic-island {
+    margin: 0 auto;
+    width: 110px;
+    height: 35px;
+    background-color: #0b132b;
+    border-radius: 20px;
+    pointer-events: auto;    /* Возвращаем кликабельность самому острову */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                border-radius 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.island-compact {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    gap: 5px;
+    transition: opacity 0.2s ease;
+}
+
+.island-arrow {
+    color: #0083e4;
+    font-size: 0.8rem;
+}
+
+.island-content {
+    opacity: 0;
+    visibility: hidden;
+    padding: 20px;
+    transition: opacity 0.2s ease;
+}
+
+/* Развернутое состояние */
+.dynamic-island.active {
+    width: 85%;
+    max-width: 340px;
+    height: auto;
+    max-height: 480px;
+    border-radius: 28px;
+    cursor: default;
+}
+
+.dynamic-island.active .island-compact {
+    display: none;
+}
+.dynamic-island.active .island-content {
+    opacity: 1;
+    visibility: visible;
+    overflow-y: auto;
+    max-height: 440px;
+}
+
+/* Мобильные элементы внутри Острова */
+.mobile-nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+.mobile-nav-links li {
+    margin: 12px 0;
+}
+.mobile-nav-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    display: block;
+    transition: color 0.2s;
+}
+.mobile-brand {
+    font-weight: 800 !important;
+    color: #0083e4 !important;
+    font-size: 1.3rem !important;
+}
+.island-hr {
+    border: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 15px 0;
+}
+.mobile-about-title {
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 5px !important;
+}
+.mobile-about-sub a {
+    font-size: 0.95rem !important;
+    color: #cbd5e1 !important;
+    font-weight: 400 !important;
+}
+.mobile-user-name {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+    word-break: break-word;
+}
+.mobile-btn-logout {
+    color: #ff4a4a !important;
+    font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   16. МЕДИА-ЗАПРОСЫ ДЛЯ АДАПТИВА И СЖАТИЯ ТАБЛИЦ ТЕЛЕФОНАМИ
+   ========================================================================== */
+@media (max-width: 992px) {
+    .desktop-navbar {
+        display: none !important;
+    }
+    .dynamic-island-container {
+        display: block;
+    }
+    .content {
+        margin-top: 70px !important;
+    }
+}
+
+/* ==========================================================================
+   16. ОБЪЕДИНЕННЫЙ И СКОРРЕКТИРОВАННЫЙ АДАПТИВ (ТАБЛИЦА + ПРОФИЛЬ + ИЗМЕНЕНИЕ)
+   ========================================================================== */
+@media (max-width: 768px) {
+
+    /* СБРОС И КОРРЕКЦИЯ 1%: Заставляем ВСЕ мобильные контейнеры и инпуты считать отступы внутрь */
+    .profile-container,
+    .profile-container *,
+    .edit-profile-container,    /* Твой новый контейнер из edit_profile.html */
+    .edit-profile-container *,
+    .table-container,
+    .table-container *,
+    .form-card,
+    .form-card *,
+    .styled-form,
+    .styled-form * {
+        box-sizing: border-box !important;
+    }
+
+    /* Ограничиваем главные контейнеры страниц физической шириной экрана */
+    .profile-container,
+    .edit-profile-container {
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        margin: 15px auto !important;
+        overflow: hidden !important;    /* Жесткий запрет на вылет вбок и зум-аут */
+    }
+
+    /* --- АДАПТИВ ДЛЯ ФОРМЫ РЕДАКТИРОВАНИЯ (ФИКС ЗУМА) --- */
+    .form-card, .auth-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 25px 15px !important; /* Уменьшаем гигантские паддинги (50px) до аккуратных мобильных */
+        border-radius: 12px !important;
+        margin: 0 auto !important;
+    }
+
+    /* Укрощаем инпуты по тегам внутри .input-group, чтобы они не растягивали форму */
+    .input-group input,
+    .input-group select,
+    .disabled-input {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 1rem !important; /* Важно: 16px спасает от принудительного зума на iOS (iPhone)! */
+        padding: 10px 12px !important;
+    }
+
+    /* Перестраиваем блок изменения аватарки в вертикальный вид на смартфонах */
+    .avatar-edit-section {
+        flex-direction: column !important; /* Аватарка встанет НАД кнопкой, а не сбоку */
+        align-items: center !important;
+        gap: 15px !important;
+        text-align: center !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Жестко укрощаем контейнер и само фото JPG, чтобы оно не занимало весь экран */
+    .current-avatar-wrapper {
+        width: 120px !important;  /* На телефоне кругляшок будет компактнее */
+        height: 120px !important;
+        min-width: 120px !important;
+        min-height: 120px !important;
+        border-radius: 50% !important;
+        overflow: hidden !important; /* Обрезает оригинальные гигантские размеры JPG */
+    }
+
+    .current-avatar-wrapper img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important; /* Картинка сжимается внутрь круга, не ломая экран */
+    }
+
+    /* Кнопки формы делаем вертикальными плитками на весь экран — удобно тапать пальцем */
+    .form-actions {
+        display: flex;
+        flex-direction: column-reverse !important; /* Отмена снизу, Сохранить сверху */
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .btn-submit, .btn-cancel, .file-input-wrapper label {
+        width: 100% !important;
+        display: block !important;
+        text-align: center !important;
+        padding: 12px !important;
+        margin: 0 !important;
+    }
+
+    /* --- АДАПТИВ ДЛЯ СТРАНИЦЫ ПРОФИЛЯ --- */
+    .profile-header {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 20px 12px !important;
+        gap: 20px !important;
+    }
+
+    .profile-main-info {
+        flex-direction: column !important;
+        gap: 15px !important;
+        width: 100% !important;
+    }
+
+    .profile-avatar {
+        width: 130px !important;
+        height: 130px !important;
+        margin: 0 auto !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .stat-card {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    .stat-value {
+        font-size: 1.5rem !important;
+    }
+
+    /* ================= СЖАТИЕ ТАБЛИЦЫ ЛИДЕРОВ ================= */
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 10px 6px !important;
+        font-size: 0.82rem !important;
+    }
+
+    .score-cell {
+        padding-right: 10px !important;
+        font-size: 0.95rem !important;
+    }
+
+    .rank-cell {
+        font-size: 0.95rem !important;
+    }
+
+    .uni-badge {
+        font-size: 0.75rem !important;
+        padding: 3px 6px !important;
+    }
+
+    .name-badge .user-link {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* ================= СВОРАЧИВАЕМЫЙ ABOUT В ОСТРОВЕ ================= */
+.mobile-about-dropdown {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0; /* По умолчанию скрыто по высоте */
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, margin 0.3s ease;
+    background: rgba(255, 255, 255, 0.03); /* Легкий контрастный фон для подменю */
+    border-radius: 8px;
+}
+
+/* Когда добавлен класс .open, подменю плавно раскрывается */
+.mobile-about-dropdown.open {
+    max-height: 215px; /* Даем достаточную высоту для 4 ссылок */
+    margin-top: 10px;
+    padding: 5px 0;
+}
+
+.mobile-about-toggle {
+    color: #cbd5e1 !important;
+    font-weight: 700 !important;
+}
+
+.mobile-about-toggle .about-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    color: #0083e4;
+}
+
+/* Поворачиваем стрелочку при раскрытии */
+.mobile-about-toggle.active .about-arrow {
+    transform: rotate(180deg);
+}
+
+/* Делаем ссылки внутри чуть компактнее */
+.mobile-about-dropdown .mobile-about-sub {
+    font-size: 0.975rem !important;
+    color: #bdbdbd !important;
+    padding: 8px 0 !important;
+}
+
+/* ================= БАЗОВЫЕ СТИЛИ АВАТАРКИ ДЛЯ ПК ================= */
+.avatar-edit-section {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.current-avatar-wrapper {
+    width: 150px;
+    height: 150px;
+    min-width: 150px;
+    min-height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--primary-color);
+}
+
+.current-avatar-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* ================= EFFECTS FOR TOURNAMENT TABS ================= */
+
+/* Базовое состояние вкладок (добавляем плавность для всех изменений) */
+.tournamenttabs .tab-link {
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    z-index: 1;
+    overflow: hidden; /* Чтобы блики или линии не вылезали за края */
+}
+
+/* Эффект при наведении на ЛЮБУЮ вкладку */
+.tournamenttabs .tab-link:hover {
+    color: #fff !important; /* Текст становится белым для контраста */
+    background: #0083e4 !important; /* Заливается фирменным синим (или поставь #a855f7 для фиолетового) */
+    transform: translateY(-3px) scale(1.03); /* Кнопка слегка приподнимается и увеличивается */
+
+    /* Мощное неоновое свечение вокруг кнопки */
+    box-shadow: 0 7px 20px rgba(0, 131, 228, 0.4),
+                0 0 10px rgba(0, 131, 228, 0.2);
+}
+
+/* Специфический эффект для фиолетовой кнопки Register/Results, если у нее другой класс */
+.tournamenttabs .tab-link.btn-reg:hover {
+    background: #a855f7 !important;
+    box-shadow: 0 7px 20px rgba(168, 85, 247, 0.5);
+}
+
+/* Эффект «взрыва» или мягкого клика при нажатии (активное нажатие мышки) */
+.tournamenttabs .tab-link:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 3px 10px rgba(0, 131, 228, 0.3);
+}
+
+/* Анимация появления плавной полосы снизу при наведении (дополнительный эффект) */
+.tournamenttabs .tab-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: #fff;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.tournamenttabs .tab-link:hover::after {
+    width: 80%; /* Полоса плавно расползается из центра на 80% ширины */
+}
+
+/* ================= FIXED FADE-TO-SHADOW EFFECT (ISOLATED COLORS) ================= */
+
+/* 1. КОМПАКТНАЯ ПИЛЮЛЯ PQ (Только для закрытого Dynamic Island) */
+.dynamic-island-container span.island-logo {
+    position: relative !important;
+    color: #ffffff !important; /* ПИЛЮЛЯ ВСЕГДА КРАСИТСЯ В ЧИСТЫЙ БЕЛЫЙ ЦВЕТ */
+    text-decoration: none !important;
+    display: inline-block !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 2. ПОЛНАЯ НАДПИСЬ PROQUIZKG (На компьютерах и внутри открытого мобильного меню) */
+.desktop-navbar a.brand-btn-home,
+.dynamic-island a.mobile-brand.brand-btn-home {
+    position: relative !important;
+    color: #007fdf !important; /* НАДПИСЬ ВСЕГДА ОСТАЕТСЯ НАШИМ ФИРМЕННЫМ СИНИМ ЦВЕТОМ */
+    text-decoration: none !important;
+    display: inline-block !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 3. ЭФФЕКТЫ ДЛЯ УСТРОЙСТВ С МЫШКОЙ (ПК / Ноутбуки) */
+@media (hover: hover) {
+
+    /* Создаем скрытую фиолетовую надпись HOME внутри ссылок ProQuizKG */
+    .desktop-navbar a.brand-btn-home::after,
+    .dynamic-island a.mobile-brand.brand-btn-home::after {
+        content: 'HOME' !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) scale(0.8) !important;
+        font-size: 0.8rem !important;
+        font-weight: 900 !important;
+        letter-spacing: 3px !important;
+        color: #ededed !important; /* Наш турнирный фиолетовый */
+        opacity: 0 !important;
+        filter: blur(4px) !important;
+        transition: opacity 0.25s ease, filter 0.25s ease, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        pointer-events: none !important;
+    }
+
+    /* При наведении курсора: синий ProQuizKG плавно гаснет (уходит в тень) */
+    .desktop-navbar a.brand-btn-home:hover,
+    .dynamic-island a.mobile-brand.brand-btn-home:hover {
+        color: rgba(0, 127, 223, 0.15) !important; /* Блекнет именно синий цвет бренда */
+        transform: scale(0.96) !important;
+    }
+
+    /* При наведении курсора: фиолетовый HOME сочно загорается по центру */
+    .desktop-navbar a.brand-btn-home:hover::after,
+    .dynamic-island a.mobile-brand.brand-btn-home:hover::after {
+        opacity: 1 !important;
+        filter: blur(0) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+        text-shadow: 0 0 12px rgb(0 131 228) !important;
+    }
+
+    /* Ховер для пилюли PQ на ПК (при сужении экрана): она не меняет текст, а просто подсвечивается голубым */
+    .dynamic-island-container span.island-logo:hover {
+        color: #0083e4 !important;
+        transform: scale(1.05) !important;
+        text-shadow: 0 0 8px rgba(0, 127, 223, 0.3) !important;
+    }
+}
+
+/* 4. МЯГКИЙ КИНЕТИЧЕСКИЙ КЛИК НА ВСЕХ УСТРОЙСТВАХ */
+.desktop-navbar a.brand-btn-home:active,
+.dynamic-island a.mobile-brand.brand-btn-home:active,
+.dynamic-island-container span.island-logo:active {
+    transform: scale(0.92) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* ================= MIDJOURNEY STYLE HERO SECTION ================= */
+
+/* Главный контейнер во весь экран */
+.mj-hero-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 80vh; /* Занимает почти всю высоту экрана */
+    background-color: #020a1c; /* Глубокий темно-синий цвет Midjourney */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace; /* Моноширинный ретро-шрифт */
+}
+
+/* Эффект ЭЛТ-монитора (горизонтальные сканирующие линии) */
+.crt-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%; /* Шаг полос */
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Медленно бегущая тень сверху вниз, имитирующая мерцание монитора */
+.crt-overlay::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0.15) 10%, rgba(18, 16, 16, 0) 20%);
+    animation: crt-glow 6s linear infinite;
+}
+
+@keyframes crt-glow {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* ================= MIDJOURNEY STYLE HERO SECTION ================= */
+
+/* Главный контейнер во весь экран */
+.mj-hero-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 80vh; /* Занимает почти всю высоту экрана */
+    background-color: #020a1c; /* Глубокий темно-синий цвет Midjourney */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace; /* Моноширинный ретро-шрифт */
+}
+
+/* Эффект ЭЛТ-монитора (горизонтальные сканирующие линии) */
+.crt-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%; /* Шаг полос */
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Медленно бегущая тень сверху вниз, имитирующая мерцание монитора */
+.crt-overlay::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0.15) 10%, rgba(18, 16, 16, 0) 20%);
+    animation: crt-glow 6s linear infinite;
+}
+
+@keyframes crt-glow {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* ================= MIDJOURNEY STYLE HERO SECTION ================= */
+
+/* Главный контейнер во весь экран */
+.mj-hero-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 80vh; /* Занимает почти всю высоту экрана */
+    background-color: #020a1c; /* Глубокий темно-синий цвет Midjourney */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace; /* Моноширинный ретро-шрифт */
+}
+
+/* Эффект ЭЛТ-монитора (горизонтальные сканирующие линии) */
+.crt-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%; /* Шаг полос */
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Медленно бегущая тень сверху вниз, имитирующая мерцание монитора */
+.crt-overlay::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0.15) 10%, rgba(18, 16, 16, 0) 20%);
+    animation: crt-glow 6s linear infinite;
+}
+
+@keyframes crt-glow {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* Главный контейнер во весь экран */
+.mj-hero-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 80vh;
+    background-color: #020a1c;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace;
+
+    /* Дефолтное положение фонарика по центру, пока мышка не задвигалась */
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+}
+
+/* ИНТЕРФЕЙСНЫЙ ФОНАРИК + БЕСШОВНОЕ РАСТВОРЕНИЕ НИЗА ШТОРКИ */
+.mj-hero-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+
+    /* Первый градиент — это наш круглый фонарик за мышкой */
+    /* Второй градиент — плавно заливает нижние 25% шторки в цвет фона сайта (#020a1c), создавая идеальный туманный стык */
+    background: radial-gradient(circle 130px at var(--mouse-x) var(--mouse-y), rgba(2, 10, 28, 0) 0%, rgba(2, 10, 28, 0.6) 60%, rgba(2, 10, 28, 0.98) 100%),
+                linear-gradient(to bottom, rgba(2, 10, 28, 0) 70%, #020a1c 100%);
+
+    z-index: 2;
+    pointer-events: none;
+    opacity: 1;
+    transition: background 0.04s ease, opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Эту строчку можно просто оставить или закомментировать — она больше не будет вызывать вспышку */
+.mj-hero-wrapper.flashlight-active::after {
+    opacity: 1;
+}
+
+/* ТОЧЕЧНЫЙ ВЗРЫВ ЯРКОСТИ: Маска полной темноты полностью гаснет ТОЛЬКО при наведении на логотип */
+.mj-hero-wrapper:has(.mj-logo:hover)::after {
+    opacity: 0 !important; /* Убираем темноту, открывая весь яркий фон */
+}
+
+/* Буквы взрываются сочностью */
+.mj-hero-wrapper:has(.mj-logo:hover) .matrix-space {
+    opacity: 0.85 !important;
+    transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+
+/* ================= ИНТЕЛЛЕКТУАЛЬНЫЙ КОСМОС PROQUIZKG (КРУПНЫЙ ШРИФТ) ================= */
+.matrix-space {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0.55;
+    z-index: 1;
+    user-select: none;
+    pointer-events: none;
+
+    /* Увеличили ширину холста до 640px, а высоту до 820px под крупный и длинный текст */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='820' viewBox='0 0 640 820'%3E%3Ctext x='10' y='22' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Did you know? Light travels at 299,792 km/s •%3C/text%3E%3Ctext x='25' y='44' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[QUIZ MASTER] Who painted the Mona Lisa? Da Vinci (1503)%3C/text%3E%3Ctext x='5' y='66' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• DNA structure was discovered in 1953 by Watson &amp; Crick •%3C/text%3E%3Ctext x='35' y='88' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E⚡ E=mc² ⚡ Albert Einstein (1905) Annus Mirabilis%3C/text%3E%3Ctext x='15' y='110' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Mount Everest height: 8,848.86 meters (29,031.7 ft) •%3C/text%3E%3Ctext x='45' y='132' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[GEOGRAPHY] Deepest place: Mariana Trench (10,994m)%3C/text%3E%3Ctext x='5' y='154' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• First computer bug was a real moth found in a relay (1947) •%3C/text%3E%3Ctext x='30' y='176' fill='%23457df7' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E🏆 ProQuizKG: Turning Knowledge into Victory! 🏆%3C/text%3E%3Ctext x='20' y='198' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Honey never spoils. Archeologists found 3000-year-old edible pots •%3C/text%3E%3Ctext x='50' y='220' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[HISTORY] Rome was not built in a day • Founded 753 BC%3C/text%3E%3Ctext x='10' y='242' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• The human heart beats about 100,000 times a day •%3C/text%3E%3Ctext x='40' y='264' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[CHESS] Total possible unique games: Shannon Number (10¹²⁰)%3C/text%3E%3Ctext x='15' y='286' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Issyk-Kul is the second largest alpine lake in the world •%3C/text%3E%3Ctext x='35' y='308' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[SPACE] One day on Venus is longer than one year on Venus •%3C/text%3E%3Ctext x='5' y='330' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Pi (π) approximation 3.14159265... calculated to 100T digits •%3C/text%3E%3Ctext x='55' y='352' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[CINEMA] 'Avatar' (2009) is the highest-grossing film ($2.92B)%3C/text%3E%3Ctext x='20' y='374' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Bananas are berries, but strawberries aren't botanically! •%3C/text%3E%3Ctext x='45' y='396' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[SPORTS] First modern Olympic Games held in Athens, Greece (1896)%3C/text%3E%3Ctext x='10' y='418' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• The Pacific Ocean is wider than the Moon's entire diameter •%3C/text%3E%3Ctext x='30' y='440' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[IT] Python language named after Monty Python, not the snake%3C/text%3E%3Ctext x='5' y='462' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Sound travels about 4.3 times faster in water than in air •%3C/text%3E%3Ctext x='40' y='484' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[SCIENCE] Water is densest at 4 degrees Celsius (39.2°F)%3C/text%3E%3Ctext x='15' y='506' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• An octopus has three hearts, nine brains, and blue blood •%3C/text%3E%3Ctext x='50' y='528' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[ART] Vincent van Gogh sold only one painting while alive%3C/text%3E%3Ctext x='5' y='550' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Cleopatra lived closer in time to the Moon landing than to Giza pyramids •%3C/text%3E%3Ctext x='35' y='572' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[QUIZ] Pure logic always beats simple memorization%3C/text%3E%3Ctext x='25' y='594' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Sharks existed before trees. Sharks: ~400M years, Trees: ~350M •%3C/text%3E%3Ctext x='55' y='616' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[LITERATURE] The longest novel ever written is 'In Search of Lost Time'%3C/text%3E%3Ctext x='15' y='638' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Total weight of all Earth ants equals total weight of all humans •%3C/text%3E%3Ctext x='45' y='660' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[MATH] Zero (0) was invented as a number by Indian mathematicians%3C/text%3E%3Ctext x='10' y='682' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Light from the Sun takes exactly 8 minutes and 20 seconds to reach Earth •%3C/text%3E%3Ctext x='35' y='704' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[GEOLOGY] Continents drift at the same speed that fingernails grow%3C/text%3E%3Ctext x='5' y='726' fill='%23528fff' font-family='Courier New, monospace' font-size='15' font-weight='bold'%3E• Wombat feces are cube-shaped, preventing them from rolling away •%3C/text%3E%3Ctext x='50' y='748' fill='%23457df7' font-family='Courier New, monospace' font-size='14' font-weight='bold'%3E[GAMES] Rubik's Cube has 43,252,003,274,489,856,000 combinations%3C/text%3E%3C/svg%3E");
+    background-repeat: repeat;
+
+    /* 3D-наклон кинескопа */
+    transform: perspective(1200px) rotateX(18deg) rotateY(-6deg);
+    filter: drop-shadow(0 0 2px rgba(82, 143, 255, 0.45));
+
+    /* ОСТАВИЛИ ОДНУ ЕДИНСТВЕННУЮ ПРАВИЛЬНУЮ АНИМАЦИЮ */
+    animation: mj-cosmic-flight 55s linear infinite;
+}
+
+/* Бесшовная анимация под новый холст (ширина 640px, высота 820px) */
+@keyframes mj-cosmic-flight {
+    0% { background-position: 0px 0px; }
+    100% { background-position: 640px -820px; }
+}
+
+
+/* ================= ЦЕНТРАЛЬНЫЙ БЛОК КОНТЕНТА И ЛОГОТИП ================= */
+.mj-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+/* Контурный футуристичный логотип */
+.mj-logo {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1.5px #ffffff;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-family: system-ui, -apple-system, sans-serif;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+/* Эффект Глитча при наведении мыши */
+.mj-logo:hover {
+    transform: scale(1.02);
+    animation: mj-glitch-break 0.3s linear infinite;
+}
+
+
+
+
+/* ================= ИДЕНТИЧНЫЕ ШТОРКЕ КАРТОЧКИ FEATURES ================= */
+.features-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 25px;
+    margin-top: 60px;
+    margin-bottom: 80px;
+    position: relative;
+    z-index: 15;
+}
+
+/* Карточки в покое — идеально глубокий цвет шторки */
+.feature-card {
+    flex: 1;
+    background: #020a1c; /* Точный глубокий цвет подложки шторки */
+    border: 1px solid rgba(82, 143, 255, 0.2); /* Сделали базовую рамку чуть ярче */
+    border-radius: 16px;
+    padding: 40px 25px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Иконки в покое — теперь они ярче и заметнее */
+.feature-icon {
+    font-size: 2.7rem; /* Немного увеличили масштаб */
+    margin-bottom: 20px;
+    display: inline-block;
+    opacity: 0.85; /* Подняли базовую видимость */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Названия карточек в покое — чистый белый цвет без серости */
+.feature-card h3 {
+    font-family: 'Courier New', Courier, monospace;
+    color: #ffffff; /* Идеально белый */
+    font-size: 1.35rem;
+    font-weight: 900;
+    margin-bottom: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.95; /* Почти полная видимость */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+/* Скрытый текст описания */
+.feature-card p {
+    font-family: system-ui, sans-serif;
+    color: #a3b8cc; /* Сделали сам шрифт светлее и читаемее */
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-top: 0;
+
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(15px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+
+/* ================= МОЩНЫЕ ЭФФЕКТЫ ХОВЕРА (ЯРКАЯ ПОДСВЕТКА) ================= */
+
+/* При наведении убираем грязно-серый оттенок! */
+/* Фон наливается сочным глубоким неоновым индиго, а backdrop-filter размывает низ */
+.feature-card:hover {
+    transform: translateY(-7px); /* Чуть выше подброс */
+    background: rgba(12, 26, 59, 0.75); /* Сочный, чистый сине-неоновый тон */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+/* Заголовок при ховере горит на все 100% */
+.feature-card:hover h3 {
+    opacity: 1;
+    color: #ffffff;
+    margin-bottom: 14px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Текст описания вылетает сочно и контрастно */
+.feature-card:hover p {
+    opacity: 1;
+    max-height: 120px;
+    transform: translateY(0);
+}
+
+.feature-card:hover .feature-icon {
+    opacity: 1;
+    transform: scale(1.15); /* Заметное интерактивное увеличение */
+}
+
+/* ИНДИВИДУАЛЬНЫЕ ЯДОВИТЫЕ НЕОНОВЫЕ ПОДСВЕТКИ */
+
+/* 1. Compete — Ядовито-синий ультра-неон */
+.feature-card:nth-child(1) .feature-icon { color: #0083e4; filter: drop-shadow(0 0 8px rgba(0, 131, 228, 0.5)); }
+.feature-card:nth-child(1):hover {
+    border-color: #0083e4;
+    /* Мощное внешнее свечение + внутреннее неоновое наливание */
+    box-shadow: 0 15px 35px rgba(0, 131, 228, 0.35), inset 0 0 20px rgba(0, 131, 228, 0.15);
+}
+.feature-card:nth-child(1):hover .feature-icon { filter: drop-shadow(0 0 15px #0083e4); }
+
+/* 2. Relive — Огненно-золотой ультра-неон */
+.feature-card:nth-child(2) .feature-icon { color: #fbbf24; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5)); }
+.feature-card:nth-child(2):hover {
+    border-color: #fbbf24;
+    box-shadow: 0 15px 35px rgba(251, 191, 36, 0.35), inset 0 0 20px rgba(251, 191, 36, 0.15);
+}
+.feature-card:nth-child(2):hover .feature-icon { filter: drop-shadow(0 0 15px #fbbf24); }
+
+/* 3. Connect — Кислотно-розовый ультра-неон */
+.feature-card:nth-child(3) .feature-icon { color: #f472b6; filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.5)); }
+.feature-card:nth-child(3):hover {
+    border-color: #f472b6;
+    box-shadow: 0 15px 35px rgba(244, 114, 182, 0.35), inset 0 0 20px rgba(244, 114, 182, 0.15);
+}
+.feature-card:nth-child(3):hover .feature-icon { filter: drop-shadow(0 0 15px #f472b6); }
+
+
+/* Адаптив под мобилки */
+@media (max-width: 768px) {
+    .features-section {
+        flex-direction: column;
+        gap: 20px;
+        padding: 0 20px;
+    }
+}
+
+
+/* ================= СТИЛЬ КАПСУЛЫ И КНОПОК МЕНЮ ================= */
+.mj-btn-group {
+    background: rgba(10, 20, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 50px; /* Круглая капсула */
+    display: flex;
+    gap: 15px;
+    backdrop-filter: blur(10px); /* Размытие заднего фона под капсулой */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Базовый стиль кнопок */
+.mj-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: system-ui, sans-serif;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.btn-icon {
+    font-size: 1.1rem;
+}
+
+/* ЦВЕТА КНОПОК */
+
+/* 1. Sign Up (Синий неон) */
+.btn-signup {
+    background-color: #0b1524;
+    color: #0083e4 !important;
+}
+.btn-signup:hover {
+    background-color: #0d233a;
+    box-shadow: 0 0 20px rgba(0, 131, 228, 0.4);
+    transform: translateY(-2px);
+}
+
+/* 2. Log In (Оранжево-желтый неон) */
+.btn-login {
+    background-color: #1c1412;
+    color: #fbbf24 !important;
+}
+.btn-login:hover {
+    background-color: #382414;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+    transform: translateY(-2px);
+}
+
+/* 3. Explore (Розово-фиолетовый неон) */
+.btn-explore {
+    background-color: #1c1221;
+    color: #f472b6 !important;
+}
+.btn-explore:hover {
+    background-color: #381a3a;
+    box-shadow: 0 0 20px rgba(244, 114, 182, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Эффект нажатия на любую кнопку */
+.mj-btn:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+/* Адаптивность для мобилок */
+@media (max-width: 768px) {
+    .mj-logo { font-size: 2.2rem; }
+    .mj-btn-group {
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 15px;
+        width: 90%;
+    }
+    .mj-btn { justify-content: center; }
+}
+
+/* ================= СТИЛИЗАЦИЯ СТРАНИЦЫ ТУРНИРОВ (TOURNAMENTS) ================= */
+.tournaments-page {
+    margin-top: 120px;
+    margin-bottom: 100px;
+    font-family: system-ui, sans-serif;
+}
+
+.tournaments-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.season-badge {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    background: rgba(82, 143, 255, 0.1);
+    border: 1px solid rgba(82, 143, 255, 0.3);
+    color: #528fff;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 8px rgba(82, 143, 255, 0.4);
+}
+
+.tournaments-header h1 {
+    font-family: 'Courier New', monospace;
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+}
+
+.tournaments-header .subtitle {
+    color: #8fa0c2;
+    font-size: 1.1rem;
+}
+
+/* СТИЛИ ТАЙМЛАЙНА ШКАЛЫ */
+.tournament-timeline {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto 60px auto;
+    padding: 0 20px;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 10px; left: 40px; right: 40px; height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.step-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #020a1c;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+/* Статусы шагов шкалы */
+.timeline-step.done .step-dot { border-color: #528fff; background: #528fff; box-shadow: 0 0 10px #528fff; }
+.timeline-step.done span { color: #528fff; }
+
+.timeline-step.active .step-dot { border-color: #fbbf24; background: #020a1c; box-shadow: 0 0 10px #fbbf24; }
+.timeline-step.active span { color: #fbbf24; }
+
+.timeline-step.locked span { color: #475569; }
+
+
+/* СЕТКА ТУРНИРНЫХ КАРТОЧЕК */
+.tournaments-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.tournament-card {
+    background: #020a1c;
+    border: 1px solid rgba(82, 143, 255, 0.15);
+    border-radius: 16px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.teams-badge {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #8fa0c2;
+    font-weight: bold;
+}
+
+.status-indicator {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
+.tournament-card h2 {
+    font-family: 'Courier New', monospace;
+    color: #ffffff;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.tournament-date {
+    color: #457df7;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.tournament-desc {
+    color: #8fa0c2;
+    line-height: 1.6;
+    font-size: 0.98rem;
+    margin-bottom: 25px;
+}
+
+/* ДИНАМИЧЕСКИЕ НЕОНОВЫЕ СТИЛИ ДЛЯ РАЗНЫХ СТАТУСОВ */
+
+/* 1. Завершенный турнир (Синий спокойный тон) */
+.tournament-card.status-completed { border-color: rgba(82, 143, 255, 0.3); }
+.tournament-card.status-completed .status-indicator { background: rgba(82, 143, 255, 0.1); color: #528fff; border: 1px solid rgba(82, 143, 255, 0.3); }
+
+/* 2. LIVE ТУРНИР (Вспыхивает золотым неоном, привлекая максимум внимания) */
+.tournament-card.status-live {
+    border-color: #fbbf24;
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.1), inset 0 0 15px rgba(251, 191, 36, 0.03);
+}
+.tournament-card.status-live .status-indicator {
+    background: #fbbf24; color: #020a1c; font-weight: 900;
+    animation: hud-light-flicker 1.5s ease-in-out infinite alternate;
+}
+
+/* 3. Будущий / Заблокированный турнир (Уходит в тень) */
+.tournament-card.status-upcoming { opacity: 0.6; border-color: rgba(255, 255, 255, 0.05); }
+.tournament-card.status-upcoming .status-indicator { background: rgba(255, 255, 255, 0.05); color: #475569; }
+
+
+/* КНОПКИ ДЕЙСТВИЯ */
+.t-btn {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-primary { background: #fbbf24; color: #020a1c; border: 1px solid #fbbf24; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 15px #fbbf24; }
+
+.btn-secondary { background: transparent; color: #528fff; border: 1px solid #528fff; }
+.btn-secondary:hover { background: rgba(82, 143, 255, 0.1); transform: translateY(-2px); }
+
+.btn-locked { background: rgba(255, 255, 255, 0.03); color: #475569; border: 1px solid rgba(255, 255, 255, 0.05); cursor: not-allowed; }
+
+@media (max-width: 768px) {
+    .tournaments-header h1 { font-size: 1.8rem; }
+    .tournament-timeline { display: none; } /* Прячем шкалу на мобилках ради чистоты */
+}
+
+/* ================= СИСТЕМНЫЕ СТИЛИ ДЛЯ РАЗДЕЛОВ ТУРНИРОВ ================= */
+
+.tournaments-section {
+    margin-top: 40px;
+}
+
+.tournaments-main-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.tournaments-main-header h1 {
+    font-size: 2.2rem;
+    color: var(--navy, #1e293b);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.subtitle-text {
+    color: var(--text-muted, #64748b);
+    font-size: 1rem;
+}
+
+.admin-top-action {
+    margin-top: 20px;
+}
+
+/* ЗАГОЛОВКИ С ЛИНЕЙКАМИ СЛЕВА */
+.title-upcoming {
+    border-left: 4px solid #a855f7;
+    padding-left: 15px;
+    margin-bottom: 25px;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.title-past {
+    border-left: 4px solid #666;
+    padding-left: 15px;
+    margin-bottom: 25px;
+    color: #666;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* СЕТКА ТУРНИРОВ */
+.tournament-default-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* КАРТОЧКИ И КОНТЕНТ */
+.tournament-custom-card {
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.upcoming-card-style { background: #ffffff; }
+.past-card-style { background: #f9f9f9; opacity: 0.95; }
+
+.card-body-wrapper {
+    margin-bottom: 20px;
+}
+
+.card-meta-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.meta-date {
+    font-size: 0.85rem;
+    color: #7c2d12;
+    font-weight: 600;
+}
+
+.tournament-custom-card h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 8px 0;
+    color: #1e293b;
+}
+
+.past-card-title {
+    color: #4b5563 !important;
+}
+
+.card-main-text {
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ВЫРАВНИВАНИЕ КНОПОК ДЕЙСТВИЯ */
+.card-buttons-layout {
+    display: flex;
+    gap: 10px;
+}
+
+/* СТАНДАРТНЫЕ СИСТЕМНЫЕ КНОПКИ */
+.btn-create-tournament {
+    text-decoration: none;
+    display: inline-block;
+    background: #a855f7;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+.btn-create-tournament:hover { background: #9333ea; }
+
+.btn-action-purple {
+    flex-grow: 1;
+    text-align: center;
+    background: #a855f7;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.btn-action-purple:hover { background: #9333ea; }
+
+.btn-standard-gray {
+    flex-grow: 1;
+    text-align: center;
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid #e2e8f0;
+}
+.btn-standard-gray:hover { background: #e2e8f0; }
+
+.btn-teams-gray {
+    flex-grow: 1;
+    text-align: center;
+    background: #e2e8f0;
+    color: #334155;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.btn-teams-gray:hover { background: #cbd5e1; }
+
+.btn-standings-gray {
+    flex-grow: 2;
+    text-align: center;
+    background: #4b5563;
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.btn-standings-gray:hover { background: #374151; }
+
+/* УПРАВЛЕНИЕ ДЛЯ МОДЕРАТОРОВ */
+.admin-edit-action { font-size: 0.85rem; color: #a855f7; text-decoration: none; font-weight: 700; }
+.admin-scores-action { font-size: 0.85rem; color: #4b5563; text-decoration: none; font-weight: 700; }
+.admin-edit-action-gray { font-size: 0.85rem; color: #666; text-decoration: none; font-weight: 700; }
+.admin-actions-inline { display: flex; gap: 10px; }
+.no-data-msg { color: #64748b; font-style: italic; }
+
+.flash-message-box {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #e0f2fe;
+    border-radius: 6px;
+    color: #0369a1;
+    font-weight: 500;
+    border: 1px solid #bae6fd;
+}
+
+
+/* ================= СТИЛИ СТРАНИЦЫ ДЕТАЛЕЙ ТУРНИРА ================= */
+.tournament-detail-section {
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+.tournament-header-node {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 30px;
+}
+
+.badge-node {
+    display: inline-block;
+    background: #f3e8ff;
+    color: #6b21a8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
+.tournament-header-node h1 {
+    font-size: 2.4rem;
+    color: #1e293b;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+}
+
+.publish-date-node {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0 0 20px 0;
+}
+
+/* ТАБЫ НАВИГАЦИИ */
+.tournament-tabs-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tab-link {
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #475569;
+    background: #f1f5f9;
+    transition: all 0.2s;
+}
+.tab-link:hover { background: #e2e8f0; color: #1e293b; }
+.tab-link.active { background: #1e293b; color: #ffffff; }
+
+.btn-reg-accent {
+    background: #a855f7;
+    color: #ffffff;
+}
+.btn-reg-accent:hover { background: #9333ea; color: #ffffff; }
+
+/* РАБОЧАЯ ОБЛАСТЬ КОНТЕНТА */
+.tournament-main-workspace {
+    margin-top: 20px;
+}
+
+.info-description-card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.info-description-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 15px 0;
+}
+
+.description-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #334155;
+    white-space: pre-line;
+    margin: 0;
+}
+
+/* ПАНЕЛЬ ОРГАНИЗАТОРА В ДЕТАЛЯХ */
+.moderator-control-panel {
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 40px;
+}
+
+.moderator-badge {
+    background: #ef4444;
+    color: white;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+}
+
+.moderator-actions-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.mod-btn-edit {
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.mod-btn-edit:hover { background: #f8fafc; }
+
+.mod-btn-success {
+    background: #10b981;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.mod-btn-success:hover { background: #059669; }
+
+.mod-delete-form {
+    display: inline;
+    margin-left: auto;
+}
+
+.mod-btn-delete {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.mod-btn-delete:hover { background: #dc2626; }
+
+/* Адаптивность для мобильных телефонов */
+@media (max-width: 768px) {
+    .moderator-actions-row { flex-direction: column; align-items: stretch; }
+    .mod-delete-form { margin-left: 0; }
+    .mod-btn-delete { width: 100%; }
+}
+
+/* ================= КЛАССИЧЕСКИЙ СВЕТЛЫЙ СТИЛЬ (ГОЛУБАЯ ЛИГА) ================= */
+
+/* Базовая карточка */
+.tournament-stage-card {
+    background: #ffffff !important;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid #ddd !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.tournament-stage-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Активная LIVE карточка выделяется голубой рамкой */
+.tournament-stage-card.card-status-live {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.08);
+}
+
+/* ГЛАВНАЯ ГОЛУБАЯ КНОПКА ДЕЙСТВИЯ */
+.btn-layout-blue-accent {
+    flex-grow: 2;
+    text-align: center;
+    background: #0ea5e9 !important; /* Насыщенный голубой */
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-layout-blue-accent:hover { background: #0284c7 !important; }
+
+/* Стандартная серая кнопка (Инфо / Команды) */
+.btn-layout-gray {
+    flex-grow: 1;
+    text-align: center;
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #334155 !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+.btn-layout-gray:hover { background: #e2e8f0 !important; }
+
+/* Темная кнопка (Результаты / Таблицы) */
+.btn-layout-dark {
+    flex-grow: 2;
+    text-align: center;
+    background: #4b5563 !important;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+.btn-layout-dark:hover { background: #374151 !important; }
+
+/* Заблокированная кнопка */
+.btn-layout-disabled {
+    flex-grow: 1;
+    text-align: center;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 10px;
+    border-radius: 6px;
+    color: #94a3b8 !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: not-allowed;
+}
+
+/* Административная кнопка создания */
+.btn-create-tournament {
+    text-decoration: none;
+    display: inline-block;
+    background: #0ea5e9 !important;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+.btn-create-tournament:hover { background: #0284c7 !important; }
+
+/* СТИЛЬНЫЕ СТАТУС-БЕЙДЖИ (UPPERCASE) */
+.status-badge-text {
+    font-size: 0.72rem !important;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge-text.status-completed {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.status-badge-text.status-live {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.status-badge-text.status-upcoming {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+

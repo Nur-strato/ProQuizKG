@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Organizers | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<div class="about-room-container" style="max-width: 1100px; margin: 50px auto; padding: 0 20px;">
+
+    <!-- Главный блок с описанием -->
+    <div style="background: var(--card-bg); border: 1px solid rgba(0,0,0,0.08); padding: 40px; border-radius: var(--radius); margin-bottom: 50px;">
+        <h1 style="font-size: 2.3rem; font-weight: 800; color: var(--navy); margin-bottom: 20px;">🏛️ Руководство и Команда Лиги</h1>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 15px;">
+            Интеллектуальная лига <strong>ProQuiz.kg</strong> основана и развивается на базе официального студенческого клуба <strong>AUCA Quiz Club</strong>.
+        </p>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 0;">
+            Организационный комитет полностью обеспечивает полный цикл создания проекта: от написания и независимого тестирования уникальных пакетов вопросов до координации межвузовской логистики, технического обеспечения мероприятий и администрирования данной веб-платформы.
+        </p>
+    </div>
+
+    <!-- Блок с карточками людей -->
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--navy); margin-bottom: 35px; text-align: center;">Организационный комитет</h2>
+
+    <div class="org-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-bottom: 60px;">
+
+        <!-- Карточка: Nurmukhamed -->
+        <div class="org-card" style="background: var(--card-bg); padding: 30px 25px; border-radius: var(--radius); text-align: center; border: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+            <div>
+                <img src="{{ url_for('static', filename='img/Nur.jpg') }}"
+     alt="Nurmukhamed"
+     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 3px solid var(--navy);">
+
+                <h3 style="color: var(--navy); font-size: 1.25rem; font-weight: 800; margin-bottom: 5px;">Nurmukhamed</h3>
+                <p style="color: #0083e4; font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 0.05em;">FOUNDER & DEV</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">
+                    Основатель лиги. Отвечает за общее стратегическое управление, масштабирование проекта, внешние партнерства и архитектуру программного обеспечения веб-платформы.
+                </p>
+            </div>
+            <a href="https://t.me/NurRay0" target="_blank" style="color: #007fdf; text-decoration: none; font-weight: 700; font-size: 0.85rem;">_______________</a>
+        </div>
+
+        <!-- Карточка: Bektemir -->
+        <div class="org-card" style="background: var(--card-bg); padding: 30px 25px; border-radius: var(--radius); text-align: center; border: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+            <div>
+                <img src="{{ url_for('static', filename='img/bektemir.png') }}"
+     alt="Bektemir"
+     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 3px solid var(--navy);">
+
+                <h3 style="color: var(--navy); font-size: 1.25rem; font-weight: 800; margin-bottom: 5px;">Bektemir</h3>
+                <p style="color: #0083e4; font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 0.05em;">CO-FOUNDER & CONTENT</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">
+                    Сооснователь проекта. Руководит редакторской группой игрового контента. Курирует составление пакетов вопросов, логистику турниров и регламент игрового процесса.
+                </p>
+            </div>
+            <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">📋 Игровой регламент</span>
+        </div>
+
+        <!-- Карточка: Shirin -->
+        <div class="org-card" style="background: var(--card-bg); padding: 30px 25px; border-radius: var(--radius); text-align: center; border: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+            <div>
+               <img src="{{ url_for('static', filename='img/shirin.png') }}"
+     alt="Shirin"
+     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 3px solid var(--navy);">
+
+                <h3 style="color: var(--navy); font-size: 1.25rem; font-weight: 800; margin-bottom: 5px;">Shirin</h3>
+                <p style="color: #0083e4; font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 0.05em;">CO-FOUNDER & SMM</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">
+                    Сооснователь проекта. Отвечает за маркетинговую стратегию лиги, связи с общественностью (PR), позиционирование бренда в медиапространстве и работу с аудиторией.
+                </p>
+            </div>
+            <a href="https://www.instagram.com/auca_quiz_club/" target="_blank" style="color: #0083e4; text-decoration: none; font-weight: 700; font-size: 0.85rem;">📸 Медиа-ресурсы</a>
+        </div>
+
+        <!-- Карточка: Adil -->
+        <div class="org-card" style="background: var(--card-bg); padding: 30px 25px; border-radius: var(--radius); text-align: center; border: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+            <div>
+               <img src="{{ url_for('static', filename='img/Adil.jpg') }}"
+     alt="Adil"
+     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 3px solid var(--navy);">
+
+                <h3 style="color: var(--navy); font-size: 1.25rem; font-weight: 800; margin-bottom: 5px;">Adil</h3>
+                <p style="color: #0083e4; font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 0.05em;">DEVELOPER</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">
+                    Технический специалист платформы. Занимается разработкой серверной логики, оптимизацией баз данных, интеграцией архитектуры веб-интерфейсов и поддержкой систем.
+                </p>
+            </div>
+            <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">💻 Технический отдел</span>
+        </div>
+    </div>
+
+    <!-- Блок взаимодействия / Сотрудничество -->
+    <div style="background: var(--card-bg); padding: 40px; border-radius: var(--radius); text-align: center; border: 1px solid rgba(0,0,0,0.08);">
+        <h3 style="color: var(--navy); font-size: 1.4rem; font-weight: 800; margin-bottom: 12px;">Сотрудничество и взаимодействие</h3>
+        <p style="color: var(--text-color); max-width: 650px; margin: 0 auto 25px auto; line-height: 1.6; font-size: 0.95rem;">
+            Мы открыты к предложениям от академических институтов, спонсоров и региональных организаций. Если вы хотите интегрировать свой университет в лигу или предложить партнерство — свяжитесь с нами напрямую.
+        </p>
+        <a href="https://t.me/NurRay0" target="_blank" style="background: #0083e4; color: white; padding: 12px 30px; border-radius: 6px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 6px rgba(0,131,228,0.15);">
+            Направить официальный запрос
+        </a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block title %}Scoring Control | {{ tournament.title if tournament.title else tournament.name }} | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Набор революционных стилей для панели управления результатами -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-dark: #0f172a;
+        --glass-panel: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(226, 232, 240, 0.8);
+    }
+
+    /* Матовая стеклянная подложка */
+    .glass-admin-card {
+        background: var(--glass-panel) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        box-shadow: 0 10px 30px -20px rgba(15, 23, 42, 0.05);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    /* Парящие строки-карточки команд */
+    .scoring-card-row {
+        background: rgba(255, 255, 255, 0.85) !important;
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 14px !important;
+        padding: 20px 24px !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.01);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .scoring-card-row:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.08) !important;
+        border-color: rgba(14, 165, 233, 0.2) !important;
+    }
+
+    /* iOS-like анимационный переключатель */
+    .winner-toggle-checkbox:checked + .toggle-slider { background-color: var(--brand-blue) !important; }
+    {% if tournament.id >= 3 %}
+    .winner-toggle-checkbox:checked + .toggle-slider { background-color: #22c55e !important; }
+    {% endif %}
+
+    .toggle-slider:before {
+        position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+        background-color: white; border-radius: 50%; transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .winner-toggle-checkbox:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* Поля ввода и кнопки инкремента */
+    .chrome-arrows-fix::-webkit-outer-spin-button,
+    .chrome-arrows-fix::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+
+    .score-control-btn {
+        background: white; border: 1px solid #cbd5e1; width: 36px; height: 36px;
+        border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #475569;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: all 0.15s ease;
+    }
+    .score-control-btn:hover {
+        border-color: var(--brand-blue); color: var(--brand-blue); background: #s;
+    }
+
+    .btn-action-modern {
+        padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 1rem;
+        cursor: pointer; text-decoration: none; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+</style>
+
+<section class="admin-scoring-section" style="padding: 50px 0; background: radial-gradient(80% 50% at 50% 0%, rgba(14, 165, 233, 0.02), transparent);">
+    <div class="container" style="max-width: 900px; padding: 0 20px;">
+
+        <!-- ADMIN HUB HEADER -->
+        <div style="border-bottom: 1px solid rgba(226, 232, 240, 0.8); padding-bottom: 24px; margin-bottom: 35px;">
+            <a href="/tournaments/{{ tournament.id }}/results" style="color: var(--brand-blue); text-decoration: none; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                ← Back to Standings
+            </a>
+            <h1 style="font-size: 2.6rem; font-weight: 900; margin: 15px 0 6px 0; color: var(--brand-dark); letter-spacing: -1px;">
+                Scoring & Advancement
+            </h1>
+            <p style="color: #64748b; font-size: 1.05rem; margin: 0; font-weight: 500;">
+                Manage points matrix and confirm bracket progression for: <span style="color: var(--brand-dark); font-weight: 700;">{{ tournament.title if tournament.title else tournament.name }}</span>
+            </p>
+        </div>
+
+        <!-- SEARCH MATRIX CONTROLLER -->
+        <div class="glass-admin-card" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; padding: 18px 24px !important;">
+            <div style="position: relative; width: 100%; max-width: 400px;">
+                <input type="text" id="admin-search" placeholder="🔍 Quick search by team name..." style="padding: 12px 18px; width: 100%; border: 1px solid rgba(203, 213, 225, 0.7); border-radius: 10px; font-size: 0.9rem; box-sizing: border-box; background: rgba(255,255,255,0.5); color: var(--brand-dark);">
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; letter-spacing: 0.5px; background: #f1f5f9; padding: 6px 14px; border-radius: 6px;">
+                Registered Rosters: <span style="color: var(--brand-blue); font-size: 0.95rem; font-weight: 900;">{{ participants|length }}</span>
+            </div>
+        </div>
+
+        <!-- MAIN SUBMIT FORM -->
+        <form method="POST" style="margin: 0;">
+            <div id="scoring-container" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 35px;">
+
+                {% for p in participants %}
+                <div class="scoring-card-row" data-team-name="{{ p.team_name.lower() }}">
+
+                    <!-- TEAM & CAPTAIN METADATA -->
+                    <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 200px;">
+                        <div style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #94a3b8; width: 30px; text-align: center;">#{{ loop.index }}</div>
+                        <div>
+                            <h4 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); letter-spacing: -0.2px;">{{ p.team_name }}</h4>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-weight: 500;">Captain: <strong style="color: #475569; font-weight: 700;">{{ p.user.name if p.user and p.user.name else 'Unknown' }}</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- SCORE INPUT CONTROLLER MODULE -->
+                    <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 4px 10px; border-radius: 10px; border: 1px solid #e2e8f0; box-sizing: border-box;">
+                        <button type="button" class="score-control-btn" onclick="stepScore('{{ p.id }}', -1)">-</button>
+                        <input type="number" id="score-input-{{ p.id }}" name="score_{{ p.id }}" value="{{ p.score if p.score else 0 }}" min="0" max="999" class="chrome-arrows-fix" style="width: 60px; text-align: center; font-weight: 900; font-family: monospace; font-size: 1.2rem; border: none; background: transparent; color: var(--brand-dark); padding: 0;" required>
+                        <button type="button" class="score-control-btn" onclick="stepScore('{{ p.id }}', 1)">+</button>
+                        <button type="button" onclick="stepScore('{{ p.id }}', 10)" style="background: #e0f2fe; border: 1px solid rgba(14, 165, 233, 0.4); padding: 0 12px; height: 36px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; color: #0369a1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;">+10</button>
+                    </div>
+
+                    <!-- BRACKET ADVANCEMENT TOGGLE SWITCH -->
+                    <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid rgba(226, 232, 240, 0.8); padding-left: 20px; min-width: 140px;">
+                        <label style="position: relative; display: inline-block; width: 44px; height: 24px; margin: 0; cursor: pointer; flex-shrink: 0;">
+                            <input type="checkbox" class="winner-toggle-checkbox" data-p-id="{{ p.id }}" name="winner_{{ p.id }}" {% if p.is_winner %}checked{% endif %} style="opacity: 0; width: 0; height: 0;">
+                            <span class="toggle-slider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; border-radius: 24px; transition: .3s cubic-bezier(0.16, 1, 0.3, 1);"></span>
+                        </label>
+
+                        <span class="winner-label-text"
+                              data-type-main="{% if tournament.id == 1 %}Promoted{% elif tournament.id == 2 %}Promoted{% elif tournament.id == 3 %}Winner 🏆{% else %}Winner 🏆{% endif %}"
+                              style="font-size: 0.8rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Contender
+                        </span>
+                    </div>
+
+                </div>
+                {% endfor %}
+
+                <!-- EMPTY SEARCH RECOVERY MODULE -->
+                <div id="admin-no-results" style="display: none; text-align: center; padding: 50px 20px; color: #64748b; font-size: 1.05rem; border: 1px dashed rgba(203, 213, 225, 0.8); border-radius: 16px; background: rgba(248, 250, 252, 0.6); backdrop-filter: blur(4px); font-weight: 600;">
+                    🔍 No registered rosters found matching that name for the current stage.
+                </div>
+
+            </div>
+
+            <!-- ACTIONS STICKY FLOATING FOOTER PANEL -->
+            {% if participants %}
+            <div class="glass-admin-card" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 28px !important;">
+                <div style="font-size: 0.9rem; color: #475569; max-width: 65%; font-weight: 500; line-height: 1.5;">
+                    {% if tournament.id == 1 %}
+                        ⚠️ Verified active advanced teams will be automatically cascaded to the <strong>Pre-Final</strong> stage track without manual re-registration requirements.
+                    {% elif tournament.id == 2 %}
+                        ⚠️ Verified advanced teams will be automatically cascaded to the <strong>Grand Final</strong> major track league stage.
+                    {% elif tournament.id == 3 %}
+                        ⚠️ Posting matrix scores will officially close the track and determine the absolute ultimate champion of the season.
+                    {% else %}
+                        ⚠️ Closing this custom community match will permanently lock further registrations and freeze the final leaderboard stand entries.
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 12px; flex-shrink: 0;">
+                    <button type="submit" class="btn-action-modern" style="background: var(--brand-blue); color: white; border: none; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);">Save & Advance</button>
+                    <a href="/tournaments/{{ tournament.id }}/results" class="btn-action-modern" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">Cancel</a>
+                </div>
+            </div>
+            {% endif %}
+        </form>
+
+    </div>
+</section>
+
+<!-- Интеллектуальный фронтенд JS блок обработки интерактивного свечения карт и динамического изменения стилей листов -->
+<script>
+    document.querySelectorAll('.glass-admin-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+    });
+
+    function stepScore(participantId, step) {
+        const input = document.getElementById('score-input-' + participantId);
+        if (input) {
+            let currentVal = parseInt(input.value) || 0;
+            let newVal = currentVal + step;
+            if (newVal < 0) newVal = 0;
+            input.value = newVal;
+        }
+    }
+
+    const checkboxes = document.querySelectorAll('.winner-toggle-checkbox');
+
+    function updateRowStyle(checkbox) {
+        const row = checkbox.closest('.scoring-card-row');
+        if (!row) return;
+        const label = row.querySelector('.winner-label-text');
+        const textValue = label.getAttribute('data-type-main');
+
+        if (checkbox.checked) {
+            {% if tournament.id >= 3 %}
+                row.style.background = 'linear-gradient(95deg, rgba(240, 253, 244, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%)';
+                row.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                label.style.color = '#166534';
+            {% else %}
+                row.style.background = 'linear-gradient(95deg, rgba(224, 242, 254, 0.6) 0%, rgba(255, 255, 255, 0.9) 100%)';
+                row.style.borderColor = 'rgba(14, 165, 233, 0.3)';
+                label.style.color = '#0369a1';
+            {% endif %}
+            label.innerText = textValue;
+        } else {
+            row.style.background = 'rgba(255, 255, 255, 0.85)';
+            row.style.borderColor = 'rgba(226, 232, 240, 0.8)';
+            label.innerText = 'Contender';
+            label.style.color = '#64748b';
+        }
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => updateRowStyle(cb));
+        updateRowStyle(cb);
+    });
+
+    const searchInput = document.getElementById('admin-search');
+    const noResultsBlock = document.getElementById('admin-no-results');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll('.scoring-card-row');
+            let foundAny = false;
+
+            rows.forEach(row => {
+                const teamName = row.getAttribute('data-team-name');
+                if (teamName.includes(filter)) {
+                    row.style.display = 'flex';
+                    foundAny = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noResultsBlock) {
+                noResultsBlock.style.display = foundAny ? 'none' : 'block';
+            }
+        });
+    }
+</script>
+{% endblock %}

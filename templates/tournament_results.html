@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+
+{% block title %}Standings | {{ tournament.title if tournament.title else tournament.name }} | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --glass-panel: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+        /* Цвета наградных зон */
+        --gold-glow: rgba(234, 179, 8, 0.06);
+        --gold-border: rgba(234, 179, 8, 0.3);
+        --silver-glow: rgba(148, 163, 184, 0.06);
+        --silver-border: rgba(148, 163, 184, 0.3);
+        --bronze-glow: rgba(180, 83, 9, 0.05);
+        --bronze-border: rgba(180, 83, 9, 0.25);
+    }
+
+    .results-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(50% 30% at 50% 0%, rgba(14, 165, 233, 0.03), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .results-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* КРИСТАЛЬНЫЕ КАРТОЧКИ (BENTO GLASS) */
+    .glass-results-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.02), 0 20px 40px -20px rgba(15, 23, 42, 0.06);
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* АНАЛИТИЧЕСКИЙ БЕНТО-БЛОК */
+    .analytics-bento-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .bento-stat-card {
+        padding: 24px !important;
+        text-align: center;
+    }
+
+    .analytics-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 0.05em;
+    }
+
+    .analytics-value {
+        font-size: 2.4rem;
+        font-weight: 900;
+        color: var(--brand-dark);
+        font-family: monospace;
+        line-height: 1;
+    }
+
+    /* ПАНЕЛЬ ПОИСКА И УПРАВЛЕНИЯ */
+    .matrix-action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .search-input-box {
+        position: relative;
+        flex: 1;
+        max-width: 380px;
+    }
+
+    .matrix-search-field {
+        padding: 12px 16px 12px 40px;
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 0.925rem;
+        box-sizing: border-box;
+        background: #ffffff;
+        color: var(--brand-dark);
+        transition: var(--transition-premium);
+        outline: none;
+    }
+
+    .matrix-search-field:focus {
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .search-icon-placeholder {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    /* НАВИГАЦИОННЫЕ КНОПКИ */
+    .nav-tab-modern {
+        padding: 10px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.875rem;
+        transition: var(--transition-premium);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid transparent;
+    }
+
+    .nav-tab-modern.inactive {
+        background: #f8fafc;
+        color: #475569;
+        border-color: var(--border-color);
+    }
+
+    .nav-tab-modern.inactive:hover {
+        background: #f1f5f9;
+        color: var(--brand-dark);
+        border-color: #cbd5e1;
+    }
+
+    .nav-tab-modern.active {
+        background: var(--brand-dark);
+        color: white;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+    }
+
+    /* КАРТОЧНАЯ СИСТЕМА ЛИДЕРБОРДА (ВМЕСТО ТАБЛИЦЫ) */
+    .matrix-cards-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .placement-row-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 18px 24px;
+        display: grid;
+        grid-template-columns: 60px 1fr auto auto;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition-premium);
+    }
+
+    .placement-row-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -10px rgba(15, 23, 42, 0.08);
+        border-color: #cbd5e1;
+    }
+
+    /* СТИЛИ ПРИЗОВЫХ МЕСТ (МЕДАЛИ) */
+    .rank-indicator-zone {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.15rem;
+        font-family: monospace;
+        color: var(--text-muted);
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    /* Золото, Серебро, Бронза */
+    .card-rank-1 { background: var(--gold-glow) !important; border-color: var(--gold-border) !important; }
+    .card-rank-1 .rank-indicator-zone { background: #fef08a; color: #a16207; border-color: #fde047; }
+
+    .card-rank-2 { background: var(--silver-glow) !important; border-color: var(--silver-border) !important; }
+    .card-rank-2 .rank-indicator-zone { background: #e2e8f0; color: #475569; border-color: #cbd5e1; }
+
+    .card-rank-3 { background: var(--bronze-glow) !important; border-color: var(--bronze-border) !important; }
+    .card-rank-3 .rank-indicator-zone { background: #ffedd5; color: #c2410c; border-color: #fed7aa; }
+
+    /* ИНФОРМАЦИЯ О РОСТЕРЕ */
+    .team-meta-section {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .team-identity-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .team-name-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .roster-players-inline {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .captain-badge {
+        font-size: 0.775rem;
+        background: #f1f5f9;
+        color: var(--brand-slate);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+    }
+
+    .teammate-badge {
+        font-size: 0.775rem;
+        background: #ffffff;
+        color: var(--text-muted);
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* БЛОК ССЫЛКИ НА ПРОФИЛЬ */
+    .captain-profile-action-zone {
+        padding-right: 15px;
+    }
+
+    .view-captain-btn {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.825rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f8fafc;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+
+    .view-captain-btn:hover {
+        color: var(--brand-blue);
+        border-color: #7dd3fc;
+        background: #e0f2fe;
+    }
+
+    /* НАБРАННЫЕ ОЧКИ */
+    .score-badge-pinnacle {
+        font-family: monospace;
+        font-weight: 900;
+        font-size: 1.25rem;
+        background: #f0f9ff;
+        color: var(--brand-blue);
+        border: 1px solid #bae6fd;
+        padding: 6px 16px;
+        border-radius: 20px;
+        min-width: 50px;
+        text-align: center;
+        box-shadow: inset 0 2px 4px rgba(14, 165, 233, 0.02);
+    }
+
+    .card-rank-1 .score-badge-pinnacle { background: #fef9c3; color: #854d0e; border-color: #fef08a; }
+
+    /* АДАПТИВНОСТЬ */
+    @media (max-width: 768px) {
+        .placement-row-card {
+            grid-template-columns: 50px 1fr;
+            gap: 16px;
+            padding: 16px;
+        }
+        .captain-profile-action-zone {
+            grid-column: 2;
+            padding: 0;
+            margin-top: 4px;
+        }
+        .score-badge-pinnacle {
+            grid-column: 2;
+            justify-self: start;
+            margin-top: 4px;
+        }
+        .matrix-search-field { max-width: 100%; }
+    }
+</style>
+
+<section class="results-layout">
+    <div class="results-container">
+
+        <div class="glass-results-card" style="margin-bottom: 24px; padding: 24px 32px !important;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <span style="background: rgba(14, 165, 233, 0.06); color: var(--brand-blue); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(14, 165, 233, 0.12); display: inline-block; margin-bottom: 6px;">
+                        Leaderboard Hub
+                    </span>
+                    <h1 style="font-size: 2rem; font-weight: 900; margin: 0; color: var(--brand-dark); letter-spacing: -0.02em;">
+                        {{ tournament.title if tournament.title else tournament.name }}
+                    </h1>
+                </div>
+
+                <nav style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <a href="/tournaments/{{ tournament.id }}" class="nav-tab-modern inactive">Overview</a>
+                    <a href="/tournaments/{{ tournament.id }}/participants" class="nav-tab-modern inactive">Participants</a>
+                    <a href="/tournaments/{{ tournament.id }}/results" class="nav-tab-modern active">Results</a>
+                </nav>
+            </div>
+        </div>
+
+        {% if tournament.past or tournament.status == 'completed' %}
+            <div class="analytics-bento-grid">
+                <div class="glass-results-card bento-stat-card">
+                    <div class="analytics-label">Total Participants</div>
+                    <div class="analytics-value">{{ participants|length }}</div>
+                </div>
+
+                <div class="glass-results-card bento-stat-card" style="background: linear-gradient(180deg, rgba(240, 253, 244, 0.4) 0%, rgba(255,255,255,0.7) 100%) !important; border-color: rgba(187, 247, 208, 0.6) !important;">
+                    <div class="analytics-label" style="color: #166534;">Highest Score</div>
+                    <div class="analytics-value" style="color: #15803d;">
+                        {% if participants %}{{ participants[0].score }}{% else %}0{% endif %} <span style="font-size: 1.1rem; font-weight: 700;">pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-results-card" style="padding: 24px !important;">
+
+                <div class="matrix-action-bar">
+                    <div class="search-input-box">
+                        <span class="search-icon-placeholder">🔍</span>
+                        <input type="text" id="matrix-live-search" class="matrix-search-field" placeholder="Найти команду или капитана...">
+                    </div>
+
+                    {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                        <a href="{{ url_for('admin_set_results', id=tournament.id) }}" class="nav-tab-modern inactive" style="border-color: #cbd5e1; font-size: 0.825rem;">
+                            ⚙️ Edit Matrix Scores
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div id="results-cards-wrapper" class="matrix-cards-stack">
+                    {% for p in participants %}
+                        <div class="placement-row-card {% if loop.index == 1 and p.is_winner %}card-rank-1{% elif loop.index == 2 %}card-rank-2{% elif loop.index == 3 %}card-rank-3{% endif %}" data-result-card>
+
+                            <div class="rank-indicator-zone">
+                                {% if loop.index == 1 and p.is_winner %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+                            </div>
+
+                            <div class="team-meta-section">
+                                <div class="team-identity-wrapper">
+                                    <h3 class="team-name-title" data-search-team>{{ p.team_name }}</h3>
+                                    {% if p.is_winner %}
+                                        <span style="font-size: 0.65rem; background: #ea580c; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Arena Winner</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="roster-players-inline">
+                                    <span class="captain-badge" data-search-captain>
+                                        ⭐ {% if p.user and p.user.name %}{{ p.user.name }}{% else %}Unknown{% endif %} (C)
+                                    </span>
+
+                                    {% if p.team and p.team.players %}
+                                        {% for player_entry in p.team.players %}
+                                            {% if player_entry.user_id != p.user_id %}
+                                                <span class="teammate-badge">
+                                                    👤 {{ player_entry.user.name if player_entry.user else "User" }}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="teammate-badge" style="border-style: dashed; color: #94a3b8;">[Слот]</span>
+                                        <span class="teammate-badge" style="border-style: dashed; color: #94a3b8;">[Слот]</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="captain-profile-action-zone">
+                                {% if p.user and p.user.id %}
+                                    <a href="{{ url_for('profile', user_id=p.user.id) }}" class="view-captain-btn">
+                                        Профиль ➔
+                                    </a>
+                                {% else %}
+                                    <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">N/A</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="score-badge-pinnacle">
+                                {{ p.score }} <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">pts</span>
+                            </div>
+
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted); font-style: italic; font-weight: 500;">
+                            🗃️ Итоги этой арены интеллекта ещё не подведены администрацией.
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div id="matrix-empty-search" style="display: none; text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; border: 1px dashed #cbd5e1; border-radius: 12px; margin-top: 10px;">
+                    🔍 Ни одна команда или капитан не соответствуют условиям поиска.
+                </div>
+
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 60px 24px; background: rgba(248, 250, 252, 0.6); backdrop-filter: blur(8px); border: 1px dashed rgba(203, 213, 225, 0.8); border-radius: 16px;">
+                <div style="font-size: 2.5rem; margin-bottom: 16px; filter: drop-shadow(0 4px 12px rgba(15,23,42,0.04));">⏳</div>
+                <h4 style="margin: 0 0 6px 0; font-size: 1.25rem; color: var(--brand-dark); font-weight: 800;">Арена в процессе игры</h4>
+                <p style="color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.95rem; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500;">Матрица официальных результатов и набранных очков сформируется автоматически сразу после завершения финального раунда.</p>
+                <a href="/tournaments/{{ tournament.id }}" class="nav-tab-modern inactive" style="border-color: #cbd5e1; padding: 10px 20px;">Вернуться к обзору</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    document.querySelectorAll('.glass-results-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+    });
+
+    // Модернизированный живой поиск по Bento-карточкам результатов
+    const searchInput = document.getElementById('matrix-live-search');
+    const emptySearchState = document.getElementById('matrix-empty-search');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value.toLowerCase();
+            const cards = document.querySelectorAll('[data-result-card]');
+            let hasVisibleCards = false;
+
+            cards.forEach(card => {
+                const teamEl = card.querySelector('[data-search-team]');
+                const captainEl = card.querySelector('[data-search-captain]');
+
+                const teamName = teamEl ? teamEl.innerText.toLowerCase() : '';
+                const captainName = captainEl ? captainEl.innerText.toLowerCase() : '';
+
+                if (teamName.includes(filter) || captainName.includes(filter)) {
+                    card.style.display = 'grid';
+                    hasVisibleCards = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Корректно скрываем/отображаем заглушку пустого результата
+            emptySearchState.style.display = hasVisibleCards ? 'none' : 'block';
+        });
+    }
+</script>
+{% endblock %}

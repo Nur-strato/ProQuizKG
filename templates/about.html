@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<div class="about-page" style="max-width: 900px; margin: 40px auto; padding: 0 20px; font-family: sans-serif;">
+
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--navy);">ℹ️ О проекте ProQuiz.kg</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Все детали нашей интеллектуальной экосистемы в одном месте</p>
+    </div>
+
+    <div id="mission" class="about-card" style="background: var(--card-bg); border: 1px solid rgba(0, 0, 0, 0.08); padding: 35px; border-radius: var(--radius); margin-bottom: 30px;">
+        <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; color: var(--navy);">🎯 Наша Миссия</h2>
+        <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-color);">
+            Мы стремимся развивать культуру интеллектуальных соревнований среди студенческого сообщества. Наша цель — создать сильную межвузовскую лигу, где интеллект, эрудиция и командная работа становятся главными ценностями прогрессивной молодёжи.
+        </p>
+    </div>
+
+    <div id="partners" class="about-card" style="background: var(--card-bg); border: 1px solid rgba(0, 0, 0, 0.08); padding: 35px; border-radius: var(--radius); margin-bottom: 30px;">
+        <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; color: var(--navy);">🤝 Партнёры</h2>
+        <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-color); margin-bottom: 20px;">
+            Мы сотрудничаем с ведущими организациями и брендами, готовыми поддерживать студенческие инициативы и интеллектуальное развитие.
+        </p>
+        <div style="background: var(--bg-color); padding: 20px; border-radius: 12px; text-align: center; border: 2px dashed rgba(0,0,0,0.05);">
+            <span style="color: var(--primary-color); font-weight: 700;">Стать партнёром лиги:</span>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Свяжитесь с нами по контактам организаторов</span>
+        </div>
+    </div>
+
+    <div id="organizers" class="about-card" style="background: var(--card-bg); border: 1px solid rgba(0, 0, 0, 0.08); padding: 35px; border-radius: var(--radius); margin-bottom: 30px;">
+        <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; color: var(--navy);">🔥 Организаторы</h2>
+        <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-color); margin-bottom: 15px;">
+            Проект управляется командой энтузиастов и вырос на базе официального студенческого клуба **AUCA Quiz Club**.
+        </p>
+        <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-color);">
+            Мы создаем качественный контент, пишем уникальные вопросы и координируем все этапы проведения турниров от идеи до финального подсчета очков на бэкенде.
+        </p>
+    </div>
+
+    <div id="faq" class="about-card" style="background: var(--card-bg); border: 1px solid rgba(0, 0, 0, 0.08); padding: 35px; border-radius: var(--radius);">
+        <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; color: var(--navy);">📋 FAQ и Правила</h2>
+        <div style="margin-top: 15px; color: var(--text-color); line-height: 1.7;">
+            <p><strong>1. Как принять участие?</strong><br>Зарегистрируйте личный профиль на сайте, перейдите в раздел Tournaments и отправьте заявку вашей команды на открытый турнир.</p>
+            <p style="margin-top: 15px;"><strong>2. Как считаются очки в рейтинге?</strong><br>В общем зачете (Leaderboard) суммируются все баллы, набранные вашей командой в прошедших играх, а шкала доминирования показывает ваш отрыв от лидера лиги.</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

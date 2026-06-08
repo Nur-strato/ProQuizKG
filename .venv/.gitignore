@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+*.pyc
+.env
+instance/
+static/profile_pics/*
+!static/profile_pics/default.png
+app.db

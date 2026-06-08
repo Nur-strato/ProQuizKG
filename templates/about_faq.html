@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+{% block title %}FAQ & Rules | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<!-- Кардинально новый Neo-Bento UI для FAQ и Правил лиги -->
+<style>
+    :root {
+        --brand-blue: #0ea5e9;
+        --brand-blue-hover: #0284c7;
+        --brand-dark: #0f172a;
+        --brand-slate: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --glass-panel: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(226, 232, 240, 0.95);
+        --transition-premium: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .faq-layout {
+        padding: 40px 0 60px 0;
+        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        min-height: calc(100vh - 70px);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .faq-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* GLASS BENTO КАРТОЧКИ */
+    .glass-card {
+        background: var(--glass-panel);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
+        transition: var(--transition-premium);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ДВУХКОЛОННЫЙ ХАБ ДЛЯ ПРАВИЛ */
+    .faq-bento-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ЗАГЛОВОК СТРАНИЦЫ */
+    .faq-header-block {
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .faq-badge {
+        background: rgba(14, 165, 233, 0.08);
+        color: var(--brand-blue);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid rgba(14, 165, 233, 0.15);
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .faq-main-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0;
+        color: var(--brand-dark);
+        letter-spacing: -0.03em;
+    }
+
+    /* НАВИГАЦИОННОЕ МЕНЮ СЛЕВА */
+    .faq-nav-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .faq-nav-btn {
+        padding: 14px 18px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: #ffffff;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.925rem;
+        text-align: left;
+        cursor: pointer;
+        transition: var(--transition-premium);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .faq-nav-btn:hover {
+        background: #f8fafc;
+        color: var(--brand-dark);
+        border-color: #cbd5e1;
+    }
+
+    .faq-nav-btn.active {
+        background: var(--brand-dark);
+        color: white;
+        border-color: var(--brand-dark);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+    }
+
+    /* ИНТЕРАКТИВНЫЕ ПЛИТКИ АККОРДЕОНА */
+    .faq-section-wrapper {
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .faq-section-wrapper.active {
+        display: flex;
+    }
+
+    .accordion-tile {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: var(--transition-premium);
+    }
+
+    .accordion-tile:hover {
+        border-color: rgba(14, 165, 233, 0.35);
+        box-shadow: 0 12px 24px -10px rgba(14, 165, 233, 0.12);
+    }
+
+    /* Кнопка-триггер */
+    .accordion-trigger {
+        width: 100%;
+        padding: 18px 24px;
+        background: none;
+        border: none;
+        text-align: left;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--brand-dark);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+        gap: 16px;
+    }
+
+    .accordion-icon {
+        width: 28px;
+        height: 28px;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        font-weight: bold;
+        transition: var(--transition-premium);
+    }
+
+    .accordion-tile.open .accordion-icon {
+        transform: rotate(180deg);
+        background: var(--brand-blue);
+        color: white;
+        border-color: var(--brand-blue);
+    }
+
+    /* Контентная область */
+    .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: max-height;
+    }
+
+    .accordion-inner-text {
+        padding: 4px 24px 24px 24px;
+        color: var(--brand-slate);
+        line-height: 1.65;
+        font-size: 0.95rem;
+    }
+
+    /* СТИЛИЗАЦИЯ ТЕКСТА ВНУТРИ ПРАВИЛ */
+    .rules-item-box {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .rule-row {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        padding: 12px 16px;
+        border-radius: 10px;
+    }
+
+    .rule-row strong {
+        color: var(--brand-dark);
+        display: inline-block;
+        margin-bottom: 2px;
+    }
+
+    /* FAQ ВОПРОСЫ-ОТВЕТЫ */
+    .faq-item-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .faq-qa-card {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        padding: 16px;
+        border-radius: 10px;
+    }
+
+    .faq-question-title {
+        color: var(--brand-blue-hover);
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .faq-answer-desc {
+        margin: 0;
+        color: var(--brand-slate);
+    }
+
+    @media (max-width: 850px) {
+        .faq-bento-grid {
+            grid-template-columns: 1fr;
+        }
+        .faq-nav-sidebar {
+            flex-direction: row;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .faq-nav-btn {
+            white-space: nowrap;
+        }
+    }
+</style>
+
+<section class="faq-layout">
+    <div class="faq-container">
+
+        <!-- PREMIUM HEADER CARD -->
+        <div class="glass-card faq-header-block">
+            <span class="faq-badge">Knowledge Base</span>
+            <h1 class="faq-main-title">FAQ & Rules</h1>
+        </div>
+
+        <!-- ГЛАВНЫЙ БЕНТО-ХАБ -->
+        <div class="faq-bento-grid">
+
+            <!-- Боковое меню переключения категорий -->
+            <div class="glass-card faq-nav-sidebar" style="padding: 16px !important;">
+                <button class="faq-nav-btn active" onclick="switchFaqTab('rules-tab', this)">
+                    <span>📋</span> 1. League Rules
+                </button>
+                <button class="faq-nav-btn" onclick="switchFaqTab('faq-tab', this)">
+                    <span>❓</span> 2. Live FAQ
+                </button>
+            </div>
+
+            <!-- Контентная область справа -->
+            <div class="glass-card" style="padding: 24px !important;">
+
+                <!-- КАТЕГОРИЯ: ПРАВИЛА ЛИГИ -->
+                <div id="rules-tab" class="faq-section-wrapper active">
+
+                    <div class="accordion-tile open" data-faq-accordion>
+                        <button class="accordion-trigger" onclick="toggleFaqAccordion(this.parentNode)">
+                            <span>🛡️ Регламент составов и честная игра</span>
+                            <div class="accordion-icon">▼</div>
+                        </button>
+                        <div class="accordion-content" style="max-height: 500px;"> <!-- Изначально открыт -->
+                            <div class="accordion-inner-text">
+                                <div class="rules-item-box">
+                                    <div class="rule-row">
+                                        <strong>• Состав команды:</strong> В одной команде должно быть строго 3 человека. Все участники должны быть зарегистрированы на платформе.
+                                    </div>
+                                    <div class="rule-row">
+                                        <strong>• Честная игра:</strong> Мы за чистый интеллект. Любые попытки сговора, шпионства или подсказок из зрительного зала аннулируют баллы за текущий тур.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-tile" data-faq-accordion>
+                        <button class="accordion-trigger" onclick="toggleFaqAccordion(this.parentNode)">
+                            <span>🚫 Технические ограничения и гаджеты</span>
+                            <div class="accordion-icon">▼</div>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-inner-text">
+                                <div class="rule-row" style="border-left: 3px solid #ef4444;">
+                                    <strong>• Использование гаджетов:</strong> Во время раундов строго запрещено использование мобильных телефонов, планшетов и смарт-часов. За любое пассивное или активное нарушение команда немедленно дисквалифицируется с текущего игрового дня.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-tile" data-faq-accordion>
+                        <button class="accordion-trigger" onclick="toggleFaqAccordion(this.parentNode)">
+                            <span>⚖️ Подача апелляций и споры</span>
+                            <div class="accordion-icon">▼</div>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="accordion-inner-text">
+                                <div class="rule-row">
+                                    <strong>• Апелляции:</strong> Если команда аргументированно не согласна с зачетом ответа, капитан имеет исключительное право подать краткую письменную или устную апелляцию судейской коллегии в течение 5 минут после официального окончания игрового раунда.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- КАТЕГОРИЯ: FAQ ВОПРОСЫ -->
+                <div id="faq-tab" class="faq-section-wrapper">
+
+                    <div class="faq-item-container">
+                        <div class="faq-qa-card">
+                            <div class="faq-question-title">Как принять участие в квизе?</div>
+                            <p class="faq-answer-desc">Зарегистрируйтесь на сайте, создайте команду во вкладке личного кабинета (или примите приглашение в существующую) и отправьте заявку на открытую игру во вкладке <strong>Tournaments</strong>.</p>
+                        </div>
+
+                        <div class="faq-qa-card">
+                            <div class="faq-question-title">Как работает динамика и тренды в Leaderboard?</div>
+                            <p class="faq-answer-desc">После завершения каждого турнира бэкенд платформы автоматически сравнивает ваше текущее положение в глобальном рейтинге с позицией до этой игры. Зеленые и красные стрелочки показывают динамику взлета или падения вашей команды.</p>
+                        </div>
+
+                        <div class="faq-qa-card">
+                            <div class="faq-question-title">Могут ли студенты из других вузов играть вместе с AUCA?</div>
+                            <p class="faq-answer-desc">Да! Наша лига официально расширилась на полноценный межвузовский уровень. Вы можете беспрепятственно собирать сборные команды из разных учебных заведений или представлять свой собственный университет в общем зачете.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Фронтенд-контроль вкладок и плавной анимации раскрытия -->
+<script>
+    // Высокопроизводительный трекинг мыши для эффекта неонового Glow
+    document.querySelectorAll('.glass-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+    });
+
+    // Переключение категорий (Свод правил / FAQ)
+    function switchFaqTab(tabId, btnElement) {
+        // Снимаем активные классы с кнопок
+        document.querySelectorAll('.faq-nav-btn').forEach(b => b.classList.remove('active'));
+        // Скрываем все контейнеры контента
+        document.querySelectorAll('.faq-section-wrapper').forEach(t => t.classList.remove('active'));
+
+        // Активируем нужные элементы
+        btnElement.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // Логика плавной кастомной распашки аккордеона
+    function toggleFaqAccordion(tileElement) {
+        const isOpen = tileElement.classList.contains('open');
+        const content = tileElement.querySelector('.accordion-content');
+
+        // Закрываем все остальные открытые аккордеоны в этой секции ради чистоты UI
+        if(!isOpen) {
+            tileElement.parentNode.querySelectorAll('[data-faq-accordion]').forEach(el => {
+                el.classList.remove('open');
+                el.querySelector('.accordion-content').style.maxHeight = "0px";
+            });
+        }
+
+        // Переключаем текущий элемент
+        if (!isOpen) {
+            tileElement.classList.add('open');
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            tileElement.classList.remove('open');
+            content.style.maxHeight = "0px";
+        }
+    }
+</script>
+{% endblock %}
