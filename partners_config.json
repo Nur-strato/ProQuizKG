@@ -1,0 +1,17 @@
+{
+    "formula": {
+        "email": "asdf@gmail.com",
+        "site": "https://formula.kg/"
+    },
+    "sidp": {
+        "site": "https://auca.kg/en/sts_sidp/",
+        "email": "sidp@auca.kg"
+    },
+    "auca": {
+        "site": "https://www.auca.kg/en/academic_advising/",
+        "email": "service@auca.kg"
+    },
+    "advising": {
+        "site": "https://auca.kg/en/sts_sidp/"
+    }
+}
