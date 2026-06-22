@@ -259,7 +259,7 @@
             <p>Обновите вашу персональную информацию и аватар в системе лиги</p>
         </div>
 
-        <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data" class="styled-form">
+        <form action="{{ url_for('auth.edit_profile') }}" method="POST" enctype="multipart/form-data" class="styled-form">
 
             <div class="avatar-edit-section">
                 <div class="current-avatar-wrapper">
@@ -298,7 +298,7 @@
             </div>
 
             <div class="form-actions">
-                <a href="{{ url_for('my_profile') }}" class="btn-cancel">Cancel</a>
+                <a href="{{ url_for('auth.my_profile') }}" class="btn-cancel">Cancel</a>
                 <button type="submit" class="btn-submit">Save Changes</button>
             </div>
         </form>

@@ -13,7 +13,7 @@
         --bg-panel: #ffffff;
     }
 
-    /* БЛОК НАВИГАЦИИ ПО ВКЛАДКАМ */
+    /* TABS NAVIGATION BAR */
     .tabs-navigation-wrapper {
         max-width: 800px;
         margin: 40px auto 20px auto;
@@ -40,6 +40,7 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        white-space: nowrap; /* Запрещаем тексту переноситься на новую строку */
     }
 
     .tab-nav-btn:hover {
@@ -55,7 +56,7 @@
         box-shadow: 0 4px 12px rgba(30, 41, 59, 0.08);
     }
 
-    /* ОБОЛОЧКА ДЛЯ КОНТЕНТА ВКЛАДОК */
+    /* TABS CONTENT CONTAINER WRAPPER */
     .tabs-content-container {
         max-width: 800px;
         margin: 0 auto 60px auto;
@@ -64,16 +65,15 @@
     }
 
     .single-tab-content {
-        display: none; /* По умолчанию скрываем все вкладки */
-        background: var(--bg-panel) !important;
-        border: 1px solid var(--border-clean) !important;
-        border-radius: 12px !important;
-        padding: 35px !important;
+        display: none;
+        background: var(--bg-panel);
+        border: 1px solid var(--border-clean);
+        border-radius: 12px;
+        padding: 35px;
         box-shadow: 0 1px 3px rgba(30, 41, 59, 0.02), 0 4px 12px rgba(30, 41, 59, 0.01);
         animation: fadeInTab 0.3s ease;
     }
 
-    /* ИСПРАВЛЕНО: Теперь первая активная вкладка корректно отображается при старте */
     .single-tab-content.active-tab-content {
         display: block;
     }
@@ -91,7 +91,7 @@
         letter-spacing: -0.4px;
     }
 
-    /* Виджет квот вузов для третьей вкладки Teams */
+    /* Mini Quota Widget Matrix Elements */
     .mini-quota-list {
         display: flex;
         flex-direction: column;
@@ -108,6 +108,7 @@
         font-size: 0.85rem;
         color: var(--brand-slate);
         font-weight: 500;
+        gap: 10px;
     }
 
     .mini-quota-tag {
@@ -119,9 +120,10 @@
         color: var(--brand-dark);
         font-size: 0.8rem;
         border: 1px solid var(--border-clean);
+        white-space: nowrap;
     }
 
-    /* Кнопка перехода */
+    /* Action Trigger Button */
     .btn-tab-action {
         display: inline-flex;
         align-items: center;
@@ -144,7 +146,7 @@
         border-color: #111827;
     }
 
-    /* СТИЛИ ХОВЕРА ДЛЯ СВЕЖЕЙ КНОПКИ ПОИСКА ИГРОКОВ */
+    /* Premium Glow Search Buttons Styling Layout */
     .btn-home-search-hero {
         background: linear-gradient(135deg, #0b172a 0%, #1e293b 100%) !important;
         color: #ffffff !important;
@@ -157,14 +159,74 @@
         background: linear-gradient(135deg, #0083e4 0%, #0ea5e9 100%) !important;
         box-shadow: 0 12px 30px -5px rgba(14, 165, 233, 0.4) !important;
     }
-    .btn-home-search-hero:hover .arrow-matrix {
-        transform: translateX(4px);
+
+/* RESPONSIVE MOBILE DISPLAY OVERRIDES (Идеальное монолитное размещение без скролла) */
+    @media (max-width: 768px) {
+        .mj-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .mj-btn {
+            width: 100% !important;
+            box-sizing: border-box;
+            justify-content: center;
+        }
+
+        /* 🔥 ИСПРАВЛЕНО: Убираем скролл, выравниваем контейнер строго по ширине экрана */
+        .tabs-navigation-wrapper {
+            justify-content: center !important;
+            overflow-x: hidden !important; /* Наглухо блокируем скролл */
+            white-space: normal !important;
+            padding: 0 16px !important;
+            margin: 30px auto 15px auto;
+            gap: 6px !important; /* Минимальный зазор между кнопками */
+        }
+
+        /* 🔥 ИСПРАВЛЕНО: Кнопки делят экран поровну и адаптируют текст вертикально */
+        .tab-nav-btn {
+            flex: 1 1 0% !important;        /* Каждая кнопка занимает ровно 1/3 экрана */
+            min-height: 52px !important;     /* Удобная высота для тапа */
+            padding: 8px 4px !important;     /* Компактные отступы, чтобы не вылезать за рамки */
+            font-size: 0.72rem !important;   /* Аккуратный мобильный шрифт */
+            letter-spacing: 0px !important;
+            border-radius: 8px !important;
+            flex-direction: column !important; /* Эмодзи встает НАД текстом, если экран узкий */
+            gap: 2px !important;
+            white-space: normal !important;  /* Разрешаем перенос слов при необходимости */
+            text-align: center !important;
+        }
+
+        .single-tab-content {
+            padding: 24px 20px;
+        }
+        .tab-content-title {
+            font-size: 1.3rem;
+        }
+        .mini-quota-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+        .mini-quota-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .btn-tab-action {
+            width: 100%;
+            box-sizing: border-box;
+        }
     }
+
 </style>
 
 <div class="mj-hero-wrapper">
     <div class="crt-overlay"></div>
-
     <div class="matrix-space"></div>
 
     <div class="mj-content">
@@ -172,21 +234,23 @@
 
         <div class="mj-btn-group">
             {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('register') }}" class="mj-btn btn-signup">
+                <a href="{{ url_for('auth.register') }}" class="mj-btn btn-signup">
                     <span class="btn-icon">👤+</span> Sign Up
                 </a>
-                <a href="{{ url_for('login') }}" class="mj-btn btn-login">
+                <a href="{{ url_for('auth.login') }}" class="mj-btn btn-login">
                     <span class="btn-icon">➔</span> Log In
                 </a>
-         {% else %}
-                <!-- ИСПРАВЛЕНО: Стрелка убрана, теги и кавычки полностью закрыты -->
-                <a href="{{ url_for('players_hub') }}" class="mj-btn btn-home-search-hero">
+            {% else %}
+                <a href="{{ url_for('auth.players_hub') }}" class="mj-btn btn-home-search-hero">
                     <span class="btn-icon">🔍</span> Find Players
+                </a>
+
+                <a href="{{ url_for('predict.index') }}" class="mj-btn btn-home-search-hero" style="border-color: rgba(14, 165, 233, 0.2) !important;">
+                    <span class="btn-icon">🧿</span> Predict
                 </a>
             {% endif %}
 
-            <!-- Кнопка тренировки остается на месте -->
-            <a href="/practice" class="mj-btn btn-explore">
+            <a href="{{ url_for('auth.practice_hub') }}" class="mj-btn btn-explore">
                 <span class="btn-icon">🎓</span> Practice
             </a>
         </div>
@@ -195,57 +259,57 @@
 
 <section class="container" style="max-width: 1200px; padding: 0;">
 
-    <div class="tabs-navigation-wrapper">
-        <button class="tab-nav-btn active-tab-trigger" onclick="switchMainHubTab(event, 'tab-main-league')">
+    <div class="tabs-navigation-wrapper" role="tablist">
+        <button id="btn-main-league" class="tab-nav-btn active-tab-trigger" role="tab" aria-selected="true" aria-controls="tab-main-league" onclick="switchMainHubTab(event, 'tab-main-league')">
             🏆 Main League
         </button>
-        <button class="tab-nav-btn" onclick="switchMainHubTab(event, 'tab-biography')">
+        <button id="btn-biography" class="tab-nav-btn" role="tab" aria-selected="false" aria-controls="tab-biography" onclick="switchMainHubTab(event, 'tab-biography')">
             📖 Biography
         </button>
-        <button class="tab-nav-btn" onclick="switchMainHubTab(event, 'tab-teams')">
+        <button id="btn-teams" class="tab-nav-btn" role="tab" aria-selected="false" aria-controls="tab-teams" onclick="switchMainHubTab(event, 'tab-teams')">
             👥 Teams Matrix
         </button>
     </div>
 
     <div class="tabs-content-container">
 
-        <div id="tab-main-league" class="single-tab-content active-tab-content">
+        <div id="tab-main-league" class="single-tab-content active-tab-content" role="tabpanel" aria-labelledby="btn-main-league">
             <h3 class="tab-content-title">Main League Hierarchy</h3>
             <p style="color: var(--brand-slate); font-size: 1rem; line-height: 1.6; margin: 0 0 24px 0; font-weight: 400;">
-                Короткое описание: Раздел содержит официальную информацию о Высшей Лиге чемпионата. Здесь вы можете изучить регламент проведения главных кубковых этапов, структуру продвижения по сезону и актуальную сетку арен интеллекта.
+                This section provides official parameters and insights regarding the Premier League Tournament. Here you can explore structural guidelines, promotion pathways across tiers, official rewards metrics, and the real-time operational calendar of the competitive season.
             </p>
-            <a href="/main-league" class="btn-tab-action">View Rewards & Regulations</a>
+            <a href="{{ url_for('auth.main_league') }}" class="btn-tab-action">View Rewards & Regulations</a>
         </div>
 
-        <div id="tab-biography" class="single-tab-content">
+        <div id="tab-biography" class="single-tab-content" role="tabpanel" aria-labelledby="btn-biography">
             <h3 class="tab-content-title">Biography of ProQuiz.kg</h3>
             <p style="color: var(--brand-slate); font-size: 1rem; line-height: 1.6; margin: 0 0 24px 0; font-weight: 400;">
-                История создания масштабного интеллектуального движения. Узнайте, как локальная инициатива Quiz Club переросла в полноценную цифровую экосистему, объединяющую ведущие институты и лучшие умы регионов.
+                Discover the origin story of our massive intellectual movement. Learn how a local initiative born inside a passionate Quiz Club evolved into a comprehensive digital ecosystem uniting leading academic institutions and the sharpest regional minds.
             </p>
-            <a href="/biography" class="btn-tab-action">Read Our Story</a>
+            <a href="{{ url_for('auth.biography') }}" class="btn-tab-action">Read Our Story</a>
         </div>
 
-        <div id="tab-teams" class="single-tab-content">
+        <div id="tab-teams" class="single-tab-content" role="tabpanel" aria-labelledby="btn-teams">
             <h3 class="tab-content-title">Institutional Teams Registry</h3>
             <p style="color: var(--brand-slate); font-size: 1rem; line-height: 1.6; margin: 0; font-weight: 400;">
-                Официальная матрица межвузовских команд. В рамках текущего соревновательного сезона установлено строго фиксированное ограничение в 14 слотов, распределенных в виде квот между университетами-участниками.
+                The official tracking matrix of active intercollegiate rosters. For the duration of the current championship cycle, a strict overall limit of 14 institutional slots is enforced, allocated safely as fixed quotas across participating universities.
             </p>
 
             <div class="mini-quota-list">
                 <div class="mini-quota-item">
-                    <span>АУЦА (AUCA) / АЛА-ТОО (Ala-Too)</span>
-                    <span class="mini-quota-tag">по 3 команды</span>
+                    <span>AUCA / Ala-Too</span>
+                    <span class="mini-quota-tag">3 Teams Each</span>
                 </div>
                 <div class="mini-quota-item">
-                    <span>МАНАС (Manas) / КРСУ (KRSU)</span>
-                    <span class="mini-quota-tag">по 2 команды</span>
+                    <span>Manas / KRSU</span>
+                    <span class="mini-quota-tag">2 Teams Each</span>
                 </div>
                 <div class="mini-quota-item">
-                    <span>ОБСЕ / КНУ / БГУ / Салымбеков</span>
-                    <span class="mini-quota-tag">по 1 команде</span>
+                    <span>OSCE / KNU / BSU / Salymbekov</span>
+                    <span class="mini-quota-tag">1 Team Each</span>
                 </div>
             </div>
-            <a href="/teams" class="btn-tab-action">View Full Rosters</a>
+            <a href="{{ url_for('auth.teams_matrix') }}" class="btn-tab-action">View Full Rosters</a>
         </div>
 
     </div>
@@ -253,16 +317,23 @@
 
 <script>
     const hero = document.querySelector('.mj-hero-wrapper');
+    let ticking = false;
 
     if (hero) {
         hero.addEventListener('mousemove', (e) => {
-            const rect = hero.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const rect = hero.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-            hero.style.setProperty('--mouse-x', `${x}%`);
-            hero.style.setProperty('--mouse-y', `${y}%`);
-            hero.classList.add('flashlight-active');
+                    hero.style.setProperty('--mouse-x', `${x}%`);
+                    hero.style.setProperty('--mouse-y', `${y}%`);
+                    hero.classList.add('flashlight-active');
+                    ticking = false;
+                });
+                ticking = true;
+            }
         });
 
         hero.addEventListener('mouseleave', () => {
@@ -270,17 +341,21 @@
         });
     }
 
-    /* Скрипт переключения вкладок */
+    /* Active tab switching script with programmatic aria state management */
     function switchMainHubTab(event, tabId) {
         document.querySelectorAll('.single-tab-content').forEach(tab => {
             tab.classList.remove('active-tab-content');
         });
         document.querySelectorAll('.tab-nav-btn').forEach(btn => {
             btn.classList.remove('active-tab-trigger');
+            btn.setAttribute('aria-selected', 'false');
         });
 
         document.getElementById(tabId).classList.add('active-tab-content');
-        event.currentTarget.classList.add('active-tab-trigger');
+
+        const currentBtn = event.currentTarget;
+        currentBtn.classList.add('active-tab-trigger');
+        currentBtn.setAttribute('aria-selected', 'true');
     }
 </script>
 {% endblock %}

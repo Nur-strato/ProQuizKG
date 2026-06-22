@@ -152,7 +152,7 @@
         border: 1px solid transparent;
     }
 
-    .role-tag.captain { background: #fffbeb; border-color: #fef3c7; color: #d97706; }
+    .role-tag.captain { background: #0f172a; border-color: #007cd8; color: #ffffff; }
     .role-tag.player { background: #f8fafc; border-color: #e2e8f0; color: var(--brand-muted); }
 
     /* ПАНЕЛЬ КАПИТАНА */
@@ -249,8 +249,9 @@
             </div>
             <div class="team-info-text">
                 <h1>{{ team_name }}</h1>
-                <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="tournament-badge-link">
-                    🎯 Track: {{ tournament.title }}
+                {# ИСПРАВЛЕНО: Аргумент переписан строго на id=tournament.id без опечаток #}
+                <a href="{{ url_for('tournaments.tournament_detail', id=tournament.id if tournament else tournament_id) }}" class="tournament-badge-link">
+                    🎯 Track: {{ tournament.title if tournament else 'Main Segment' }}
                 </a>
             </div>
         </div>
@@ -262,13 +263,13 @@
         <div class="member-row-card">
             <div class="member-left">
                 <img src="{{ url_for('static', filename='profile_pics/' + member.user.avatar) if member.user and member.user.avatar else url_for('static', filename='profile_pics/default.png') }}" class="member-avatar" alt="User Avatar">
-                <a href="{{ url_for('profile', user_id=member.user_id) }}" class="member-name">
+                <a href="{{ url_for('auth.profile', user_id=member.user_id) }}" class="member-name">
                     {{ member.user.name if member.user else "Unknown Player" }}
                 </a>
             </div>
 
             <span class="role-tag {% if member.user_id == captain_id %}captain{% else %}player{% endif %}">
-                {% if member.user_id == captain_id %}👑 Капитан{% else %}Игрок{% endif %}
+                {% if member.user_id == captain_id %} Капитан{% else %}Игрок{% endif %}
             </span>
         </div>
     {% endfor %}
@@ -283,7 +284,7 @@
             <form method="POST" action="" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
                 <div>
                     <label style="display:block; font-size:0.65rem; font-weight:800; color:var(--brand-dark); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Текущий PIN-код состава</label>
-                    <input type="text" name="team_password" class="input-pin" value="{{ current_pin if current_pin else '' }}" placeholder="4 цифры" maxlength="10" required autocomplete="off">
+                    <input type="text" name="team_password" class="input-pin" value="{{ current_pin if current_pin else '' }}" placeholder="3 цифры" maxlength="3" required autocomplete="off">
                 </div>
                 <button type="submit" class="btn-save-pin">Обновить PIN</button>
             </form>
@@ -293,7 +294,6 @@
 </div>
 
 <script>
-    // Плавное авто-скрытие флэш тостов уведомлений
     setTimeout(() => {
         document.querySelectorAll('.toast-notification').forEach(toast => {
             toast.style.transition = 'all 0.4s ease';

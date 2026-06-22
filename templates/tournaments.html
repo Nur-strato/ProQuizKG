@@ -3,312 +3,611 @@
 {% block title %}Tournaments - ProQuiz.kg{% endblock %}
 
 {% block body %}
-<!-- Набор стилей: Минимализм + Насыщенный Полуночно-Синий UI (Без черного) -->
 <style>
     :root {
-        --brand-blue: #0ea5e9;
-        --brand-dark: #1e293b; /* Насыщенный полуночно-синий вместо серо-черного */
-        --brand-slate: #475569;
-        --brand-muted: #64748b;
-        --border-clean: #e2e8f0;
-        --bg-card: #ffffff;
+        --tg-bg: #f8fafc;
+        --tg-card: #111c35;
+        --tg-border: rgba(14, 165, 233, 0.4);
+        --tg-text-main: #ffffff;
+        --tg-text-muted: #94a3b8;
+        --tg-blue: #0ea5e9;
+        --tg-blue-light: #38bdf8;
+        --tg-blue-glow: rgba(14, 165, 233, 0.35);
     }
 
-    /* Чистая минималистичная карточка с Reveal-свечением */
-    .premium-tournament-card {
-        background: var(--bg-card) !important;
-        border: 1px solid var(--border-clean) !important;
-        border-radius: 12px !important;
-        padding: 30px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-shadow: 0 1px 3px rgba(30, 41, 59, 0.02), 0 4px 12px rgba(30, 41, 59, 0.01);
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        position: relative;
-        overflow: hidden;
+    body {
+        background-color: var(--tg-bg) !important;
     }
 
-    .premium-tournament-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        /* Тонкий, еле заметный неоновый блик за мышью */
-        background: radial-gradient(600px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.06), transparent 40%);
-        opacity: 0;
-        transition: opacity 0.25s ease;
-        pointer-events: none;
+    .tournaments-section {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, sans-serif;
+        padding: 40px 0 8px 0;
     }
 
-    .premium-tournament-card:hover {
-        transform: translateY(-3px);
-        border-color: #cbd5e1 !important;
-        box-shadow: 0 12px 24px -10px rgba(30, 41, 59, 0.08) !important;
-    }
-
-    .premium-tournament-card:hover::before {
-        opacity: 1;
-    }
-
-    /* Строгий левый маркер для Премьер-Лиги */
-    .main-league-card {
-        border-left: 4px solid var(--brand-dark) !important;
-    }
-
-    /* Аккуратные плоские кнопки управления */
-    .action-btn-modern {
-        padding: 11px 18px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.8rem;
-        text-decoration: none;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
+    .cyber-max-wrapper {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 0 24px;
         box-sizing: border-box;
     }
 
-    .btn-gray-modern {
-        background: #f1f5f9;
-        color: var(--brand-slate);
-        border: 1px solid #e2e8f0;
-    }
-    .btn-gray-modern:hover {
-        background: #e2e8f0;
-        color: var(--brand-dark);
+    .cyber-aligned-header {
+        margin-bottom: 32px;
+        text-align: left;
     }
 
-    .btn-blue-modern {
-        background: var(--brand-blue);
-        color: white;
-        border: 1px solid var(--brand-blue);
+    .cyber-aligned-header h1 {
+        color: #0f172a !important;
     }
-    .btn-blue-modern:hover {
-        background: #0284c7;
-        border-color: #0284c7;
+    .cyber-aligned-header p {
+        color: #64748b !important;
     }
 
-    /* Заменено: Никакого черного, при наведении уходит в глубокий чистый ультрамарин */
-    .btn-dark-modern {
-        background: var(--brand-dark);
-        color: white;
-        border: 1px solid var(--brand-dark);
-    }
-    .btn-dark-modern:hover {
-        background: #111827;
-        border-color: #111827;
-    }
-
-    .btn-disabled-modern {
-        background: #f8fafc;
-        color: var(--brand-muted);
-        border: 1px dashed var(--border-clean);
-        cursor: not-allowed;
+    .filter-panel-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 32px;
+        box-sizing: border-box;
     }
 
-    .btn-admin-accent {
-        background: rgba(239, 68, 68, 0.08);
-        color: #ef4444;
-        border: 1px solid rgba(239, 68, 68, 0.2);
+    .tabs-group {
+        display: flex;
+        background: #111c35;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 4px;
+        border-radius: 12px;
+        gap: 4px;
     }
-    .btn-admin-accent:hover {
-        background: #ef4444;
-        color: white;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.35);
+
+    .tab-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    .tab-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.03); }
+    .tab-btn.active {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+
+    .filter-select-wrapper { position: relative; }
+    .cyber-select {
+        background: #111c35;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        padding: 10px 40px 10px 16px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-radius: 12px;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        transition: all 0.2s;
+    }
+    .cyber-select:hover { border-color: var(--tg-blue-light); }
+    .filter-select-wrapper::after {
+        content: '▾'; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;
+    }
+
+    .notion-tournaments-wall {
+        background: transparent;
+        padding: 0 !important;
+        overflow: hidden;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .tournaments-arena-frame {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+        box-sizing: border-box;
+    }
+
+    .cyber-hero-card {
+        position: relative;
+        background-color: #111c35;
+        border: 2.5px solid var(--tg-blue) !important;
+        border-radius: 24px !important;
+        padding: 36px 32px 0 32px !important;
+        min-height: 570px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+        overflow: hidden;
+        box-shadow: 0 15px 35px -10px rgba(11, 28, 53, 0.4),
+                    0 0 15px 0 rgba(14, 165, 233, 0.2),
+                    inset 0 0 15px rgba(56, 189, 248, 0.1);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .cyber-hero-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        border-color: var(--tg-blue-light) !important;
+        box-shadow: 0 25px 50px -10px rgba(14, 165, 233, 0.4),
+                    0 0 25px 4px rgba(14, 165, 233, 0.45),
+                    inset 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+
+    .card-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(180deg, rgba(11, 18, 31, 0) 0%, rgba(11, 18, 31, 0.1) 40%, rgba(7, 11, 20, 0.98) 85%) !important;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .card-photo-bg {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        object-fit: cover;
+        object-position: center 15%;
+        z-index: 1;
+        filter: saturate(1.5) contrast(1.25) brightness(1.05);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: scale(1.0);
+    }
+
+    .cyber-hero-card:hover .card-photo-bg {
+        transform: scale(1.05) translateY(1px);
+        filter: saturate(1.75) contrast(1.35) brightness(1.15);
+    }
+
+    .card-inner-content {
+        position: relative;
+        z-index: 5;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cyber-hero-card:hover .card-inner-content {
+        transform: translateY(-2px);
+    }
+
+    .hero-tournament-title {
+        font-size: 1.9rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+        line-height: 1.15;
+        margin: 0 0 20px 0;
+        color: #ffffff;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+    }
+
+    .meta-parameter-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+    .meta-parameter-item { display: flex; align-items: center; gap: 12px; font-size: 0.925rem; color: #e2e8f0; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+    .meta-parameter-item svg { width: 18px; height: 18px; color: var(--tg-blue-light); opacity: 1; flex-shrink: 0; }
+
+    .prizepool-block { margin-bottom: 20px; }
+    .prizepool-label { font-size: 0.725rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.8px; margin-bottom: 2px; }
+    .prizepool-value { font-size: 2.1rem; font-weight: 900; color: var(--tg-blue-light); text-shadow: 0 2px 8px rgba(56, 189, 248, 0.3); line-height: 1; }
+
+    .prizepool-usd-converter {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #64748b;
+        margin-top: 4px;
+        letter-spacing: 0.3px;
+        display: inline-block;
+    }
+
+    .btn-cyber-enter {
+        width: 100%; padding: 14px 16px; border-radius: 10px; font-weight: 700; font-size: 0.875rem; text-transform: uppercase;
+        letter-spacing: 0.5px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+        gap: 6px; border: 1px solid rgba(255, 255, 255, 0.1); background: #1e293b !important; color: #ffffff !important;
+        transition: all 0.25s ease; position: relative; z-index: 5;
+        margin-bottom: 24px;
+    }
+    .btn-cyber-enter:hover {
+        background: var(--tg-blue) !important;
+        border-color: var(--tg-blue);
+        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.5);
+    }
+
+    .card-bottom-stats-wall {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(15, 23, 42, 0.6);
+        border-top: 1.5px solid rgba(14, 165, 233, 0.25);
+        padding: 14px 32px;
+        margin-left: -32px;
+        margin-right: -32px;
+        width: calc(100% + 64px);
+        box-sizing: border-box;
+    }
+    .stat-mini-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        text-align: center;
+    }
+    .stat-mini-block:not(:last-child) {
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .stat-mini-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+    .stat-mini-value {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #ffffff;
+    }
+
+    .btn-admin-edit-trigger {
+        background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff;
+        padding: 6px 14px; border-radius: 8px; font-size: 0.725rem; font-weight: 700; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
+    }
+    .btn-admin-edit-trigger:hover { background: #ffffff; border-color: #ffffff; color: #000000; }
+
+    .cyber-future-slot {
+        background: #111c35;
+        border: 2.5px dashed rgba(14, 165, 233, 0.25);
+        border-radius: 24px !important;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        min-height: 570px;
+        color: #475569; font-weight: 800; font-size: 0.8rem; letter-spacing: 2px;
+        text-transform: uppercase; box-sizing: border-box; gap: 12px;
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    .cyber-future-slot:hover {
+        border-color: var(--tg-blue);
+        color: #94a3b8;
+    }
+    .cyber-future-slot .lock-icon {
+        font-size: 1.5rem;
+        opacity: 0.4;
+        color: var(--tg-blue-light);
+    }
+
+    /* PREMIUM NOTION-STYLE EDITING MODAL */
+    .notion-modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(5, 8, 15, 0.5); backdrop-filter: blur(4px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999; opacity: 0; pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+    .notion-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .notion-modal-window {
+        background: #ffffff; width: 100%; max-width: 480px;
+        border-radius: 20px; padding: 32px; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.15);
+        transform: translateY(20px); border: 1px solid rgba(15, 23, 42, 0.08);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        font-family: system-ui, -apple-system, sans-serif; color: #0f172a;
+    }
+    .notion-modal-overlay.active .notion-modal-window { transform: translateY(0); }
+
+    .modal-field-group { margin-bottom: 16px; }
+    .modal-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .modal-input {
+        width: 100%; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0;
+        border-radius: 10px; font-size: 0.925rem; color: #0f172a; outline: none; transition: all 0.2s ease; box-sizing: border-box;
+    }
+    .modal-input:focus { border-color: var(--tg-blue); background: #ffffff; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
+
+    .modal-actions-row { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+    .modal-btn { padding: 12px 22px; font-size: 0.875rem; font-weight: 700; border-radius: 10px; cursor: pointer; border: none; transition: all 0.15s ease; }
+    .modal-btn-cancel { background: #f1f5f9; color: #64748b; }
+    .modal-btn-cancel:hover { background: #e2e8f0; color: #0f172a; }
+    .modal-btn-save { background: var(--tg-blue); color: #ffffff; }
+    .modal-btn-save:hover { background: #0284c7; }
+
+    @media (max-width: 1200px) { .tournaments-arena-frame { grid-template-columns: repeat(2, 1fr); } }
+
+    /* 🔥 КРЕМНИЕВАЯ МОБИЛЬНАЯ ОПТИМИЗАЦИЯ СЕТКИ И СБАЛАНСИРОВАННЫХ ТАБОВ С РАСПРЕДЕЛЕНИЕМ 2х2 */
+    @media (max-width: 768px) {
+        .tournaments-arena-frame { grid-template-columns: 1fr; }
+        .cyber-hero-card { padding: 36px 20px 0 20px !important; }
+        .card-bottom-stats-wall { margin-left: -20px; margin-right: -20px; width: calc(100% + 40px); padding: 14px 20px; }
+
+        .filter-panel-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 16px;
+        }
+
+        /* 🔥 ИСПРАВЛЕНО: Сетка Grid 2x2 — ровно две кнопки сверху, две снизу */
+        .tabs-group {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            padding: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .tab-btn {
+            text-align: center;
+            padding: 10px 8px;
+            font-size: 0.85rem;
+            white-space: normal; /* Разрешаем аккуратный перенос текста кнопки внутри её ячейки при нехватке места */
+        }
+
+        .filter-select-wrapper, .cyber-select {
+            width: 100%;
+        }
     }
 </style>
 
-<section class="tournaments-section" style="padding: 60px 0; background: transparent;">
-    <div class="container" style="max-width: 1200px; padding: 0 24px;">
+<section class="tournaments-section">
+    <div class="cyber-max-wrapper">
 
-        <!-- CLEAN MODERN HEADER -->
-        <div class="section-header" style="text-align: center; margin-bottom: 65px;">
-            <div style="display: inline-block; background: rgba(14, 165, 233, 0.04); color: var(--brand-dark); padding: 5px 14px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; border: 1px solid rgba(14, 165, 233, 0.08);">
-                {{ season if season else 'SEASON 2026' }}
-            </div>
-            <h1 style="font-size: 2.8rem; color: var(--brand-dark); font-weight: 800; margin: 0 0 14px 0; letter-spacing: -0.8px; line-height: 1.15;">
-                Arena Intellectus
-            </h1>
-            <p style="color: var(--brand-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 28px auto; line-height: 1.6; font-weight: 400;">
-                Official championships track and custom community battles of minds.
-            </p>
-
-            {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
-                <div>
-                    <a href="{{ url_for('admin') }}" class="action-btn-modern btn-dark-modern" style="padding: 12px 24px; font-size: 0.85rem; border-radius: 6px;">
-                        + Create Tournament
-                    </a>
-                </div>
-            {% endif %}
+        <div class="cyber-aligned-header">
+            <h1 style="font-size: 2.6rem; font-weight: 900; letter-spacing: -0.8px; margin: 0 0 6px 0;">Tournaments</h1>
+            <p style="font-size: 1rem; margin: 0; font-weight: 600;">Compete. Learn. Win.</p>
         </div>
 
-        <!-- NOTIFICATIONS HINT LOG -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}" style="margin-bottom: 35px; padding: 16px 20px; background: #ffffff; border-radius: 6px; color: var(--brand-dark); border-left: 4px solid var(--brand-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.03); font-weight: 600; font-size: 0.95rem;">
-                        💡 {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-
-        <!-- HUB 1: PREMIER DIVISION (MAIN LEAGUE) -->
-        <div class="main-league-premium-wrapper" style="background: #ffffff; border: 1px solid var(--border-clean); border-radius: 12px; padding: 40px; margin-bottom: 55px; position: relative;">
-
-            <!-- Track Badge -->
-            <div style="position: absolute; top: -11px; left: 35px; background: var(--brand-dark); color: #ffffff; padding: 3px 14px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; font-family: monospace; letter-spacing: 1px; text-transform: uppercase;">
-                ★ PREMIER DIVISION TRACK
+        <div class="filter-panel-row">
+            <div class="tabs-group">
+                <button class="tab-btn active" onclick="filterStatus('all')">All Tournaments</button>
+                <button class="tab-btn" onclick="filterStatus('upcoming')">Upcoming</button>
+                <button class="tab-btn" onclick="filterStatus('ongoing')">Ongoing</button>
+                <button class="tab-btn" onclick="filterStatus('finished')">Finished</button>
             </div>
 
-            <div class="tournament-block">
-                <h2 class="title-main-league" style="margin: 0 0 30px 0; font-weight: 800; color: var(--brand-dark); font-size: 1.6rem; letter-spacing: -0.5px;">
-                    Premier Cup Stages
-                </h2>
-
-                <div class="tournament-main-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 26px;">
-                    {% for tournament in tournaments %}
-                        {% if tournament.is_main_league %}
-                            <div class="premium-tournament-card main-league-card">
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-                                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--brand-muted); font-family: monospace;">
-                                            ⚡ {{ tournament.teams_count }} SLOT LIMIT
-                                        </span>
-                                        <span class="status-badge-text status-{{ tournament.status }}" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px; {% if tournament.status == 'live' %}background: rgba(14, 165, 233, 0.08); color: var(--brand-blue); border: 1px solid rgba(14, 165, 233, 0.15);{% elif tournament.status == 'completed' %}background: #f1f5f9; color: var(--brand-slate);{% else %}background: #f8fafc; color: var(--brand-muted); border: 1px solid var(--border-clean);{% endif %}">
-                                            ● {{ tournament.status }}
-                                        </span>
-                                    </div>
-                                    <h3 style="margin: 0 0 10px 0; font-size: 1.4rem; font-weight: 800; color: var(--brand-dark); letter-spacing: -0.4px; line-height: 1.3;">
-                                        {{ tournament.name }}
-                                    </h3>
-                                    <div style="font-size: 0.85rem; color: var(--brand-blue); font-weight: 700; margin-bottom: 18px; font-family: monospace; display: flex; align-items: center; gap: 6px;">
-                                        <span>📅</span> {{ tournament.date }}
-                                    </div>
-                                    <p style="color: var(--brand-slate); font-size: 0.95rem; line-height: 1.6; margin: 0 0 30px 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400;">
-                                        {{ tournament.desc }}
-                                    </p>
-                                </div>
-
-                                <div class="card-actions-layout" style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
-                                    <div style="display: flex; gap: 12px; width: 100%;">
-                                        {% if tournament.status == 'completed' %}
-                                            <a href="{{ url_for('tournament_participants', id=tournament.id) }}" class="action-btn-modern btn-gray-modern" style="flex: 1;">Teams</a>
-                                            <a href="{{ url_for('tournament_results', id=tournament.id) }}" class="action-btn-modern btn-dark-modern" style="flex: 1;">Standings</a>
-                                        {% elif tournament.status == 'live' %}
-                                            <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="action-btn-modern btn-gray-modern" style="flex: 1;">Details</a>
-
-                                            {% if tournament.league_type == 'open' %}
-                                                <a href="{{ url_for('tournament_register', id=tournament.id) }}" class="action-btn-modern btn-blue-modern" style="flex: 1;">Register</a>
-                                            {% elif tournament.league_type == 'qualification' %}
-                                                <button class="action-btn-modern btn-disabled-modern" style="flex: 1.4; font-size: 0.75rem;" disabled>🔒 Qualification</button>
-                                            {% else %}
-                                                <button class="action-btn-modern btn-disabled-modern" style="flex: 1.4; font-size: 0.75rem;" disabled>🔒 Promotion Track</button>
-                                            {% endif %}
-                                        {% else %}
-                                            <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="action-btn-modern btn-gray-modern" style="flex: 1;">Details</a>
-                                            <button class="action-btn-modern btn-disabled-modern" style="flex: 1;" disabled>Locked</button>
-                                        {% endif %}
-                                    </div>
-
-                                    <!-- АДМИН-КОНТРОЛЬ: Ввод результатов матча -->
-                                    {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] and tournament.status == 'live' %}
-                                        <a href="{{ url_for('admin_set_results', id=tournament.id) }}" class="action-btn-modern btn-admin-accent" style="width: 100%;">
-                                            ⚙️ Manage Standings & Results
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+            <div class="filter-select-wrapper">
+                <select class="cyber-select" onchange="sortTournaments(this.value)">
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                </select>
             </div>
         </div>
 
+        <div class="notion-tournaments-wall">
+            <div class="tournaments-arena-frame">
 
-        <!-- HUB 2: COMMUNITY MATCHES (ADDITIONAL LEAGUE) -->
-        <div class="tournament-block" style="padding: 0;">
-            <h2 class="title-additional-league" style="margin: 0 0 30px 0; font-weight: 800; color: var(--brand-slate); font-size: 1.45rem; letter-spacing: -0.5px;">
-                Community Matches
-            </h2>
+                {% set first_tournament = tournaments[0] if tournaments else none %}
 
-            <div class="tournament-main-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 26px;">
-                {% for tournament in tournaments %}
-                    {% if not tournament.is_main_league %}
-                        <div class="premium-tournament-card">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-                                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--brand-muted); font-family: monospace;">
-                                        👥 {{ tournament.teams_count }} SLOTS
-                                    </span>
-                                    <span class="status-badge-text status-{{ tournament.status }}" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px; {% if tournament.status == 'live' %}background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;{% elif tournament.status == 'completed' %}background: #f1f5f9; color: #475569;{% else %}background: #f8fafc; color: #94a3b8;{% endif %}">
-                                        ● {{ tournament.status }}
-                                    </span>
-                                </div>
-                                <h3 style="margin: 0 0 10px 0; font-size: 1.45rem; font-weight: 800; color: var(--brand-dark); letter-spacing: -0.4px; line-height: 1.2;">
-                                    {{ tournament.name }}
-                                </h3>
-                                <div style="font-size: 0.85rem; color: var(--brand-muted); font-weight: 700; margin-bottom: 16px; font-family: monospace; display: flex; align-items: center; gap: 6px;">
-                                    <span>📅</span> {{ tournament.date }}
-                                </div>
-                                <p style="color: var(--brand-slate); font-size: 0.95rem; line-height: 1.6; margin: 0 0 30px 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400;">
-                                    {{ tournament.desc }}
-                                </p>
-                            </div>
+                {% if first_tournament %}
+                    {% set t_id = first_tournament.id %}
 
-                            <div class="card-actions-layout" style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
-                                <div style="display: flex; gap: 12px; width: 100%;">
-                                    {% if tournament.status == 'completed' %}
-                                        <a href="{{ url_for('tournament_participants', id=tournament.id) }}" class="action-btn-modern btn-gray-modern" style="flex: 1;">Teams</a>
-                                        <a href="{{ url_for('tournament_results', id=tournament.id) }}" class="action-btn-modern btn-dark-modern" style="flex: 1;">Results</a>
-                                    {% elif tournament.status == 'live' %}
-                                        <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="action-btn-modern btn-gray-modern" style="flex: 1;">Details</a>
+                    <div id="tournament-card-{{ t_id }}" class="cyber-hero-card">
+                        <img src="{{ first_tournament.bg_image if first_tournament.bg_image else '/static/img/uni2026.png' }}" class="card-photo-bg" id="t-img-bg-{{ t_id }}" alt="Tournament Background">
+                        <div class="card-overlay"></div>
+                        <div class="card-inner-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <span style="background: rgba(234, 179, 8, 0.15); color: #facc15; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(234, 179, 8, 0.25);">
+                                    ● {{ (first_tournament.status if first_tournament.status else 'ONGOING') | upper }}
+                                </span>
 
-                                        {% if tournament.league_type == 'open' %}
-                                            <a href="{{ url_for('tournament_register', id=tournament.id) }}" class="action-btn-modern btn-blue-modern" style="flex: 1;">Register</a>
-                                        {% elif tournament.league_type == 'qualification' %}
-                                            <button class="action-btn-modern btn-disabled-modern" style="flex: 1; font-size: 0.75rem;" disabled>🔒 Qualification</button>
-                                        {% else %}
-                                            <button class="action-btn-modern btn-disabled-modern" style="flex: 1; font-size: 0.75rem;" disabled>🔒 Promotion Track</button>
-                                        {% endif %}
-                                    {% else %}
-                                        <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="action-btn-modern btn-gray-modern" style="flex: 1;">Details</a>
-                                        <button class="action-btn-modern btn-disabled-modern" style="flex: 1;" disabled>Locked</button>
-                                    {% endif %}
-                                </div>
-
-                                <!-- АДМИН-КОНТРОЛЬ: Ввод результатов матча -->
-                                {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] and tournament.status == 'live' %}
-                                    <a href="{{ url_for('admin_set_results', id=tournament.id) }}" class="action-btn-modern btn-admin-accent" style="width: 100%;">
-                                        ⚙️ Manage Results & Scores
-                                    </a>
+                                {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                                    <button class="btn-admin-edit-trigger" onclick="openEditModal({{ t_id }}, '{{ first_tournament.bg_image if first_tournament.bg_image else '' }}')">
+                                        ⚙️ Edit Card & BG
+                                    </button>
                                 {% endif %}
                             </div>
+
+                            <div>
+                                <h3 id="t-title-{{ t_id }}" class="hero-tournament-title">
+                                    {{ first_tournament.title }}
+                                </h3>
+
+                                <div class="meta-parameter-list">
+                                    <div class="meta-parameter-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                        </svg>
+                                        <span id="t-date-{{ t_id }}">{{ first_tournament.date_str if first_tournament.date_str else '5 – 25 April 2026' }}</span>
+                                    </div>
+                                    <div class="meta-parameter-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                                        </svg>
+                                        <span id="t-format-{{ t_id }}">{{ first_tournament.team_format if first_tournament.team_format else 'Team Format (3 students)' }}</span>
+                                    </div>
+                                    <div class="meta-parameter-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                                        </svg>
+                                        <span id="t-tag-{{ t_id }}">{{ first_tournament.league_type if first_tournament.league_type else 'qualification' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="prizepool-block">
+                                    <div class="prizepool-label">Total Prize Pool</div>
+                                    <div class="prizepool-value">
+                                        <span id="t-prize-{{ t_id }}">{{ first_tournament.prize_pool if first_tournament.prize_pool else '51 000' }}</span>
+                                        <span style="font-size: 0.95rem; color: var(--tg-blue-light); margin-left: 2px; font-weight: 800;">SOM</span>
+                                    </div>
+                                    <div class="prizepool-usd-converter">
+                                        ≈ $<span id="t-usd-{{ t_id }}">{{ first_tournament.prize_usd if first_tournament.prize_usd else '580' }}</span> USD
+                                    </div>
+                                </div>
+
+                                <div style="padding: 0 32px; margin-left: -32px; margin-right: -32px;">
+                                    <a href="{{ url_for('tournaments.tournament_stages_hub') }}" class="btn-cyber-enter">
+                                        Open Stages Hub <span style="margin-left: 2px;">➔</span>
+                                    </a>
+                                </div>
+
+                                <div class="card-bottom-stats-wall">
+                                    <div class="stat-mini-block">
+                                        <span class="stat-mini-label">Стадии</span>
+                                        <span class="stat-mini-value">4</span>
+                                    </div>
+                                    <div class="stat-mini-block">
+                                        <span class="stat-mini-label">Универы</span>
+                                        <span class="stat-mini-value">7</span>
+                                    </div>
+                                    <div class="stat-mini-block">
+                                        <span class="stat-mini-label">Команды</span>
+                                        <span class="stat-mini-value">{{ first_tournament.teams_count if first_tournament.teams_count else '16' }}</span>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
-                    {% endif %}
-                {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="cyber-hero-card" style="background-color: #111c35; justify-content: center; align-items: center; text-align: center; min-height: 570px;">
+                        <p style="color: #64748b; margin: 0; font-weight: 600;">Турниры не найдены в БД.<br>Добавьте первый турнир через админ-панель.</p>
+                    </div>
+                {% endif %}
+
+                <div class="cyber-future-slot"><span class="lock-icon">🔒</span><span>Coming Soon</span></div>
+                <div class="cyber-future-slot"><span class="lock-icon">🔒</span><span>Coming Soon</span></div>
+
             </div>
         </div>
-
     </div>
 </section>
 
-<!-- Чистый JS-обработчик Reveal-бликов без тормозов -->
+<div id="editTournamentModal" class="notion-modal-overlay" onclick="closeEditModal(event)">
+    <div class="notion-modal-window" onclick="event.stopPropagation()">
+        <h3 style="margin: 0 0 24px 0; font-size: 1.25rem; font-weight: 900; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px;">⚙️ Edit Tournament Track</h3>
+
+        <input type="hidden" id="modal-tournament-id">
+
+        <div class="modal-field-group">
+            <label class="modal-label">Background Image URL</label>
+            <input type="text" id="modal-input-bg" class="modal-input" placeholder="/static/img/uni2026.png">
+        </div>
+
+        <div class="modal-field-group">
+            <label class="modal-label">Tournament Title</label>
+            <input type="text" id="modal-input-title" class="modal-input">
+        </div>
+
+        <div class="modal-field-group">
+            <label class="modal-label">Date Track</label>
+            <input type="text" id="modal-input-date" class="modal-input">
+        </div>
+
+        <div class="modal-field-group">
+            <label class="modal-label">Team Format</label>
+            <input type="text" id="modal-input-format" class="modal-input">
+        </div>
+
+        <div class="modal-field-group">
+            <label class="modal-label">Category Tag</label>
+            <input type="text" id="modal-input-tag" class="modal-input">
+        </div>
+
+        <div class="modal-field-group" style="display: flex; gap: 12px;">
+            <div style="flex: 1;">
+                <label class="modal-label">Prize Pool (SOM)</label>
+                <input type="text" id="modal-input-prize" class="modal-input">
+            </div>
+            <div style="flex: 1;">
+                <label class="modal-label">Prize Pool (USD)</label>
+                <input type="text" id="modal-input-usd" class="modal-input" placeholder="580">
+            </div>
+        </div>
+
+        <div class="modal-actions-row">
+            <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('editTournamentModal').classList.remove('active')">Cancel</button>
+            <button class="modal-btn modal-btn-save" onclick="saveTournamentData()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.querySelectorAll('.premium-tournament-card').forEach(card => {
-        card.addEventListener('mousemove', e => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--x', `${x}px`);
-            card.style.setProperty('--y', `${y}px`);
-        });
-    });
+    function filterStatus(status) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+    }
+
+    function openEditModal(id, currentBg) {
+        document.getElementById('modal-tournament-id').value = id;
+        document.getElementById('modal-input-bg').value = currentBg;
+        document.getElementById('modal-input-title').value = document.getElementById('t-title-' + id).innerText;
+        document.getElementById('modal-input-date').value = document.getElementById('t-date-' + id).innerText;
+        document.getElementById('modal-input-format').value = document.getElementById('t-format-' + id).innerText;
+        document.getElementById('modal-input-tag').value = document.getElementById('t-tag-' + id).innerText;
+        document.getElementById('modal-input-prize').value = document.getElementById('t-prize-' + id).innerText;
+
+        const usdElem = document.getElementById('t-usd-' + id);
+        document.getElementById('modal-input-usd').value = usdElem ? usdElem.innerText : '580';
+
+        document.getElementById('editTournamentModal').classList.add('active');
+    }
+
+    function closeEditModal(e) {
+        document.getElementById('editTournamentModal').classList.remove('active');
+    }
+
+    function saveTournamentData() {
+        const id = document.getElementById('modal-tournament-id').value;
+        const newBg = document.getElementById('modal-input-bg').value;
+        const newTitle = document.getElementById('modal-input-title').value;
+        const newDate = document.getElementById('modal-input-date').value;
+        const newFormat = document.getElementById('modal-input-format').value;
+        const newTag = document.getElementById('modal-input-tag').value;
+        const newPrize = document.getElementById('modal-input-prize').value;
+        const newUsd = document.getElementById('modal-input-usd').value;
+
+        if(newBg.trim() !== "") {
+            const bgImg = document.getElementById('t-img-bg-' + id);
+            if (bgImg) bgImg.src = newBg;
+        }
+        document.getElementById('t-title-' + id).innerText = newTitle;
+        document.getElementById('t-date-' + id).innerText = newDate;
+        document.getElementById('t-format-' + id).innerText = newFormat;
+        document.getElementById('t-tag-' + id).innerText = newTag;
+        document.getElementById('t-prize-' + id).innerText = newPrize;
+
+        const usdElem = document.getElementById('t-usd-' + id);
+        if(usdElem) usdElem.innerText = newUsd;
+
+        fetch(`/admin/tournament/${id}/update_ongoing`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                bg: newBg,
+                title: newTitle,
+                date: newDate,
+                format: newFormat,
+                tag: newTag,
+                prize: newPrize,
+                prize_usd: newUsd
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' || data.status === 'ok') {
+                console.log("Бэкенд успешно обновлен!");
+            } else {
+                alert("Ошибка сохранения на сервере: " + data.message);
+            }
+        })
+        .catch(err => console.error("Ошибка сети:", err));
+
+        document.getElementById('editTournamentModal').classList.remove('active');
+    }
 </script>
 {% endblock %}

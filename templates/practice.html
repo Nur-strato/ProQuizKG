@@ -191,7 +191,7 @@
 
                 {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
                     <div style="margin-bottom: 10px;">
-                        <a href="{{ url_for('admin_add_practice_question') }}" class="arena-btn btn-reveal-blue" style="flex: none; display: inline-flex; padding: 10px 20px; font-size: 0.8rem; background: #f1f5f9; color: #475569; box-shadow: none; border: 1px solid #cbd5e1;">
+                       <a href="{{ url_for('admin.admin_add_practice_question') }}" class="arena-btn btn-reveal-blue" style="flex: none; display: inline-flex; padding: 10px 20px; font-size: 0.8rem; background: #f1f5f9; color: #475569; box-shadow: none; border: 1px solid #cbd5e1;">
                             ⚙️ Конструктор вопросов (Админ)
                         </a>
                     </div>

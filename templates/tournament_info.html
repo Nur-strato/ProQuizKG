@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Info | {{ tournament.title if tournament.title else tournament.name }} | ProQuiz.kg{% endblock %}
+{% block title %}{% if tournament.title %}{{ tournament.title }}{% else %}{{ tournament.name }}{% endif %} | ProQuiz.kg{% endblock %}
 
 {% block body %}
 <!-- Набор премиум стилей для редизайна карточки турнира -->
@@ -56,6 +56,7 @@
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
     }
 
@@ -109,6 +110,24 @@
     @media (max-width: 768px) {
         .quiz-main-content {
             grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .glass-info-card {
+            padding: 24px 20px !important;
+        }
+        .header-top-flex {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .quiz-tabs {
+            width: 100%;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .nav-tab-modern {
+            width: 100%;
+            box-sizing: border-box;
         }
     }
 </style>
@@ -118,9 +137,9 @@
 
         <!-- HEADER PLATFORM CARD -->
         <div class="glass-info-card" style="margin-bottom: 35px; padding: 35px !important;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+            <div class="header-top-flex" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
                 <div>
-                    <span class="badge" style="background: rgba(14, 165, 233, 0.08); color: var(--brand-blue); padding: 5px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(14, 165, 233, 0.15);">
+                    <span class="badge" style="background: rgba(14, 165, 233, 0.08); color: var(--brand-blue); padding: 5px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(14, 165, 233, 0.15); display: inline-block;">
                         Tournament Core
                     </span>
                     <h1 style="font-size: 2.6rem; font-weight: 900; margin: 15px 0 8px 0; color: var(--brand-dark); letter-spacing: -1px; line-height: 1.1;">
@@ -128,7 +147,6 @@
                     </h1>
 
                     <p class="publish-date" style="color: #64748b; font-size: 0.9rem; margin: 0; font-weight: 500;">
-                        <!-- ИСПРАВЛЕНО: Убрана неработающая в шаблонах функция getattr, проверка заменена на валидацию типа данных -->
                         {% if tournament.date and tournament.date.strftime %}
                             Published on: <strong style="color: var(--brand-dark);">{{ tournament.date.strftime('%B %d, %Y') }}</strong>
                         {% else %}
@@ -139,18 +157,18 @@
 
                 <!-- CONTROLS NAVIGATION TABS -->
                 <nav class="quiz-tabs" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="/tournaments/{{ tournament.id }}" class="nav-tab-modern active">Info</a>
-                    <a href="/tournaments/{{ tournament.id }}/participants" class="nav-tab-modern inactive">Participants</a>
+                    <a href="{{ url_for('tournaments.tournament_detail', id=tournament.id) }}" class="nav-tab-modern active">Info</a>
+                    <a href="{{ url_for('tournaments.tournament_participants', id=tournament.id) }}" class="nav-tab-modern inactive">Participants</a>
 
                     {% if tournament.past or tournament.status == 'completed' %}
-                        <a href="/tournaments/{{ tournament.id }}/results" class="nav-tab-modern inactive">Results</a>
+                        <a href="{{ url_for('tournaments.tournament_results', id=tournament.id) }}" class="nav-tab-modern inactive">Results</a>
                     {% else %}
                         {% if tournament.league_type == 'open' %}
-                            <a href="/tournaments/{{ tournament.id }}/register" class="nav-tab-modern pulse-glow">Register Now</a>
+                            <a href="{{ url_for('tournaments.tournament_register', id=tournament.id) }}" class="nav-tab-modern pulse-glow">Register Now</a>
                         {% elif tournament.league_type == 'qualification' %}
-                            <span style="background: rgba(14, 165, 233, 0.05); color: #0369a1; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px dashed rgba(14, 165, 233, 0.3); user-select: none;">🔒 By Qualification</span>
+                            <span style="background: rgba(14, 165, 233, 0.05); color: #0369a1; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px dashed rgba(14, 165, 233, 0.3); user-select: none; display: inline-flex; align-items: center; justify-content: center;">🔒 By Qualification</span>
                         {% else %}
-                            <span style="background: #f8fafc; color: #94a3b8; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px dashed #e2e8f0; user-select: none;">🔒 Promotion Only</span>
+                            <span style="background: #f8fafc; color: #94a3b8; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px dashed #e2e8f0; user-select: none; display: inline-flex; align-items: center; justify-content: center;">🔒 Promotion Only</span>
                         {% endif %}
                     {% endif %}
                 </nav>
@@ -216,7 +234,6 @@
                         <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); min-width: 55px;"><span id="minutes" style="color: #ffffff;">00</span><div style="font-size: 0.65rem; color: #64748b; font-weight: 500; margin-top: 4px; font-family: sans-serif;">MINS</div></div>
                     </div>
                 </div>
-                <style>@keyframes blinkPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }</style>
                 {% endif %}
 
                 <!-- Lobby Configuration Matrix -->
@@ -225,7 +242,6 @@
                     <div style="display: flex; flex-direction: column; font-size: 0.95rem;">
                         <div class="param-matrix-row">
                             <span style="color: #64748b; font-weight: 500;">Schedule:</span>
-                            <!-- ИСПРАВЛЕНО: Безопасное форматирование даты через Jinja фильтры, если это не кастомная строка date_str -->
                             <strong style="color: var(--brand-dark);">
                                 {% if tournament.date_str %}
                                     {{ tournament.date_str }}
@@ -271,11 +287,11 @@
                 <div class="moderator-badge" style="font-size: 0.75rem; font-weight: 900; color: #be123c; margin-bottom: 18px; letter-spacing: 1px; font-family: monospace; text-transform: uppercase;">ADMIN INTERACTIVE AREA</div>
                 <div class="moderator-actions-row" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
                     {% if tournament.id > 3 or current_user.status == 'head' %}
-                        <a href="/tournaments/{{ tournament.id }}/edit" class="nav-tab-modern inactive" style="background: white;">✏️ Advanced Settings</a>
+                        <a href="{{ url_for('tournaments.edit_tournament', id=tournament.id) }}" class="nav-tab-modern inactive" style="background: white;">✏️ Advanced Settings</a>
                     {% else %}
                         <span style="background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: not-allowed; display: inline-flex; align-items: center; gap: 6px;" title="Only the Club Head can edit the Main League stages">🔒 Main Stage (Head Only)</span>
                     {% endif %}
-                    <a href="{{ url_for('admin_set_results', id=tournament.id) }}" class="nav-tab-modern" style="background: var(--brand-blue); color: white; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);">🏆 Close & Post Results</a>
+                    <a href="{{ url_for('tournaments.admin_set_results', id=tournament.id) }}" class="nav-tab-modern" style="background: var(--brand-blue); color: white; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);">🏆 Close & Post Results</a>
                 </div>
             </div>
         {% endif %}
@@ -295,10 +311,12 @@
         });
     });
 
-    // Безопасный запуск синхронизированного таймера
     let targetDateStr = "{{ js_target_date }}";
     if (targetDateStr && targetDateStr.trim() !== "" && targetDateStr !== "None") {
-        let targetDate = new Date(targetDateStr).getTime();
+        // 🔥 Стабильный парсинг для Safari / iOS
+        let ISOFormattedDate = targetDateStr.replace(" ", "T");
+        let targetDate = new Date(ISOFormattedDate).getTime();
+
         const daysEl = document.getElementById("days");
         const hoursEl = document.getElementById("hours");
         const minutesEl = document.getElementById("minutes");

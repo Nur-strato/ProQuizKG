@@ -3,6 +3,7 @@
 {% block title %}Sign Up — ProQuiz.kg{% endblock %}
 
 {% block body %}
+<!-- Ultimate Minimalistic UI for League Registration -->
 <style>
     :root {
         --brand-blue: #0284c7;          /* Премиальный лазурный */
@@ -79,26 +80,24 @@
         padding: 40px 24px;
     }
 
+    .form-card {
+        width: 100%;
+        max-width: 420px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 20px;
+    }
 
-.form-card {
-    width: 100%;
-    max-width: 420px;
-    background: transparent; /* Карточка растворяется */
-    border: none;
-    box-shadow: none;
-    padding: 20px; /* Уменьшаем отступы, так как границ больше нет */
-}
-/* Чтобы инпуты выделялись на белом фоне, делаем их слегка серыми */
-.field-input-clean {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #0f172a !important;
-}
-.field-input-clean:focus {
-    border-color: #0f172a !important;
-    background: #ffffff !important;
-}
-
+    .field-input-clean {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
+    }
+    .field-input-clean:focus {
+        border-color: #0f172a !important;
+        background: #ffffff !important;
+    }
 
     .auth-badge-clean {
         display: inline-flex;
@@ -235,7 +234,7 @@
         transition: width 0.3s ease, background-color 0.3s ease;
     }
 
-    /* УЛЬТИМАТИВНАЯ КНОПКА (Всегда активна) */
+    /* УЛЬТИМАТИВНАЯ КНОПКА */
     .btn-submit-clean {
         width: 100%;
         padding: 14px;
@@ -280,19 +279,20 @@
 
 <div class="portal-auth-wrapper">
 
+    <!-- ЛЕВАЯ ИНФО-ПАНЕЛЬ С РЕЙТИНГОМ НА АНГЛИЙСКОМ -->
     <div class="auth-side-wall">
         <div>
-            <div class="wall-section-title">♛ UNIV. Leaderboard</div>
+            <div class="wall-section-title">♛ Univ. Leaderboard</div>
             <div class="wall-stat-row"><span>1. AUCA</span><span style="color: var(--brand-blue); font-weight: 700;">TBD pts</span></div>
             <div class="wall-stat-row"><span>2. Ala-Too</span><span style="color: var(--brand-dark); font-weight: 600;">TBD pts</span></div>
             <div class="wall-stat-row"><span>3. Manas</span><span style="color: var(--brand-dark); font-weight: 600;">TBD pts</span></div>
             <div class="wall-stat-row"><span>4. KRSU</span><span style="color: var(--brand-dark); font-weight: 600;">TBD pts</span></div>
             <div class="wall-stat-row wall-hide-responsive"><span>5. KNU</span><span>TBD pts</span></div>
             <div class="wall-stat-row wall-hide-responsive"><span>6. BSU</span><span>TBD pts</span></div>
-            <div class="wall-stat-row wall-hide-responsive"><span>7. Salymbekov</span><span>TBD pts</span></div>
+            <div class="wall-stat-row wall-hide-responsive"><span>7. Salymbekov University</span><span>TBD pts</span></div>
         </div>
         <div style="font-size: 0.7rem; font-weight: 600; color: var(--brand-slate); letter-spacing: 0.03em;">
-            LIVE_RANKINGS_NATIVE
+            LIVE_LEAGUE_RANKINGS
         </div>
     </div>
 
@@ -318,24 +318,25 @@
 
                 <div class="form-field-group">
                     <label class="field-label-clean">Full Name</label>
-                    {{ form.name(class="field-input-clean", id="regFullName", placeholder="Иван Иванов", autocomplete="off") }}
+                    {{ form.name(class="field-input-clean", id="regFullName", placeholder="John Doe", autocomplete="off") }}
                 </div>
 
                 <div class="form-field-group">
-                    <label class="field-label-clean">Login</label>
-                    {{ form.login(class="field-input-clean", id="regLoginId", placeholder="Придумайте логин", autocomplete="off") }}
+                    <label class="field-label-clean">Login ID</label>
+                    {{ form.login(class="field-input-clean", id="regLoginId", placeholder="Choose username", autocomplete="off") }}
                 </div>
 
                 <div class="form-field-group">
                     <label class="field-label-clean">University Delegation</label>
                     <select name="university" id="universitySelect" class="field-select-clean">
-                        <option value="" disabled selected>-- ВЫБЕРИТЕ ВАШ ВУЗ --</option>
+                        <option value="" disabled selected>-- SELECT YOUR UNIVERSITY --</option>
                         {% if real_quotas %}
                             {% for univ_name, data in real_quotas.items() %}
+                                <!-- 🔥 СИНХРОНИЗИРОВАНО: Никакого хардкода перевода, вывод названий напрямую из СУБД на английском -->
                                 <option value="{{ univ_name }}" id="{{ data.optId }}">{{ univ_name }}</option>
                             {% endfor %}
                         {% endif %}
-                        <option value="Other" id="opt-other">(Другой ВУЗ / Вне лиги)</option>
+                        <option value="Other" id="opt-other">(Other University / Independent)</option>
                     </select>
                 </div>
 
@@ -358,28 +359,29 @@
                     <button type="button" class="password-text-toggle" onclick="togglePasswordText('regConfirmField', this)">SHOW</button>
                 </div>
 
-                <button type="submit" id="registerSubmitButton" class="btn-submit-clean">Создать аккаунт ➔</button>
+                <button type="submit" id="registerSubmitButton" class="btn-submit-clean">Create Account ➔</button>
             </form>
 
             <div style="margin-top: 35px; border-top: 1px solid var(--border-color); padding-top: 24px; text-align: center;">
                 <p style="margin: 0; font-size: 0.85rem; color: var(--brand-muted); font-weight: 500;">
-                    Уже зарегистрированы? <a href="{{ url_for('login') }}" style="color: var(--brand-blue); font-weight: 700; text-decoration: none;">Войти в систему</a>
+                    Already registered? <a href="{{ url_for('auth.login') }}" style="color: var(--brand-blue); font-weight: 700; text-decoration: none;">Sign In here</a>
                 </p>
             </div>
 
         </div>
     </div>
 
+    <!-- ПРАВАЯ ИНФО-ПАНЕЛЬ С ЛИМИТАМИ НА АНГЛИЙСКОМ -->
     <div class="auth-side-wall right-wall">
         <div>
             <div class="wall-section-title">📊 System Limits</div>
-            <div class="wall-stat-row"><span>VERIFICATION</span><span style="color: var(--brand-dark); font-weight: 600;">NATIVE_AUTH</span></div>
+            <div class="wall-stat-row"><span>VERIFICATION</span><span style="color: var(--brand-dark); font-weight: 600;">LOCAL_AUTH</span></div>
             <div class="wall-stat-row"><span>ROSTER STATUS</span><span style="color: var(--brand-dark); font-weight: 600;">14 TEAMS LIMIT</span></div>
-            <div class="wall-stat-row"><span>PASSWORD</span><span style="color: var(--brand-dark); font-weight: 600;">6+ CHARS</span></div>
+            <div class="wall-stat-row"><span>PASSWORD</span><span style="color: var(--brand-dark); font-weight: 600;">MIN 6 CHARS</span></div>
             <div class="wall-stat-row wall-hide-responsive"><span>SECURITY</span><span style="color: #16a34a; font-weight: 700;">ENCRYPTED</span></div>
         </div>
         <div style="font-size: 0.7rem; font-weight: 600; color: var(--brand-slate); text-align: right; letter-spacing: 0.03em;">
-            SECURE_REG
+            SECURE_REG_NODE
         </div>
     </div>
 
@@ -401,7 +403,6 @@
         }
     }
 
-    // Живой интерактивный расчёт сложности пароля (без блокировки кнопки)
     passwordInput.addEventListener('input', () => {
         const passwordValue = passwordInput.value;
         let finalScore = 0;

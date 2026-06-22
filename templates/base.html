@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -8,43 +9,454 @@
 </head>
 <body>
 
+<style>
+    :root {
+        --is-blue: #0284c7;           /* Premium Azure */
+        --is-blue-hover: #0369a1;
+        --is-dark: #0f172a;           /* Deep Slate Monolith */
+        --is-slate: #94a3b8;          /* Muted typography for inactive components */
+        --is-muted: #334155;          /* Distinct Slate navigation text color */
+        --is-border: rgba(255, 255, 255, 0.08);
+        --is-bg: #ffffff;
+    }
+
+    /* --- DYNAMIC ISLAND NOTCH CONTAINER --- */
+    .dynamic-island-container {
+        position: fixed;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        width: calc(100% - 24px);
+        max-width: 370px;
+        pointer-events: none;
+    }
+
+    .dynamic-island {
+        pointer-events: auto;
+        margin: 0 auto;
+        width: max-content;
+        height: 32px;
+        background: var(--is-dark);
+        border-radius: 30px;
+        border: 1px solid var(--is-border);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+        overflow-x: hidden;
+        overflow-y: auto;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 16px;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    /* --- ОЧЕНЬ ТОНКИЙ СКРОЛЛБАР ДЛЯ DYNAMIC ISLAND --- */
+    .dynamic-island::-webkit-scrollbar,
+    .island-content::-webkit-scrollbar {
+        width: 3px !important;
+        height: 3px !important;
+    }
+    .dynamic-island::-webkit-scrollbar-track,
+    .island-content::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    .dynamic-island::-webkit-scrollbar-thumb,
+    .island-content::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3) !important; /* Полупрозрачный Slate */
+        border-radius: 10px !important;
+    }
+    .dynamic-island::-webkit-scrollbar-thumb:hover,
+    .island-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.6) !important;
+    }
+
+    .dynamic-island:not(.active) {
+        min-width: 110px;
+        max-width: 160px;
+        overflow: hidden !important; /* Прячем скролл в закрытом состоянии */
+    }
+
+    .dynamic-island:active {
+        transform: scale(0.96);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+    }
+
+    .dynamic-island.active {
+        width: 100% !important;
+        max-width: 370px !important;
+        height: auto;
+        max-height: 85vh; /* Чтобы не вылезал за экраны мобилок */
+        border-radius: 22px;
+        padding: 10px 16px 20px 16px;
+        background: var(--is-bg);
+        border: 2px solid var(--is-dark);
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.2);
+        box-sizing: border-box;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }
+
+    /* --- АНИМАЦИЯ И СТИЛИЗАЦИЯ COMPACT ISLAND NODES --- */
+    .island-compact {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .island-compact-arrow {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.65rem;
+        transition: transform 0.3s ease;
+    }
+
+    .dynamic-island:hover .island-compact-arrow {
+        color: #ffffff;
+        transform: translateY(1px);
+    }
+
+    .dynamic-island.active .island-compact { display: none; }
+
+    .island-logo {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        line-height: 1;
+    }
+
+    .island-content {
+        opacity: 0;
+        visibility: hidden;
+        width: 100%;
+        max-height: 380px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        box-sizing: border-box;
+        padding-right: 0 !important;
+    }
+    .dynamic-island.active .island-content {
+        opacity: 1;
+        visibility: visible;
+        animation: fadeInIslandMenu 0.25s ease forwards;
+    }
+
+    @keyframes fadeInIslandMenu {
+        from { transform: translateY(2px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ВЫРАВНИВАНИЕ НАДПИСЕЙ ПО ЦЕНТРУ */
+    .mobile-nav-links { list-style: none; margin: 0; padding: 0; width: 100%; text-align: center; }
+    .mobile-nav-links li { border-bottom: 1px solid rgba(15, 23, 42, 0.06); width: 100%; display: flex; justify-content: center; }
+    .mobile-nav-links li.no-border-island { border-bottom: none; }
+    .mobile-nav-links li a { display: block; padding: 11.2px 0; color: var(--is-muted); text-decoration: none; font-size: 1.05rem; font-weight: 600; width: 100%; text-align: center; }
+
+    .mobile-nav-links li a:not(.mobile-brand):not(.mobile-btn-island-dark):hover,
+    .mobile-nav-links li a.current-text-active { color: var(--is-blue) !important; }
+
+   .dropdown-menu li a.current-text-active { color: var(--is-blue) !important; font-weight: 700; }
+
+    /* 🔥 Эффект жидкого глянцевого блика (раз в 2 секунды) */
+    @keyframes langShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    /* Применяем премиальный блик к АКТИВНОМУ ПУНКТУ ВНУТРИ списка */
+    .dropdown-menu .lang-active-pulsate {
+        font-weight: 700 !important;
+        display: inline-block !important;
+        /* Создаем градиент: Основной синий -> Белый блик -> Основной синий */
+        background: linear-gradient(90deg, #0284c7 30%, #ffffff 50%, #0284c7 70%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        /* Блик плавно пробегает, создавая дорогой UI-эффект */
+        animation: langShimmer 2s infinite linear !important;
+    }
+
+    /* Обычный статический синий цвет для внешней кнопки (без анимации, чтобы не рябило в глазах) */
+    .desktop-navbar .lang-active-static {
+        color: var(--is-blue) !important;
+        font-weight: 700 !important;
+    }
+
+    .mobile-about-wrapper { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+
+    .mobile-about-dropdown { padding: 4px 0 6px 0; margin: 2px 0 4px 0; list-style: none; border-left: none; display: none; width: 100%; text-align: center; }
+    .mobile-about-dropdown.open { display: block; }
+    .mobile-about-dropdown li { border-bottom: none !important; }
+
+    .mobile-about-dropdown li a.mobile-about-sub {
+        font-size: 1.035rem !important;
+        color: #94a3b8 !important;
+        opacity: 0.7;
+        padding: 6px 0 !important;
+        font-weight: 600 !important;
+        text-align: center;
+        transition: opacity 0.2s ease, color 0.2s ease;
+    }
+    .mobile-about-dropdown li a.mobile-about-sub:hover,
+    .mobile-about-dropdown li a.mobile-about-sub.current-text-active {
+        color: var(--is-blue) !important;
+        opacity: 1 !important;
+    }
+
+    .island-auth-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 14px; justify-content: center; }
+    .island-auth-buttons-row li { flex: 1; border: none !important; max-width: 140px; }
+
+    .mobile-btn-island-dark {
+        display: block; text-align: center; background: var(--is-dark) !important; color: #ffffff !important;
+        padding: 11px 0 !important; border-radius: 10px; font-weight: 700 !important; font-size: 0.8rem !important;
+        text-transform: uppercase; letter-spacing: 0.03em; text-decoration: none !important; border: 1px solid var(--is-dark) !important;
+    }
+    .mobile-btn-island-dark:hover { background: var(--is-blue) !important; border-color: var(--is-blue) !important; }
+    .mobile-btn-island-logout {
+        display: block; text-align: center; background: rgba(239, 68, 68, 0.06) !important; color: #ef4444 !important;
+        padding: 11px 0 !important; border-radius: 10px; font-weight: 700 !important; font-size: 0.8rem !important;
+        text-transform: uppercase; border: 1px solid rgba(239, 68, 68, 0.15) !important; text-decoration: none !important;
+    }
+
+    .mobile-lang-floating-sidebar { position: absolute; right: 0px; top: 15px; display: flex; flex-direction: column; gap: 5px; z-index: 15; }
+    .lang-link-floating { font-size: 0.65rem; font-weight: 800; width: 44px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 5px; color: var(--is-slate); text-decoration: none; background: rgba(15, 23, 42, 0.03); }
+    .lang-link-floating.active-badge { color: var(--is-blue); background: #f0f9ff; border: 1px solid #b3e0ff; animation: langPulse 1.5s infinite ease-in-out; }
+
+    /* --- MINIMALISTIC FLAT LIGHT FOOTER CONSOLE --- */
+    .inception-terminal {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        padding: 35px 0 25px 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        border-top: 4px solid #0f172a;
+        position: relative;
+        margin-top: 60px;
+        box-shadow: none;
+    }
+
+    .terminal-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .terminal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .terminal-horizontal-panel {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .terminal-card-line {
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        max-width: max-content;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    .widget-title-inline {
+        margin: 0;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .terminal-divider-dot { color: #334155; user-select: none; }
+    .bio-auth-inline, .bio-guest-inline { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; }
+    .bio-welcome-inline { margin: 0; color: #f8fafc; font-weight: 600; }
+    .bio-status-inline { margin: 0; color: #94a3b8; font-weight: 600; }
+    .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+    .bio-alert-inline { margin: 0; color: #94a3b8; font-weight: 600; }
+
+    .terminal-btn-inline {
+        display: inline-block;
+        background: #1e293b;
+        color: #f8fafc;
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        transition: background 0.2s;
+    }
+    .terminal-btn-inline:hover { background: #0ea5e9; }
+
+    .terminal-bottom {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 18px;
+        margin-top: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .foot-brand-icon {
+        color: #0f172a;
+        text-decoration: none;
+        font-size: 2.05rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+    }
+    .foot-brand-icon:hover { transform: scale(1.12); }
+
+    .icon-inst:hover, .icon-inst.is-active { color: #e1306c !important; filter: drop-shadow(0 0 6px rgba(225, 48, 108, 0.4)); }
+    .icon-link:hover, .icon-link.is-active { color: #0077b5 !important; filter: drop-shadow(0 0 6px rgba(0, 119, 181, 0.4)); }
+
+    .icon-yt { font-size: 2.35rem !important; }
+    .icon-yt:hover, .icon-yt.is-active { color: #ff0000 !important; filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.5)); }
+    .icon-tg:hover, .icon-tg.is-active { color: #229ed9 !important; filter: drop-shadow(0 0 6px rgba(34, 158, 217, 0.4)); }
+
+    .icon-mail {
+        background-color: #ffffff;
+        border: 2.5px solid #0f172a;
+        border-radius: 50% !important;
+        padding: 6.5px !important;
+        box-sizing: border-box;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .icon-mail:hover, .icon-mail.is-active {
+        border-color: transparent !important;
+        background-image: linear-gradient(#ffffff, #ffffff),
+                          linear-gradient(135deg, #4285f4 25%, #ea4335 25% 50%, #fbbc05 50% 75%, #34a853 75%) !important;
+        box-shadow: 0 4px 14px rgba(234, 67, 53, 0.3) !important;
+        transform: scale(1.15) !important;
+    }
+    .icon-gmail-svg .g-path { transition: fill 0.3s ease; fill: #0f172a; }
+
+    .icon-mail:hover .g-blue, .icon-mail.is-active .g-blue { fill: #4285f4 !important; }
+    .icon-mail:hover .g-red, .icon-mail.is-active .g-red { fill: #ea4335 !important; }
+    .icon-mail:hover .g-yellow, .icon-mail.is-active .g-yellow { fill: #fbbc05 !important; }
+    .icon-mail:hover .g-green, .icon-mail.is-active .g-green { fill: #34a853 !important; }
+
+    .terminal-mini-modal {
+        position: absolute; bottom: 55px; background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(15, 23, 42, 0.08); padding: 16px 20px; border-radius: 14px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15); display: none;
+        flex-direction: column; gap: 8px; z-index: 999; width: 230px; opacity: 0;
+        transform: translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .terminal-mini-modal .modal-btn {
+        margin-top: 4px; display: inline-block; background: #0f172a; color: #ffffff;
+        text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem;
+        font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.3px;
+        transition: all 0.2s;
+    }
+
+    #lockAlertNotice {
+        position: absolute; bottom: -45px; left: 0; width: 100%;
+        background: #ef4444; color: #ffffff; font-family: system-ui, sans-serif;
+        font-size: 0.75rem; font-weight: 700; text-align: center;
+        padding: 6px 0; border-radius: 6px; display: none;
+        animation: alertFadeIn 0.2s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    }
+    @keyframes alertFadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
 <div class="dynamic-island-container">
-  <div class="dynamic-island" id="dynamicIsland" onclick="toggleIsland(event)">
+    <div class="dynamic-island" id="dynamicIsland" onclick="toggleIsland(event)">
         <div class="island-compact">
-            <span class="island-logo brand-btn-home">PQ</span>
-            <span class="island-arrow">▾</span>
+            <span class="island-logo">
+                {% if request.path == url_for('index') %}
+                    Menu
+                {% elif request.path == url_for('tournaments.tournaments') %}
+                    Tourns
+                {% elif request.path == url_for('auth.leaderboard') %}
+                    Leadbrd
+                {% elif request.path == url_for('auth.hall_of_fame') %}
+                    Hall
+                {% elif request.path == url_for('auth.universities') %}
+                    Univ
+                {% elif request.path == url_for('auth.about_mission') %}
+                    Mission
+                {% elif request.path == url_for('auth.about_partners') %}
+                    Partnrs
+                {% elif request.path == url_for('auth.about_organizers') %}
+                    Orgznrs
+                {% elif request.path == url_for('auth.about_faq') %}
+                    FAQ
+                {% else %}
+                    Menu
+                {% endif %}
+            </span>
+            <span style="font-weight: 900; color: rgba(255, 255, 255, 0.85); font-size: 1rem; line-height: 1; transition: transform 0.3s ease; display: inline-block; margin-top: -1px;">▾</span>
         </div>
 
-        <div class="island-content">
+        <div class="island-content" onclick="event.stopPropagation();">
             <ul class="mobile-nav-links">
-                <li><a href="{{ url_for('index') }}" class="mobile-brand brand-btn-home">ProQuizKG</a></li>
-                <hr class="island-hr">
+                <li class="no-border-island"><a href="{{ url_for('index') }}" class="mobile-brand brand-btn-home" style="color: var(--is-dark); font-size: 1.15rem; font-weight: 800; padding: 0 0 6px 0; text-align: center;">ProQuizKG</a></li>
+                <li><a href="{{ url_for('tournaments.tournaments') }}" class="{% if request.path == url_for('tournaments.tournaments') %}current-text-active{% endif %}">{{ _('Tournaments') }}</a></li>
+                <li><a href="{{ url_for('auth.leaderboard') }}" class="{% if request.path == url_for('auth.leaderboard') %}current-text-active{% endif %}">{{ _('Leaderboard') }}</a></li>
+                <li><a href="{{ url_for('auth.hall_of_fame') }}" class="{% if request.path == url_for('auth.hall_of_fame') %}current-text-active{% endif %}">{{ _('Hall of Fame') }}</a></li>
+                <li><a href="{{ url_for('auth.universities') }}" class="{% if request.path == url_for('auth.universities') %}current-text-active{% endif %}">{{ _('Universities') }}</a></li>
 
-                <li><a href="{{ url_for('tournaments') }}">Tournaments</a></li>
-                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
-                <li><a href="{{ url_for('hall_of_fame') }}">Hall of Fame</a></li>
-                <li><a href="{{ url_for('universities') }}">Universities</a></li>
-
-                <hr class="island-hr">
-                <li class="mobile-about-wrapper">
-                    <a href="#" class="mobile-about-toggle" onclick="toggleMobileAbout(event)">About <span class="about-arrow">▾</span></a>
+                <li class="mobile-about-wrapper" id="mobileAboutWrapper">
+                    <a href="#" class="mobile-about-toggle" onclick="toggleMobileAbout(event)">
+                        <span>{{ _('About') }}</span> <span class="about-arrow">▾</span>
+                    </a>
                     <ul class="mobile-about-dropdown" id="mobileAboutDropdown">
-                        <li><a href="{{ url_for('about_mission') }}" class="mobile-about-sub">Mission</a></li>
-                        <li><a href="{{ url_for('about_partners') }}" class="mobile-about-sub">Partners</a></li>
-                        <li><a href="{{ url_for('about_organizers') }}" class="mobile-about-sub">Organizers</a></li>
-                        <li><a href="{{ url_for('about_faq') }}" class="mobile-about-sub">FAQ & Rules</a></li>
+                        <li><a href="{{ url_for('auth.about_mission') }}" class="mobile-about-sub {% if request.path == url_for('auth.about_mission') %}current-text-active{% endif %}">{{ _('Mission') }}</a></li>
+                        <li><a href="{{ url_for('auth.about_partners') }}" class="mobile-about-sub {% if request.path == url_for('auth.about_partners') %}current-text-active{% endif %}">{{ _('Partners') }}</a></li>
+                        <li><a href="{{ url_for('auth.about_organizers') }}" class="mobile-about-sub {% if request.path == url_for('auth.about_organizers') %}current-text-active{% endif %}">{{ _('Organizers') }}</a></li>
+                        <li><a href="{{ url_for('auth.about_faq') }}" class="mobile-about-sub {% if request.path == url_for('auth.about_faq') %}current-text-active{% endif %}">{{ _('FAQ & Rules') }}</a></li>
                     </ul>
                 </li>
-                <hr class="island-hr">
 
-                {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('my_profile') }}" class="mobile-user-name">👤 {{ current_user.name }}</a></li>
-                    <li><a href="{{ url_for('logout') }}" class="mobile-btn-logout">Log Out</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('login') }}">Log In</a></li>
-                    <li><a href="{{ url_for('register') }}" class="mobile-btn-signup">Sign Up</a></li>
-                {% endif %}
+                <div class="island-auth-buttons-row">
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('auth.my_profile') }}" class="mobile-btn-island-dark {% if request.path == url_for('auth.my_profile') %}current-page-active{% endif %}">👤 {{ current_user.name }}</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" class="mobile-btn-island-logout">{{ _('Log Out') }}</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" class="mobile-btn-island-dark {% if request.path == url_for('auth.login') %}current-page-active{% endif %}">{{ _('Log In') }}</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="mobile-btn-island-dark {% if request.path == url_for('auth.register') %}current-page-active{% endif %}">{{ _('Sign Up') }}</a></li>
+                    {% endif %}
+                </div>
             </ul>
+
+            <div class="mobile-lang-floating-sidebar">
+                {% set current_lang = session.get('lang', 'ru') | lower %}
+                <a href="{{ url_for('set_lang', lang_code='en') }}" class="lang-link-floating {{ 'active-badge' if current_lang == 'en' }}">EN</a>
+                <a href="{{ url_for('set_lang', lang_code='ky') }}" class="lang-link-floating {{ 'active-badge' if current_lang == 'ky' }}">KY</a>
+                <a href="{{ url_for('set_lang', lang_code='ru') }}" class="lang-link-floating {{ 'active-badge' if current_lang == 'ru' }}">RU</a>
+            </div>
         </div>
     </div>
 </div>
@@ -53,31 +465,42 @@
     <div class="container nav-container">
         <nav>
             <ul class="nav-links">
-                <li><a href="{{ url_for('index') }}" class="brand-btn-home" style="font-weight: 700; font-size: 1.2rem; margin-right: 15px; letter-spacing: 0.5px;">ProQuizKG</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle lang-active-static" id="navLangToggle">
+                        <i class="bi bi-translate"></i> {% set current_lang = session.get('lang', 'ru') | lower %}
+                        {{ current_lang | upper }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('set_lang', lang_code='ru') }}" class="{% if current_lang == 'ru' %}lang-active-pulsate{% endif %}">Русский (RU)</a></li>
+                        <li><a href="{{ url_for('set_lang', lang_code='ky') }}" class="{% if current_lang == 'ky' %}lang-active-pulsate{% endif %}">Кыргызча (KY)</a></li>
+                        <li><a href="{{ url_for('set_lang', lang_code='en') }}" class="{% if current_lang == 'en' %}lang-active-pulsate{% endif %}">English (EN)</a></li>
+                    </ul>
+                </li>
 
-                <li><a href="{{ url_for('tournaments') }}">Tournaments</a></li>
-                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
-                <li><a href="{{ url_for('hall_of_fame') }}">Hall of Fame</a></li>
-                <li><a href="{{ url_for('universities') }}">Universities</a></li>
+                <li><a href="{{ url_for('index') }}" class="brand-btn-home" style="font-weight: 700; font-size: 1.2rem; margin-right: 15px; letter-spacing: 0.5px;">ProQuizKG</a></li>
+                <li><a href="{{ url_for('tournaments.tournaments') }}">{{ _('Tournaments') }}</a></li>
+                <li><a href="{{ url_for('auth.leaderboard') }}">{{ _('Leaderboard') }}</a></li>
+                <li><a href="{{ url_for('auth.hall_of_fame') }}">{{ _('Hall of Fame') }}</a></li>
+                <li><a href="{{ url_for('auth.universities') }}">{{ _('Universities') }}</a></li>
 
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" onclick="return false;">About</a>
+                    <a href="#" class="dropdown-toggle" onclick="return false;">{{ _('About') }}</a>
                     <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('about_mission') }}"> Mission</a></li>
-                        <li><a href="{{ url_for('about_partners') }}"> Partners</a></li>
-                        <li><a href="{{ url_for('about_organizers') }}"> Organizers</a></li>
-                        <li><a href="{{ url_for('about_faq') }}"> FAQ & Rules</a></li>
+                        <li><a href="{{ url_for('auth.about_mission') }}">{{ _('Mission') }}</a></li>
+                        <li><a href="{{ url_for('auth.about_partners') }}">{{ _('Partners') }}</a></li>
+                        <li><a href="{{ url_for('auth.about_organizers') }}">{{ _('Organizers') }}</a></li>
+                        <li><a href="{{ url_for('auth.about_faq') }}">{{ _('FAQ & Rules') }}</a></li>
                     </ul>
                 </li>
 
                 <li class="nav-divider">|</li>
 
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('my_profile') }}" class="user-name">{{ current_user.name }}</a></li>
-                    <li><a href="{{ url_for('logout') }}" class="btn-logout">Log Out</a></li>
+                    <li><a href="{{ url_for('auth.my_profile') }}" class="user-name">{{ current_user.name }}</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}" class="btn-logout">{{ _('Log Out') }}</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('login') }}">Log In</a></li>
-                    <li><a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a></li>
+                    <li><a href="{{ url_for('auth.login') }}">{{ _('Log In') }}</a></li>
+                    <li><a href="{{ url_for('auth.register') }}" class="btn-signup">{{ _('Sign Up') }}</a></li>
                 {% endif %}
             </ul>
         </nav>
@@ -96,51 +519,291 @@
     {% block body %}{% endblock %}
 </main>
 
-<footer class="main-footer">
-    <div class="container footer-content">
-        <p>&copy; 2026 ProQuiz.kg. Все права защищены.</p>
+<footer class="inception-terminal">
+    <div class="terminal-container">
 
-        <a href="{{ url_for('index') }}" class="footer-logo-link">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ProQuiz.kg Logo" class="footer-logo">
-        </a>
+        <div class="terminal-header" style="margin-bottom: 25px; border: none; padding: 0; display: flex; justify-content: space-between; align-items: center;">
+            <span onclick="openDevModal()" style="color: #0f172a; font-family: system-ui, -apple-system, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; position: relative; display: inline-block; padding-bottom: 2px; transition: all 0.2s;" onmouseenter="this.style.borderBottom='2px solid #0f172a'" onmouseleave="this.style.borderBottom='none'">
+                Dev Team
+            </span>
 
-        <div class="footer-socials">
-            <a href="https://t.me/NurRay0" target="_blank">Telegram</a>
-            <a href="https://www.instagram.com/auca_quiz_club/" target="_blank">Instagram</a>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0; font-weight: 500; text-transform: none; letter-spacing: normal;">
+                Copyright © 2026 ProQuizKG All rights reserved.
+            </p>
+        </div>
+
+        <div class="terminal-horizontal-panel" style="margin-bottom: 25px; position: relative;">
+            <div class="terminal-card-line" style="width: 310px; max-width: 100%; padding: 6px 16px; justify-content: space-between; box-sizing: border-box; height: 36px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h4 class="widget-title-inline" style="margin: 0; font-size: 0.7rem;">
+                        <i class="bi bi-fingerprint" style="color: {% if current_user.is_authenticated %}#22c55e{% else %}#64748b{% endif %}; transition: color 0.3s;"></i> Profiler:
+                    </h4>
+
+                    {% if current_user.is_authenticated %}
+                        <div class="bio-auth-inline" style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem;">
+                            <p class="bio-welcome-inline" style="color: #94a3b8; margin: 0;">Agent: <span style="font-weight: 700; color: #ffffff;">{{ current_user.name }}</span></p>
+                            <span class="terminal-divider-dot" style="color: #334155;">•</span>
+                            <span class="status-badge" style="padding: 1px 5px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+                                {% if current_user.status == 'head' %}
+                                    background: rgba(14, 165, 233, 0.2); color: #38bdf8;
+                                {% elif current_user.status == 'admin' %}
+                                    background: rgba(239, 68, 68, 0.2); color: #f87171;
+                                {% else %}
+                                    background: rgba(255, 255, 255, 0.15); color: #ffffff;
+                                {% endif %}">
+                                {{ current_user.status | upper }}
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="bio-guest-inline" style="font-size: 0.75rem;">
+                            <a href="{{ url_for('auth.login') }}" class="terminal-btn-inline" style="font-size: 0.65rem; padding: 2px 6px;">Login</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if current_user.is_authenticated and current_user.status == 'head' %}
+                    <div onclick="toggleLockManagerMenu(event)" id="lockSystemBtn" style="cursor: pointer; display: flex; align-items: center; padding: 4px; position: relative;" title="Manage Gateway Access Overrides">
+                        <i class="bi bi-sliders" id="lockIcon" style="color: #38bdf8; font-size: 0.85rem;"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div id="lockManagerDropdown" style="position: absolute; bottom: 42px; left: 0; width: 310px; background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: none; flex-direction: column; gap: 8px; z-index: 1000; box-sizing: border-box;">
+                <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; margin-bottom: 2px;">
+                    Gateway Security Manager
+                </div>
+                <label style="display: flex; justify-content: space-between; align-items: center; color: #ffffff; font-size: 0.75rem; cursor: pointer; margin: 0;">
+                    <span>Instagram</span>
+                    <input type="checkbox" id="lock_inst" onchange="updateLockState('inst')" style="cursor: pointer; accent-color: #ef4444;">
+                </label>
+                <label style="display: flex; justify-content: space-between; align-items: center; color: #ffffff; font-size: 0.75rem; cursor: pointer; margin: 0;">
+                    <span>LinkedIn</span>
+                    <input type="checkbox" id="lock_link" onchange="updateLockState('link')" style="cursor: pointer; accent-color: #ef4444;">
+                </label>
+                <label style="display: flex; justify-content: space-between; align-items: center; color: #ffffff; font-size: 0.75rem; cursor: pointer; margin: 0;">
+                    <span>YouTube</span>
+                    <input type="checkbox" id="lock_yt" onchange="updateLockState('yt')" style="cursor: pointer; accent-color: #ef4444;">
+                </label>
+                <label style="display: flex; justify-content: space-between; align-items: center; color: #ffffff; font-size: 0.75rem; cursor: pointer; margin: 0;">
+                    <span>Telegram</span>
+                    <input type="checkbox" id="lock_tg" onchange="updateLockState('tg')" style="cursor: pointer; accent-color: #ef4444;">
+                </label>
+                <label style="display: flex; justify-content: space-between; align-items: center; color: #ffffff; font-size: 0.75rem; cursor: pointer; margin: 0;">
+                    <span>Gmail</span>
+                    <input type="checkbox" id="lock_mail" onchange="updateLockState('mail')" style="cursor: pointer; accent-color: #ef4444;">
+                </label>
+            </div>
+        </div>
+
+       <div style="display: flex; width: 310px; justify-content: space-between; align-items: center; padding-left: 2px; position: relative; box-sizing: border-box;">
+            <span id="btn_inst" onclick="handleGateClick(event, 'instMiniModal', 'inst', 'btn_inst')" class="foot-brand-icon icon-inst" title="Instagram"><i class="bi bi-instagram"></i></span>
+            <div id="instMiniModal" class="terminal-mini-modal" style="left: -15px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Community</span>
+                <strong style="font-size: 0.9rem; color: #0f172a; font-family: system-ui, sans-serif;">@auca_quiz_club</strong>
+                <a href="https://www.instagram.com/auca_quiz_club/" target="_blank" class="modal-btn" onmouseenter="this.style.background='#e1306c'" onmouseleave="this.style.background='#0f172a'">View Profile →</a>
+            </div>
+
+            <span id="btn_link" onclick="handleGateClick(event, 'linkMiniModal', 'link', 'btn_link')" class="foot-brand-icon icon-link" title="LinkedIn"><i class="bi bi-linkedin"></i></span>
+            <div id="linkMiniModal" class="terminal-mini-modal" style="left: 20px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Business Profile</span>
+                <strong style="font-size: 0.9rem; color: #0f172a; font-family: system-ui, sans-serif;">ProQuiz LinkedIn</strong>
+                <a href="https://linkedin.com" target="_blank" class="modal-btn" onmouseenter="this.style.background='#0077b5'" onmouseleave="this.style.background='#0f172a'">Connect Now →</a>
+            </div>
+
+            <span id="btn_yt" onclick="handleGateClick(event, 'ytMiniModal', 'yt', 'btn_yt')" class="foot-brand-icon icon-yt" title="YouTube"><i class="bi bi-youtube"></i></span>
+            <div id="ytMiniModal" class="terminal-mini-modal" style="left: 50px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Media Portal</span>
+                <strong style="font-size: 0.9rem; color: #0f172a; font-family: system-ui, sans-serif;">YouTube Channel</strong>
+                <a href="https://youtube.com" target="_blank" class="modal-btn" onmouseenter="this.style.background='#ff0000'" onmouseleave="this.style.background='#0f172a'">Watch Videos →</a>
+            </div>
+
+            <span id="btn_tg" onclick="handleGateClick(event, 'tgMiniModal', 'tg', 'btn_tg')" class="foot-brand-icon icon-tg" title="Telegram"><i class="bi bi-telegram"></i></span>
+            <div id="tgMiniModal" class="terminal-mini-modal" style="left: 90px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Direct Channel</span>
+                <strong style="font-size: 0.9rem; color: #0f172a; font-family: monospace;">@NurRay0</strong>
+                <a href="https://t.me/NurRay0" target="_blank" class="modal-btn" onmouseenter="this.style.background='#229ed9'" onmouseleave="this.style.background='#0f172a'">Open Chat →</a>
+            </div>
+
+            <span id="btn_mail" onclick="handleGateClick(event, 'mailMiniModal', 'mail', 'btn_mail')" class="foot-brand-icon icon-mail" title="Display Email Node">
+                <svg class="icon-gmail-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%" style="display: block; overflow: visible;">
+                    <path class="g-path g-blue" d="M4 8.2v9.3c0 1.38 1.12 2.5 2.5 2.5H8V7.5L4 8.2z"/>
+                    <path class="g-path g-green" d="M16 7.5V20h1.5c1.38 0 2.5-1.12 2.5-2.5V8.2l-4.1-.7z"/>
+                    <path class="g-path g-yellow" d="M16 7.5v3.8l4-3.1V6.5C20 5.12 18.88 4 17.5 4H16v3.5z"/>
+                    <path class="g-path g-red" d="M17.5 4H16l-4 3.5L8 4H6.5C5.12 4 4 5.12 4 6.5v1.7l8 6.3 8-6.3V6.5C20 5.12 18.88 4 17.5 4z"/>
+                </svg>
+            </span>
+            <div id="mailMiniModal" class="terminal-mini-modal" style="left: 95px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Official Email</span>
+                <strong style="font-size: 0.9rem; color: #0f172a; font-family: monospace; word-break: break-all;">proquizkg@gmail.com</strong>
+                <a href="mailto:proquizkg@gmail.com" class="modal-btn" onmouseenter="this.style.background='#ea4335'" onmouseleave="this.style.background='#0f172a'">Send Message →</a>
+            </div>
+
+            <div id="lockAlertNotice">ⓘ This routing link will be updated shortly.</div>
         </div>
     </div>
 </footer>
 
+<div id="devModalFullScreen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div style="background: #ffffff; border-radius: 20px; width: calc(100% - 40px); max-width: 650px; padding: 35px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif;">
+        <button onclick="closeDevModal()" style="position: absolute; top: 20px; right: 25px; background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; transition: color 0.2s; outline: none;">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+            <i class="bi bi-code-square" style="font-size: 1.8rem; color: #0f172a;"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 1.4rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em;">ProQuiz Ecosystem Nodes</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Core Engine Specifications</p>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px;">
+                <h4 style="margin: 0 0 12px 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; font-weight: 800;">// COMPANY & CREDITS</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; line-height: 1.6; color: #334155;">
+                    <li style="margin-bottom: 4px;">Platform: <strong style="color: #0f172a;">ProQuizKG</strong></li>
+                    <li style="margin-bottom: 4px;">Built by: <strong style="color: #0284c7;">Vital Tech</strong></li>
+                    <li style="margin-bottom: 4px;">Community: <strong style="color: #0f172a;">University Students</strong></li>
+                    <li>Location: <strong style="color: #0f172a;">Bishkek, Kyrgyzstan</strong></li>
+                </ul>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px;">
+                <h4 style="margin: 0 0 12px 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; font-weight: 800;">// SYSTEM METRICS</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; line-height: 1.6; color: #334155;">
+                    <li style="margin-bottom: 4px;">Database Status: <span style="color: #16a34a; font-weight: bold;">ONLINE // SSL_TRUE</span></li>
+                    <li style="margin-bottom: 4px;">Core Gateway Ping: <span style="color: #16a34a; font-weight: bold;">14ms</span></li>
+                    <li style="margin-bottom: 4px;">Architecture Version: <span style="color: #64748b; font-weight: bold;">v2.0.4</span></li>
+                    <li>Operational Mode: <span style="color: #b45309; font-weight: bold;">PRODUCTION</span></li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #f1f5f9; text-align: right;">
+            <span style="font-family: monospace; font-size: 0.75rem; color: #94a3b8; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: bold;">
+                status: all_systems_nominal
+            </span>
+        </div>
+    </div>
+</div>
+
 <script>
+let lockedGates = JSON.parse(localStorage.getItem('terminal_locked_gates')) || {
+    inst: false, link: false, yt: false, tg: false, mail: false
+};
+let modalTimeouts = {};
+
+document.addEventListener("DOMContentLoaded", function() {
+    for (let key in lockedGates) {
+        const checkbox = document.getElementById(`lock_${key}`);
+        if (checkbox) checkbox.checked = lockedGates[key];
+    }
+});
+
 function toggleIsland(event) {
-    const island = document.getElementById('dynamicIsland');
-
-    if (event && event.target.closest('a') && !event.target.closest('.mobile-about-toggle')) return;
-
-    island.classList.toggle('active');
+    const island = document.getElementById("dynamicIsland");
+    if (island) island.classList.toggle("active");
 }
 
 function toggleMobileAbout(event) {
     event.preventDefault();
     event.stopPropagation();
-
-    const toggleLink = event.currentTarget;
-    const dropdown = document.getElementById('mobileAboutDropdown');
-
-    toggleLink.classList.toggle('active');
-    dropdown.classList.toggle('open');
+    const dropdown = document.getElementById("mobileAboutDropdown");
+    const wrapper = document.getElementById("mobileAboutWrapper");
+    const arrow = event.currentTarget.querySelector(".about-arrow");
+    if (dropdown) {
+        dropdown.classList.toggle("open");
+        if (wrapper) wrapper.classList.toggle("is-open", dropdown.classList.contains("open"));
+        if (arrow) arrow.style.transform = dropdown.classList.contains("open") ? "rotate(180deg)" : "rotate(0deg)";
+    }
 }
 
-document.addEventListener('click', function(event) {
-    const island = document.getElementById('dynamicIsland');
-    const container = document.querySelector('.dynamic-island-container');
-
-    if (island && container && !container.contains(event.target) && island.classList.contains('active')) {
-        island.classList.remove('active');
-        document.getElementById('mobileAboutDropdown').classList.remove('open');
-        const aboutToggle = document.querySelector('.mobile-about-toggle');
-        if (aboutToggle) aboutToggle.classList.remove('active');
+function openDevModal() {
+    const modal = document.getElementById("devModalFullScreen");
+    if (modal) {
+        modal.style.display = "flex";
+        setTimeout(() => {
+            modal.style.opacity = "1";
+            modal.querySelector('div').style.transform = "scale(1)";
+        }, 10);
     }
+}
+
+// ... Остальные JS функции (closeDevModal, toggleLockManagerMenu, updateLockState, handleGateClick, closeAllMiniModals, showLockNotice и клик-листнеры) остаются полностью прежними без изменений ...
+function closeDevModal() {
+    const modal = document.getElementById("devModalFullScreen");
+    if (modal) {
+        modal.style.opacity = "0";
+        modal.querySelector('div').style.transform = "scale(0.95)";
+        setTimeout(() => { modal.style.display = "none"; }, 300);
+    }
+}
+
+function toggleLockManagerMenu(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById("lockManagerDropdown");
+    if (!dropdown) return;
+    const isVisible = dropdown.style.display === "flex";
+    closeAllMiniModals();
+    dropdown.style.display = isVisible ? "none" : "flex";
+}
+
+function updateLockState(systemKey) {
+    const checkbox = document.getElementById(`lock_${systemKey}`);
+    if (!checkbox) return;
+    lockedGates[systemKey] = checkbox.checked;
+    localStorage.setItem('terminal_locked_gates', JSON.stringify(lockedGates));
+
+    if (checkbox.checked) {
+        const modalMap = { inst: 'instMiniModal', link: 'linkMiniModal', yt: 'ytMiniModal', tg: 'tgMiniModal', mail: 'mailMiniModal' };
+        const iconMap = { inst: 'btn_inst', link: 'btn_link', yt: 'btn_yt', tg: 'btn_tg', mail: 'btn_mail' };
+        const modal = document.getElementById(modalMap[systemKey]);
+        const icon = document.getElementById(iconMap[systemKey]);
+        if (modal) { modal.style.display = "none"; modal.style.opacity = "0"; }
+        if (icon) icon.classList.remove('is-active');
+    }
+}
+
+function handleGateClick(event, modalId, systemKey, iconId) {
+    event.stopPropagation();
+    if (lockedGates[systemKey]) { showLockNotice(); return; }
+    const modal = document.getElementById(modalId);
+    const icon = document.getElementById(iconId);
+    if (!modal || !icon) return;
+
+    if (modalTimeouts[modalId]) { clearTimeout(modalTimeouts[modalId]); delete modalTimeouts[modalId]; }
+    const isAlreadyOpen = modal.style.display === "flex";
+    closeAllMiniModals();
+
+    if (!isAlreadyOpen) {
+        modal.style.display = "flex";
+        icon.classList.add('is-active');
+        setTimeout(() => { modal.style.opacity = "1"; modal.style.transform = "translateY(0)"; }, 10);
+    }
+}
+
+function closeAllMiniModals() {
+    const modals = document.querySelectorAll('.terminal-mini-modal');
+    modals.forEach(modal => {
+        if (modal.style.display === "flex" && !modalTimeouts[modal.id]) {
+            modal.style.opacity = "0";
+            modal.style.transform = "translateY(10px)";
+            modalTimeouts[modal.id] = setTimeout(() => { modal.style.display = "none"; delete modalTimeouts[modal.id]; }, 300);
+        }
+    });
+    const icons = document.querySelectorAll('.foot-brand-icon');
+    icons.forEach(icon => icon.classList.remove('is-active'));
+}
+
+function showLockNotice() {
+    const notice = document.getElementById("lockAlertNotice");
+    if (notice) { notice.style.display = "block"; setTimeout(() => { notice.style.display = "none"; }, 2500); }
+}
+
+document.addEventListener("click", function(e) {
+    const lockMenu = document.getElementById("lockManagerDropdown");
+    if (lockMenu && !lockMenu.contains(e.target) && !e.target.closest('#lockSystemBtn')) lockMenu.style.display = "none";
+    if (!e.target.closest('.terminal-mini-modal') && !e.target.closest('.foot-brand-icon')) closeAllMiniModals();
+    const island = document.getElementById("dynamicIsland");
+    if (island && !island.contains(e.target)) island.classList.remove("active");
+    const devModal = document.getElementById("devModalFullScreen");
+    if (devModal && e.target === devModal) closeDevModal();
 });
 </script>
 

@@ -3,18 +3,17 @@
 {% block title %}Teams Matrix & Quotas — ProQuiz.kg{% endblock %}
 
 {% block body %}
-<!-- Ультимативный Минималистичный UI Матрицы Квот Лиги -->
 <style>
     :root {
-        --brand-blue: #0284c7;          /* Премиальный лазурный */
-        --brand-dark: #0f172a;          /* Глубокий slate для текстов */
+        --brand-blue: #0284c7;          /* Premium Azure */
+        --brand-dark: #0f172a;          /* Deep Slate for texts */
         --brand-slate: #475569;
-        --brand-muted: #64748b;         /* Серый для вспомогательной разметки */
-        --border-color: rgba(15, 23, 42, 0.06); /* Notion-style ультратонкая граница */
-        --bg-matte-light: #f8fafc;      /* Чистый светлый матовый фон всей страницы */
+        --brand-muted: #64748b;         /* Muted slate for helper geometry */
+        --border-color: rgba(15, 23, 42, 0.06); /* Notion-style ultra-thin border */
+        --bg-matte-light: #f8fafc;      /* Clean light matte page background */
         --bg-pure-white: #ffffff;
-        --brand-success: #16a34a;       /* Исправлено: Насыщенный благородный зеленый */
-        --brand-danger: #dc2626;        /* Строгий красный для лимитов */
+        --brand-success: #16a34a;       /* Rich noble green */
+        --brand-danger: #dc2626;        /* Strict red for limits */
         --transition-premium: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -71,7 +70,7 @@
         transition: var(--transition-premium);
     }
 
-    /* Мягкий интерактивный ховер строк */
+    /* Smooth interactive row hover effect */
     .quota-table tbody tr:hover td {
         background: #f8fafc;
     }
@@ -89,7 +88,7 @@
         letter-spacing: 0.02em;
     }
 
-    /* Интерактивные статусы */
+    /* Interactive allocation status indicators */
     .status-badge {
         font-size: 0.85rem;
         font-weight: 700;
@@ -118,74 +117,62 @@
     <div class="matrix-panel">
         <span style="color: var(--brand-blue); font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Allocation Registry</span>
         <h1 style="font-size: 2rem; font-weight: 800; color: var(--brand-dark); margin: 0 0 8px 0; letter-spacing: -0.02em;">Institutional Teams Matrix</h1>
-        <p style="color: var(--brand-muted); margin: 0; font-size: 0.95rem; font-weight: 500;">Строгое квотирование фиксированных мест между университетами ProQuiz Лиги:</p>
+        <p style="color: var(--brand-muted); margin: 0; font-size: 0.95rem; font-weight: 500;">Strict quota distribution of fixed team slots among ProQuiz League universities:</p>
 
         <table class="quota-table">
             <thead>
                 <tr>
                     <th>University Name</th>
                     <th>Allocated Slots</th>
-                    <th>Status Track</th>
+                    <th>Quota Status</th>
                 </tr>
             </thead>
             <tbody id="matrixTableBody">
-                <!-- Контент генерируется через JS -->
+                {% if battle_map %}
+                    {% set university_limits = {
+                        'auca': 3, 'alatoo': 3, 'manas': 2, 'krsu': 2, 'osceacademy': 1, 'knu': 1, 'bsu': 1, 'salymbekovuniversity': 1
+                    } %}
+
+                    {% set university_labels = {
+                        'auca': 'AUCA',
+                        'alatoo': 'Ala-Too',
+                        'manas': 'Manas',
+                        'krsu': 'KRSU',
+                        'osceacademy': 'OSCE Academy',
+                        'knu': 'KNU',
+                        'bsu': 'BSU',
+                        'salymbekovuniversity': 'Salymbekov University'
+                    } %}
+
+                    {% for code, limit in university_limits.items() %}
+                        <tr>
+                            <td style="font-weight: 700; color: var(--brand-dark);">{{ university_labels[code] }}</td>
+                            <td><span class="quota-tag">{{ limit }} {{ 'Team' if limit == 1 else 'Teams' }}</span></td>
+                            <td>
+                                {# 🔥 СИНХРОНИЗИРОВАНО: Логика переключена на статус 'full' от СУБД первого турнира #}
+                                {% if battle_map[code] == 'full' %}
+                                    <span class="status-badge status-full">● Quota Full</span>
+                                {% else %}
+                                    <span class="status-badge status-available">● Slots Available</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="3" style="text-align:center; color: var(--brand-muted);">Database allocation registry sync error.</td></tr>
+                {% endif %}
             </tbody>
         </table>
 
-        <!-- БЕНТО-ФУТЕР ОБЩЕГО ПРЕДЕЛА -->
         <div style="margin-top: 28px; background: #f8fafc; border: 1px dashed rgba(15, 23, 42, 0.08); padding: 16px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-            <span style="font-size: 0.85rem; color: var(--brand-slate); font-weight: 600;">Глобальный лимит лиги:</span>
+            <span style="font-size: 0.85rem; color: var(--brand-slate); font-weight: 600;">Global league limit:</span>
             <span style="font-size: 0.75rem; font-weight: 800; color: var(--brand-dark); background: #e2e8f0; padding: 5px 12px; border-radius: 8px; letter-spacing: 0.03em;">14 TEAMS TOTAL</span>
         </div>
 
-        <!-- КНОПКИ НАВИГАЦИИ -->
         <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
-            <a href="/" class="btn-link-premium">← На главную</a>
-            <a href="/register" class="btn-link-premium" style="color: var(--brand-blue);">Регистрация ростера ➔</a>
+            <a href="/" class="btn-link-premium">← Back to home</a>
+            <a href="{{ url_for('auth.register') }}" class="btn-link-premium" style="color: var(--brand-blue);">Register Roster ➔</a>
         </div>
     </div>
 </div>
-
-<script>
-    // Имитация базы данных квот (Flask синхронизация сохранена полностью)
-    const quotaDatabase = [
-        { id: "auca", label: "АУЦА (AUCA)", maxTeams: 3, registeredUsers: 7 },
-        { id: "alatoo", label: "АЛА-ТОО (Ala-Too International University)", maxTeams: 3, registeredUsers: 3 },
-        { id: "manas", label: "МАНАС (КРТУ Манас)", maxTeams: 2, registeredUsers: 0 },
-        { id: "krsu", label: "КРСУ (им. Ельцина)", maxTeams: 2, registeredUsers: 6 },
-        { id: "osce", label: "ОБСЕ (Академия ОБСЕ)", maxTeams: 1, registeredUsers: 1 },
-        { id: "knu", label: "КНУ (им. Жусупа Баласагына)", maxTeams: 1, registeredUsers: 1 },
-        { id: "bsu", label: "БГУ (им. К. Карасаева)", maxTeams: 1, registeredUsers: 2 },
-        { id: "salymbekov", label: "Салымбеков Университет", maxTeams: 1, registeredUsers: 2 }
-    ];
-
-    function renderMatrix() {
-        const tbody = document.getElementById('matrixTableBody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        quotaDatabase.forEach(u => {
-            const maxAllowedUsers = u.maxTeams * 3;
-            const slotsLeft = maxAllowedUsers - u.registeredUsers;
-
-            let statusHTML = '';
-            if (slotsLeft <= 0) {
-                statusHTML = `<span class="status-badge status-full">● Квота заполнена</span>`;
-            } else {
-                statusHTML = `<span class="status-badge status-available">● Доступно мест: ${slotsLeft}</span>`;
-            }
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td style="font-weight: 700; color: var(--brand-dark);">${u.label}</td>
-                <td><span class="quota-tag">${u.maxTeams} ${u.maxTeams === 1 ? 'Team' : 'Teams'}</span></td>
-                <td>${statusHTML}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', renderMatrix);
-</script>
 {% endblock %}

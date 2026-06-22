@@ -211,7 +211,7 @@
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin: 2px 0 0 0; font-weight: 500;">Проектирование и загрузка инкрементальных пулов вопросов</p>
             </div>
             <div style="display: flex; gap: 12px;">
-                <a href="{{ url_for('admin_view_practice_questions') }}" class="submit-btn btn-secondary-light" style="padding: 12px 20px; font-size: 0.8rem;">📋 База вопросов</a>
+                <a href="{{ url_for('admin.admin_view_practice_questions') }}" class="submit-btn btn-secondary-light" style="padding: 12px 20px; font-size: 0.8rem;">📋 База вопросов</a>
                 <a href="/practice" class="submit-btn" style="background: var(--brand-blue); color: white; padding: 12px 20px; font-size: 0.8rem;">🎮 На Арену</a>
             </div>
         </div>
@@ -221,7 +221,7 @@
             <div class="glass-card">
                 <h2 style="font-size: 1.25rem; font-weight: 900; color: var(--brand-dark); margin: 0 0 24px 0;">➕ Добавить новый вопрос</h2>
 
-                <form method="POST" action="{{ url_for('admin_add_practice_question') }}">
+                <form method="POST" action="{{ url_for('admin.admin_add_practice_question') }}">
                     <div class="form-group">
                         <label class="form-label" for="theme">
                             <span>Категория (Тема) Арены</span>

@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+
+{% block title %}Stages Hub - ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --tg-bg: #f9fafb;
+        --tg-card-bg: #ffffff;
+        --tg-text-main: #0f172a;
+        --tg-text-muted: #475569;
+        --tg-text-light: #94a3b8;
+
+        /* Киберспортивная неоновая палитра */
+        --neon-playoff: #0f172a;
+        --neon-prefinal: #007cd8;
+        --neon-grandfinal: #d80000;
+        --neon-champion: #eab308;
+        --neon-success: #10b981;
+    }
+
+    body {
+        background-color: var(--tg-bg) !important;
+    }
+
+    .stages-section {
+        background: var(--tg-bg) !important;
+        min-height: 100vh;
+        color: var(--tg-text-main);
+        font-family: system-ui, -apple-system, sans-serif;
+        padding: 60px 0;
+    }
+
+    /* ПРОФЕССИОНАЛЬНАЯ ТУРНИРНАЯ СЕТКА */
+    .esports-bracket-wrapper {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        padding: 32px;
+        margin-top: 32px;
+        margin-bottom: 56px;
+        box-shadow: 0 10px 30px -15px rgba(15, 23, 42, 0.03);
+        position: relative;
+        z-index: 10;
+    }
+
+    .bracket-grid {
+        display: grid;
+        grid-template-columns: 1fr 40px 1fr 40px 1fr 40px 1fr;
+        align-items: center;
+        box-sizing: border-box;
+    }
+
+    .bracket-node {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        position: relative;
+        box-sizing: border-box;
+    }
+
+    .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .node-badge { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 2px 0; }
+    .node-counter { font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 30px; }
+    .node-title { font-size: 1.2rem; font-weight: 850; margin: 0 0 4px 0; letter-spacing: -0.5px; line-height: 1.1; }
+    .node-meta { font-size: 0.75rem; color: var(--tg-text-muted); margin: 0; display: flex; align-items: center; gap: 4px; }
+
+    .bracket-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .gate-line { height: 2px; background: #e2e8f0; width: 100%; position: relative; }
+    .gate-label { position: absolute; background: #f1f5f9; border: 1px solid #e2e8f0; color: var(--tg-text-muted); font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 20px; top: -9px; white-space: nowrap; text-transform: uppercase; }
+
+    .node-playoff { border-top: 4px solid var(--neon-playoff); }
+    .node-playoff .node-badge { color: var(--neon-playoff); }
+    .node-playoff .node-counter { background: rgba(15, 23, 42, 0.05); color: var(--neon-playoff); }
+
+    .node-prefinal { border-top: 4px solid var(--neon-prefinal); }
+    .node-prefinal .node-badge { color: var(--neon-prefinal); }
+    .node-prefinal .node-counter { background: rgba(0, 124, 216, 0.08); color: var(--neon-prefinal); }
+
+    .node-grandfinal { border-top: 4px solid var(--neon-grandfinal); }
+    .node-grandfinal .node-badge { color: var(--neon-grandfinal); }
+    .node-grandfinal .node-counter { background: rgba(216, 0, 0, 0.08); color: var(--neon-grandfinal); }
+
+    .node-champion-style { border-top: 4px solid var(--neon-champion); background: linear-gradient(180deg, #ffffff 0%, rgba(234, 179, 8, 0.02) 100%); }
+    .node-champion-style .node-badge { color: var(--neon-champion); }
+    .node-champion-style .node-counter { background: rgba(234, 179, 8, 0.12); color: var(--neon-champion); }
+    .node-champion-style .node-title { color: #b45309; }
+
+    /* СЕТКА НИЖНИХ КАРТОЧЕК */
+    .stages-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 36px 28px;
+        box-sizing: border-box;
+        position: relative;
+        z-index: 5;
+    }
+
+    .stage-card-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .stage-card-wrapper:hover {
+        transform: translateY(-5px);
+    }
+
+    .stage-pyramid-hump {
+        position: absolute;
+        top: -31px; left: 50%; transform: translateX(-50%);
+        background: #ffffff; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 10px 10px 0 0;
+        padding: 5px 22px; font-size: 0.7rem; font-weight: 850; text-transform: uppercase; letter-spacing: 1px; color: var(--tg-text-muted);
+        display: flex; align-items: center; gap: 6px; box-shadow: 0 -4px 10px -4px rgba(15, 23, 42, 0.02); z-index: 5; white-space: nowrap;
+        transition: border-top-color 0.4s ease, color 0.4s ease;
+    }
+    .stage-pyramid-hump svg { width: 12px; height: 12px; color: var(--tg-text-light); transition: color 0.4s ease; }
+
+    .stage-card-wrapper:hover .hump-1 { border-top: 3px solid var(--neon-playoff); color: var(--tg-text-main); }
+    .stage-card-wrapper:hover .hump-1 svg { color: var(--neon-playoff); }
+    .stage-card-wrapper:hover .hump-2 { border-top: 3px solid var(--neon-prefinal); color: var(--neon-prefinal); }
+    .stage-card-wrapper:hover .hump-2 svg { color: var(--neon-prefinal); }
+    .stage-card-wrapper:hover .hump-3 { border-top: 3px solid var(--neon-grandfinal); color: var(--neon-grandfinal); }
+    .stage-card-wrapper:hover .hump-3 svg { color: var(--neon-grandfinal); }
+
+    .stage-card {
+        background: var(--tg-card-bg) !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important;
+        padding: 32px !important; min-height: 270px; display: flex; flex-direction: column; justify-content: space-between;
+        position: relative; z-index: 1; box-sizing: border-box; box-shadow: 0 4px 20px -6px rgba(15, 23, 42, 0.02);
+        transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .stage-card-wrapper:hover .stage-card { box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.06); }
+
+    .stage-card-wrapper:hover .stage-playoff { border-color: var(--neon-playoff) !important; }
+    .stage-card-wrapper:hover .stage-playoff .stage-title { color: var(--neon-playoff); }
+    .stage-card-wrapper:hover .stage-prefinal { border-color: var(--neon-prefinal) !important; }
+    .stage-card-wrapper:hover .stage-prefinal .stage-title { color: var(--neon-prefinal); }
+    .stage-card-wrapper:hover .stage-grandfinal { border-color: var(--neon-grandfinal) !important; }
+    .stage-card-wrapper:hover .stage-grandfinal .stage-title { color: var(--neon-grandfinal); }
+
+    .status-indicator-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .status-indicator-dot.active { background-color: var(--neon-success); box-shadow: 0 0 8px var(--neon-success); animation: pulseStatus 2s infinite; }
+    .status-indicator-dot.completed { background-color: var(--tg-text-light); }
+    .status-indicator-dot.pending { background-color: #cbd5e1; }
+
+    @keyframes pulseStatus {
+        0% { transform: scale(0.95); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.5; }
+    }
+
+    .stage-title { font-size: 2.4rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1.5px; margin: 0 0 6px 0; line-height: 1; color: var(--tg-text-main); transition: color 0.3s ease; }
+    .stage-desc { color: var(--tg-text-muted); font-size: 0.85rem; line-height: 1.4; margin: 0 0 20px 0; }
+
+    .btn-playoff { background: #0f172a !important; }
+    .btn-playoff:hover { background: var(--neon-playoff) !important; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3); }
+    .btn-prefinal { background: #0f172a !important; }
+    .btn-prefinal:hover { background: var(--neon-prefinal) !important; box-shadow: 0 4px 14px rgba(0, 124, 216, 0.3); }
+    .btn-grandfinal { background: #0f172a !important; }
+    .btn-grandfinal:hover { background: var(--neon-grandfinal) !important; box-shadow: 0 4px 14px rgba(216, 0, 0, 0.3); }
+
+    .meta-row { display: flex; gap: 14px; margin-bottom: 20px; align-items: center; }
+    .meta-pill { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--tg-text-muted); font-weight: 600; background: #f1f5f9; padding: 4px 10px; border-radius: 8px; }
+    .meta-pill svg { width: 13px; height: 13px; color: var(--tg-text-light); }
+
+    .stage-card-footer { display: flex; flex-direction: column; gap: 8px; }
+
+    .stage-btn {
+        width: 100%; padding: 13px 20px; border-radius: 10px; font-weight: 700; font-size: 0.825rem; text-transform: uppercase; letter-spacing: 0.5px;
+        text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: none; color: #ffffff !important;
+        transition: all 0.2s ease; cursor: pointer;
+    }
+    .stage-btn span { transition: transform 0.2s ease; }
+    .stage-btn:hover span { transform: translateX(4px); }
+
+    .btn-admin-manage {
+        background: transparent !important; color: #ef4444 !important; border: 1px dashed rgba(239, 68, 68, 0.3) !important;
+        font-size: 0.725rem; font-weight: 600; padding: 9px 12px; transition: all 0.2s;
+    }
+    .btn-admin-manage:hover { background: rgba(239, 68, 68, 0.04) !important; border-color: #ef4444 !important; }
+
+    .edit-mode-panel { display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .edit-panel-input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; margin-bottom: 10px; box-sizing: border-box; color: var(--tg-text-main); }
+    .edit-panel-input:focus { outline: none; border-color: #007cd8; background: #ffffff; }
+    .edit-panel-actions { display: flex; gap: 8px; }
+    .btn-panel-save { flex: 1; background: #10b981; color: white; border: none; padding: 9px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
+    .btn-panel-cancel { background: #e2e8f0; color: var(--tg-text-muted); border: none; padding: 9px 12px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
+
+    @media (max-width: 1200px) {
+        .bracket-grid { grid-template-columns: 1fr; gap: 0; }
+        .bracket-node { margin-bottom: 12px; } /* 🔥 ИСПРАВЛЕНО: Предотвращение слипания нод на мобилках */
+        .bracket-gate { display: none; }
+        .esports-bracket-wrapper { margin-bottom: 32px; padding: 20px; }
+        .stages-grid { grid-template-columns: repeat(2, 1fr); gap: 40px 24px; }
+    }
+    @media (max-width: 768px) {
+        .stages-grid { grid-template-columns: 1fr; gap: 48px 0; }
+        .stage-card { padding: 24px 16px !important; }
+        .stage-title { font-size: 2rem; }
+    }
+</style>
+
+<section class="stages-section">
+    <div class="container" style="max-width: 1200px; padding: 0 24px; margin: 0 auto; box-sizing: border-box;">
+
+        <a href="{{ url_for('tournaments.tournaments') }}" style="color: var(--tg-text-light); text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s;" onmouseover="this.style.color='var(--tg-text-main)'" onmouseout="this.style.color='var(--tg-text-light)'">
+            ← Back to League Open
+        </a>
+
+        <div style="margin-top: 24px;">
+            <h1 style="font-size: 2.3rem; font-weight: 800; letter-spacing: -0.6px; margin: 0 0 4px 0; color: var(--tg-text-main);">Championship Stages</h1>
+            <p style="color: var(--tg-text-muted); font-size: 0.95rem; margin: 0; font-weight: 400;">Следите за отбором команд и продвижением по турнирной сетке.</p>
+        </div>
+
+        <div class="esports-bracket-wrapper">
+            <div class="bracket-grid">
+
+                <div class="bracket-node node-playoff" id="bracket-node-1">
+                    <div class="node-header">
+                        <span class="node-badge">Stage 01</span>
+                        <span class="node-counter" id="bracket-count-1">ALL TEAMS</span>
+                    </div>
+                    <h4 class="node-title" id="bracket-title-1">Playoff Phase</h4>
+                    <p class="node-meta" id="bracket-meta-1">Старт всех команд</p>
+                </div>
+
+                <div class="bracket-gate">
+                    <div class="gate-line"></div>
+                    <span class="gate-label">Top 10</span>
+                </div>
+
+                <div class="bracket-node node-prefinal" id="bracket-node-2">
+                    <div class="node-header">
+                        <span class="node-badge">Stage 02</span>
+                        <span class="node-counter" id="bracket-count-2">10 SQUADS</span>
+                    </div>
+                    <h4 class="node-title" id="bracket-title-2">Pre-Final Battle</h4>
+                    <p class="node-meta" id="bracket-meta-2">Жесткий отбор сильнейших</p>
+                </div>
+
+                <div class="bracket-gate">
+                    <div class="gate-line"></div>
+                    <span class="gate-label">Top 4</span>
+                </div>
+
+                <div class="bracket-node node-grandfinal" id="bracket-node-3">
+                    <div class="node-header">
+                        <span class="node-badge">Stage 03</span>
+                        <span class="node-counter" id="bracket-count-3">4 ELITE</span>
+                    </div>
+                    <h4 class="node-title" id="bracket-title-3">Grand Final</h4>
+                    <p class="node-meta" id="bracket-meta-3">Главная битва за кубок лиги</p>
+                </div>
+
+                <div class="bracket-gate">
+                    <div class="gate-line"></div>
+                    <span class="gate-label">1 team</span>
+                </div>
+
+                <div class="bracket-node node-champion-style">
+                    <div class="node-header">
+                        <span class="node-badge">WINNER</span>
+                        <span class="node-counter" style="background:#fef3c7; color:#d97706;">1 TEAM</span>
+                    </div>
+                    <h4 class="node-title" id="bracket-champ-title">TBD Champion 👑</h4>
+                    <p class="node-meta">Обладатель кубка ProQuiz 2026</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="stages-grid">
+            {% for stage in stages %}
+                <div class="stage-card-wrapper card-idx-{{ stage.id }}" id="stage-wrapper-{{ stage.id }}">
+
+                    <div class="stage-pyramid-hump {% if stage.id == 1 %}hump-1{% elif stage.id == 2 %}hump-2{% else %}hump-3{% endif %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                        </svg>
+                        <span id="display-date-{{ stage.id }}">{{ stage.date_str }}</span>
+                    </div>
+
+                    <div class="stage-card {% if stage.id == 1 %}stage-playoff{% elif stage.id == 2 %}stage-prefinal{% else %}stage-grandfinal{% endif %}">
+
+                        <div class="stage-view-block" id="view-block-{{ stage.id }}">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                                <div style="font-size: 0.65rem; font-family: monospace; color: var(--tg-text-light); font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">
+                                    STAGE 0{{ stage.id }}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 700; color: var(--tg-text-muted); text-transform: uppercase;">
+                                    <span class="status-indicator-dot {% if stage.status == 'active' %}active{% elif stage.status == 'completed' %}completed{% else %}pending{% endif %}"></span>
+                                    {{ stage.status }}
+                                </div>
+                            </div>
+
+                            <h3 class="stage-title" id="display-title-{{ stage.id }}">
+                                {% if stage.id == 1 %}Playoff{% elif stage.id == 2 %}Pre-Final{% else %}GrandFinal{% endif %}
+                            </h3>
+                            <p class="stage-desc" id="display-text-{{ stage.id }}">{{ stage.text }}</p>
+
+                            <div class="meta-row">
+                                <div class="meta-pill">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                    </svg>
+                                    <span id="display-teams-{{ stage.id }}">
+                                        {% if stage.id == 1 %}All Slots{% elif stage.id == 2 %}10 Teams{% else %}4 Elite{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form class="edit-mode-panel" id="edit-block-{{ stage.id }}" onsubmit="saveStageInline(event, '{{ stage.id }}')">
+                            <label style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--tg-text-muted); display:block; margin-bottom:4px;">Заголовок карточки</label>
+                            <input type="text" class="edit-panel-input" id="input-title-{{ stage.id }}" value="{% if stage.id == 1 %}Playoff{% elif stage.id == 2 %}Pre-Final{% else %}GrandFinal{% endif %}">
+
+                            <label style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--tg-text-muted); display:block; margin-bottom:4px;">Описание раунда</label>
+                            <textarea class="edit-panel-input" id="input-text-{{ stage.id }}" rows="2" style="resize:none;">{{ stage.text }}</textarea>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div>
+                                    <label style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--tg-text-muted); display:block; margin-bottom:4px;">Дата (в горб)</label>
+                                    <input type="text" class="edit-panel-input" id="input-date-{{ stage.id }}" value="{{ stage.date_str }}">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--tg-text-muted); display:block; margin-bottom:4px;">Слоты команд</label>
+                                    <input type="text" class="edit-panel-input" id="input-teams-{{ stage.id }}" value="{% if stage.id == 1 %}All Slots{% elif stage.id == 2 %}10 Teams{% else %}4 Elite{% endif %}">
+                                </div>
+                            </div>
+
+                            <div style="border-top:1px dashed #cbd5e1; margin-top:8px; padding-top:8px;">
+                                <label style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:#007cd8; display:block; margin-bottom:4px;">Текст ноды в сетке</label>
+                                <input type="text" class="edit-panel-input" id="input-bracket-title-{{ stage.id }}" value="{% if stage.id == 1 %}Playoff Phase{% elif stage.id == 2 %}Pre-Final Battle{% else %}Grand Final{% endif %}">
+
+                                {% if stage.id == 3 %}
+                                <div style="background:rgba(234,179,8,0.05); padding:8px; border-radius:6px; border:1px solid rgba(234,179,8,0.2); margin-top:4px;">
+                                    <label style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:#b45309; display:block; margin-bottom:4px;">👑 Имя победителя (Champion)</label>
+                                    <input type="text" class="edit-panel-input" id="input-bracket-champ" value="TBD Champion" style="margin-bottom:0px;">
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="edit-panel-actions" style="margin-top:12px;">
+                                <button type="submit" class="btn-panel-save">Сохранить</button>
+                                <button type="button" class="btn-panel-cancel" onclick="toggleInlineEdit('{{ stage.id }}', false)">Отмена</button>
+                            </div>
+                        </form>
+
+                        <div class="stage-card-footer" id="footer-block-{{ stage.id }}">
+                            {% if stage.status == 'completed' %}
+                                <a href="{{ url_for('tournaments.tournament_results', id=stage.id) }}" class="stage-btn {% if stage.id == 1 %}btn-playoff{% elif stage.id == 2 %}btn-prefinal{% else %}btn-grandfinal{% endif %}">
+                                    View Results <span>➔</span>
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('tournaments.tournament_detail', id=stage.id) }}" class="stage-btn {% if stage.id == 1 %}btn-playoff{% elif stage.id == 2 %}btn-prefinal{% else %}btn-grandfinal{% endif %}">
+                                    Enter Arena <span>➔</span>
+                                </a>
+                            {% endif %}
+
+                            {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                                <button type="button" class="stage-btn btn-admin-manage" onclick="toggleInlineEdit('{{ stage.id }}', true)">
+                                    ⚙️ Configure Bracket Data
+                                </button>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+<script>
+    function toggleInlineEdit(stageId, isEdit) {
+        const view = document.getElementById(`view-block-${stageId}`);
+        const edit = document.getElementById(`edit-block-${stageId}`);
+        const footer = document.getElementById(`footer-block-${stageId}`);
+
+        if (isEdit) {
+            view.style.display = 'none';
+            footer.style.display = 'none';
+            // 🔥 ИСПРАВЛЕНО: Убираем принудительный инлайновый block, чтобы форма наследовала контекст контейнера
+            edit.style.display = '';
+            edit.classList.add('active-edit-panel'); // Опциональный хук для CSS контроля, если понадобится
+            // Но для базовой совместимости оставим дефолтное поведение:
+            edit.style.display = 'block';
+        } else {
+            view.style.display = 'block';
+            footer.style.display = 'flex';
+            edit.style.display = 'none';
+        }
+    }
+
+    function saveStageInline(event, stageId) {
+        event.preventDefault();
+
+        const updatedTitle = document.getElementById(`input-title-${stageId}`).value;
+        const updatedText = document.getElementById(`input-text-${stageId}`).value;
+        const updatedDate = document.getElementById(`input-date-${stageId}`).value;
+        const updatedTeams = document.getElementById(`input-teams-${stageId}`).value;
+        const updatedBracketTitle = document.getElementById(`input-bracket-title-${stageId}`).value;
+
+        document.getElementById(`display-title-${stageId}`).innerText = updatedTitle;
+        document.getElementById(`display-text-${stageId}`).innerText = updatedText;
+        document.getElementById(`display-teams-${stageId}`).innerText = updatedTeams;
+        document.getElementById(`display-date-${stageId}`).innerText = updatedDate;
+
+        const bracketTitle = document.getElementById(`bracket-title-${stageId}`);
+        const bracketCount = document.getElementById(`bracket-count-${stageId}`);
+        const bracketMeta = document.getElementById(`bracket-meta-${stageId}`);
+
+        if (bracketTitle) bracketTitle.innerText = updatedBracketTitle;
+        if (bracketCount) bracketCount.innerText = updatedTeams.toUpperCase();
+        if (bracketMeta) bracketMeta.innerText = updatedText;
+
+        if (stageId == 3) {
+            const champInputVal = document.getElementById('input-bracket-champ').value;
+            const bracketChampTitle = document.getElementById('bracket-champ-title');
+            if (bracketChampTitle) bracketChampTitle.innerText = champInputVal + " 👑";
+        }
+
+        toggleInlineEdit(stageId, false);
+
+        let payload = {
+            title: updatedTitle,
+            text: updatedText,
+            date_str: updatedDate,
+            teams_count: updatedTeams,
+            bracket_title: updatedBracketTitle
+        };
+
+        if (stageId == 3) {
+            payload.champion_name = document.getElementById('input-bracket-champ').value;
+        }
+
+        fetch(`/admin/stage/${stageId}/update_bracket`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' || data.status === 'ok') {
+                console.log("Успешно.");
+            }
+        })
+        .catch(err => console.error("Ошибка:", err));
+    }
+</script>
+{% endblock %}

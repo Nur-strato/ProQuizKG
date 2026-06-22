@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if university and university.name %}{{ university.name }}{% else %}Профиль вуза{% endif %} | ProQuiz.kg
+    {% if university and university.name %}{{ university.name }}{% else %}University Profile{% endif %} | ProQuiz.kg
 {% endblock %}
 
 {% block body %}
-<!-- Ультимативный Cyber-Bento UI профиля университета -->
+<!-- Ultimate Cyber-Bento UI for University Profile -->
 <style>
     :root {
         --brand-blue: #0ea5e9;
@@ -67,7 +67,7 @@
     .profile-hero-flex {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
         flex-wrap: wrap;
         gap: 24px;
     }
@@ -77,6 +77,8 @@
         align-items: center;
         gap: 24px;
         flex-wrap: wrap;
+        flex: 1;
+        min-width: 280px;
     }
 
     .uni-main-logo {
@@ -87,6 +89,7 @@
         border: 1px solid var(--border-color);
         padding: 6px;
         border-radius: 16px;
+        flex-shrink: 0;
     }
 
     .uni-title-text {
@@ -120,6 +123,7 @@
         text-align: center;
         border: 1px solid rgba(14, 165, 233, 0.15);
         min-width: 140px;
+        box-sizing: border-box;
     }
 
     .points-label {
@@ -194,6 +198,7 @@
     .contact-row-item {
         font-size: 0.95rem;
         color: var(--brand-slate);
+        word-break: break-word;
     }
 
     .contact-row-item strong {
@@ -215,6 +220,8 @@
         transition: var(--transition-premium);
         margin-top: 12px;
         width: max-content;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .uni-web-btn:hover {
@@ -272,15 +279,22 @@
         flex-shrink: 0;
     }
 
+    .student-info-holder {
+        flex: 1;
+        min-width: 0;
+    }
+
     .student-name {
         margin: 0;
         font-size: 0.95rem;
         color: var(--brand-dark);
         font-weight: 700;
-        white-space: nowrap;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 140px;
     }
 
     .student-username {
@@ -288,6 +302,9 @@
         font-size: 0.8rem;
         color: var(--text-muted);
         font-family: monospace;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* КАРТОЧКА ПУСТОГО СОСТОЯНИЯ */
@@ -301,9 +318,16 @@
     }
 
     @media (max-width: 768px) {
-        .profile-hero-flex { flex-direction: column; align-items: stretch; }
-        .points-score-box { text-align: left; padding: 14px; }
-        .uni-web-btn { width: 100%; justify-content: center; box-sizing: border-box; }
+        .uni-profile-layout { padding: 20px 0 40px 0; }
+        .uni-profile-container { padding: 0 16px; }
+        .glass-card { padding: 24px 16px; border-radius: 16px; }
+        .profile-hero-flex { flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+        .hero-info-left { flex-direction: column; align-items: center; justify-content: center; }
+        .uni-title-text { font-size: 1.8rem; }
+        .points-score-box { width: 100%; text-align: center; padding: 16px; }
+        .uni-web-btn { width: 100%; justify-content: center; }
+        .edit-profile-btn { width: 100%; justify-content: center; box-sizing: border-box; }
+        .students-display-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
     }
 </style>
 
@@ -312,8 +336,8 @@
 
         <!-- ССЫЛКА НАЗАД -->
         <div>
-            <a href="{{ url_for('universities') }}" class="back-nav-link">
-                ← Назад к общему зачету
+            <a href="{{ url_for('auth.universities') }}" class="back-nav-link">
+                ← Back to Leaderboard
             </a>
         </div>
 
@@ -322,8 +346,7 @@
             <div class="profile-hero-flex">
 
                 <div class="hero-info-left">
-                    <!-- ИСПРАВЛЕНО: Безопасный рендеринг адаптивного логотипа -->
-                    <img src="{% if university.logo %}{% if university.logo.startswith('http') %}{{ university.logo }}{% else %} {{ url_for('static', filename='profile_pics/' + university.logo) }} {% endif %}{% else %}https://ui-avatars.com/api/?name={{ university.name if university else 'University' }}&background=0ea5e9&color=fff&size=128{% endif %}"
+                    <img src="{% if university.logo %}{% if university.logo.startswith('http') %}{{ university.logo }}{% else %}{{ url_for('static', filename='profile_pics/' + university.logo) }}{% endif %}{% else %}https://ui-avatars.com/api/?name={{ university.name if university else 'University' }}&background=0ea5e9&color=fff&size=128{% endif %}"
                          alt="Logo {{ university.name }}"
                          class="uni-main-logo">
 
@@ -333,7 +356,7 @@
                             {{ university.name }}
                         </h1>
 
-                        <div style="display: flex; gap: 4px; margin-top: 6px;">
+                        <div style="display: flex; gap: 4px; margin-top: 6px; justify-content: inherit;">
                             {% if university.is_host %}
                                 <span class="status-tag tag-host">HOST</span>
                             {% endif %}
@@ -351,11 +374,10 @@
                 </div>
             </div>
 
-            <!-- ИСПРАВЛЕНО: Унифицированные права доступа для админов и хэдов -->
             {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
                 <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
-                     <a href="{{ url_for('admin_edit_university_profile', id=university.id) }}" class="edit-profile-btn">
-                        ⚙️ Редактировать профиль вуза
+                    <a href="{{ url_for('admin.admin_edit_university_profile', id=university.id) }}" class="edit-profile-btn">
+                        ⚙️ Edit University Profile
                     </a>
                 </div>
             {% endif %}
@@ -363,27 +385,27 @@
             <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;">
 
             <!-- ОПИСАНИЕ -->
-            <h3 class="info-section-title">ℹ️ Описание университета</h3>
+            <h3 class="info-section-title">ℹ️ University Description</h3>
             <p class="info-body-text">
-                {{ university.description if university.description else "Расширенное описание структуры учебного заведения ещё не заполнено администрацией лиги." }}
+                {{ university.description if university.description else "Detailed description for this educational institution has not been provided by the league administration yet." }}
             </p>
 
             <!-- КОНТАКТЫ -->
-            <h3 class="info-section-title">📞 Контактные данные и ресурсы</h3>
+            <h3 class="info-section-title">📞 Contact Details & Resources</h3>
             <div class="contact-links-stack">
-                <div class="contact-row-item">📍 <strong>Региональное расположение:</strong> {{ university.city }}</div>
+                <div class="contact-row-item">📍 <strong>Location:</strong> {{ university.city }}</div>
 
-                <div class="contact-row-item">🏢 <strong>Физический адрес:</strong>
-                    {% if university.address %}{{ university.address }}{% else %}<span style="color: var(--text-muted); font-style: italic;">не указан</span>{% endif %}
+                <div class="contact-row-item">🏢 <strong>Physical Address:</strong>
+                    {% if university.address %}{{ university.address }}{% else %}<span style="color: var(--text-muted); font-style: italic;">not specified</span>{% endif %}
                 </div>
 
-                <div class="contact-row-item">✉️ <strong>Электронная почта:</strong>
-                    {% if university.email %}<a href="mailto:{{ university.email }}" style="color: var(--brand-blue); text-decoration: none; font-weight: 600;">{{ university.email }}</a>{% else %}<span style="color: var(--text-muted); font-style: italic;">не указана</span>{% endif %}
+                <div class="contact-row-item">✉️ <strong>Email Address:</strong>
+                    {% if university.email %}<a href="mailto:{{ university.email }}" style="color: var(--brand-blue); text-decoration: none; font-weight: 600;">{{ university.email }}</a>{% else %}<span style="color: var(--text-muted); font-style: italic;">not specified</span>{% endif %}
                 </div>
 
                 {% if university.website %}
                     <a href="{{ university.website }}" target="_blank" class="uni-web-btn">
-                        🌐 Официальный веб-сайт вуза →
+                        🌐 Official Website →
                     </a>
                 {% endif %}
             </div>
@@ -391,7 +413,7 @@
 
         <!-- СПИСОК ЗАРЕГИСТРИРОВАННЫХ СТУДЕНТОВ -->
         <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--brand-dark); margin-bottom: 20px; letter-spacing: -0.01em;">
-            👥 Зарегистрированные игроки вуза ({{ students|length }})
+            👥 Registered Varsity Players ({{ students|length }})
         </h2>
 
         {% if students %}
@@ -402,7 +424,7 @@
                              alt="{{ student.name }}"
                              class="student-avatar">
 
-                        <div>
+                        <div class="student-info-holder">
                             <h4 class="student-name">{{ student.name }}</h4>
                             <p class="student-username">@{{ student.login }}</p>
                         </div>
@@ -411,8 +433,8 @@
             </div>
         {% else %}
             <div class="dashed-empty-box">
-                <p style="font-size: 1.1rem; margin: 0 0 6px 0; font-weight: 700; color: var(--brand-dark);">Игроков из данного вуза пока нет</p>
-                <p style="font-size: 0.875rem; margin: 0; font-weight: 500;">Укажи {{ university.name }} в настройках своего личного кабинета, чтобы стать первым представителем альма-матер!</p>
+                <p style="font-size: 1.1rem; margin: 0 0 6px 0; font-weight: 700; color: var(--brand-dark);">No players from this university yet</p>
+                <p style="font-size: 0.875rem; margin: 0; font-weight: 500;">Select {{ university.name }} in your personal dashboard settings to become the first representative of your alma mater!</p>
             </div>
         {% endif %}
 

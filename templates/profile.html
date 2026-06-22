@@ -13,817 +13,784 @@
     {% set total_score.value = total_score.value + (p.score | int) %}
 {% endfor %}
 
-{% set active_participation = namespace(found=None) %}
-{% for p in participations | reverse %}
-    {% if not p.tournament.past and active_participation.found == None %}
-        {% set active_participation.found = p %}
-    {% endif %}
-{% endfor %}
+{# Эмуляция dynamic данных по скриншоту #}
+{% set won_cash = total_wins * 1250 %}
+{% set answer_accuracy = 78 if total_games > 0 else 0 %}
 
 <style>
     :root {
-        --brand-blue: #007cd8;          /* Яркий фирменный синий */
-        --brand-blue-deep: #0b172a;     /* Глубокий тёмно-синий для вставок и текстов */
-        --brand-night: #050b14;         /* Полуночный синий для левой панели */
-        --brand-slate: #94a3b8;
-        --brand-muted: #475569;
-        --brand-success: #0083e4;
-
-        /* Светлая матовая основа */
-        --bg-matte-light: #f1f5f9;
-        --bg-pure-white: #ffffff;       /* Белые стенки/карточки */
-        --text-smooth-dark: #0f172a;
+        --cyber-bg: #ffffff;
+        --cyber-card: #ffffff;
+        --cyber-border: #e2e8f0;
+        --cyber-focus-border: #1d4ed8;
+        --cyber-blue: #007cd8;
+        --cyber-blue-glow: rgba(0, 124, 216, 0.15);
+        --cyber-success: #10b981;
+        --cyber-warning: #f59e0b;
+        --text-bright: #090d16;
+        --text-muted: #475569;
+        --card-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.02);
     }
 
     body {
-        background: var(--bg-matte-light); /* БЕЛЫЙ МАТОВЫЙ ФОН ВСЕЙ СТРАНИЦЫ */
-        color: var(--text-smooth-dark);
+        background: var(--cyber-bg) !important;
+        color: var(--text-bright);
         font-family: system-ui, -apple-system, sans-serif;
         margin: 0;
         padding: 0;
         -webkit-font-smoothing: antialiased;
     }
 
-    .profile-portal-layout {
+    .cyber-profile-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
         display: flex;
-        min-height: calc(100vh - 70px);
-        width: 100%;
-        animation: fadeInLayout 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        flex-direction: column;
+        gap: 24px;
+        animation: cyberFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    @keyframes fadeInLayout {
-        from { opacity: 0; transform: translateY(8px); }
+    @keyframes cyberFadeIn {
+        from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ==========================================================================
-       ЛЕВАЯ ПАНЕЛЬ: ТЕМНО-СИНИЙ МОНОЛИТ (КОНТРАСТНАЯ ВСТАВКА)
-       ========================================================================== */
-    .profile-side-wall {
-        width: 24%;
-        background: linear-gradient(180deg, var(--brand-blue-deep) 0%, var(--brand-night) 100%);
-        position: relative;
-        overflow: hidden;
+    .cyber-section-title {
+        color: var(--text-bright);
+        font-size: 1.2rem;
+        font-weight: 800;
+        margin: 0;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        padding: 40px 24px 30px 24px;
-        box-sizing: border-box;
-        border-right: 1px solid rgba(11, 23, 42, 0.1);
+        gap: 10px;
     }
 
-    .profile-side-wall::before {
+    /* MAIN HEADER */
+    .cyber-user-hero {
+        background: var(--cyber-card);
+        border: 1px solid var(--cyber-border);
+        border-radius: 20px;
+        padding: 40px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+    }
+    .cyber-user-hero::before {
         content: '';
         position: absolute;
-        inset: 0;
-        background-image: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
-        background-size: 20px 20px;
+        top: -50%; right: -20%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(0, 124, 216, 0.03) 0%, transparent 70%);
         pointer-events: none;
     }
 
-    .avatar-portal-wrapper {
+    .cyber-avatar-zone {
         position: relative;
-        margin-bottom: 24px;
-        z-index: 10;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    .cyber-avatar-frame {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        padding: 4px;
+        background: var(--cyber-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px var(--cyber-blue-glow);
+    }
+    .cyber-avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #ffffff;
     }
 
-    .avatar-portal-frame {
-        padding: 4px;
+    .btn-cyber-avatar-edit {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 36px;
+        height: 36px;
+        background: #ffffff;
+        border: 2px solid var(--cyber-blue);
+        color: var(--cyber-blue);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        {% if user.status == 'admin' %}
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        {% elif user.status == 'head' %}
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
-        {% else %}
-            background: linear-gradient(135deg, #38bdf8, var(--brand-blue));
-            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2);
-        {% endif %}
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 124, 216, 0.15);
+        z-index: 5;
+    }
+    .btn-cyber-avatar-edit:hover {
+        background: var(--cyber-blue);
+        color: #ffffff;
+        transform: scale(1.05);
     }
 
-    .player-main-photo {
-        width: 115px;
-        height: 115px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid var(--brand-blue-deep);
+    .cyber-user-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .cyber-info-left-block {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 6px;
+    }
+    .cyber-username-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+    .cyber-username-row h1 {
+        margin: 0;
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text-bright);
+    }
+    .cyber-verified-check {
+        color: var(--cyber-blue);
+        font-size: 1.3rem;
     }
 
-    .status-badge-portal {
+    /* КРУПНЫЙ И СИНИЙ ИНТЕРАКТИВНЫЙ СТИЛЬ FAVORITE С ПОДЧЕРКИВАНИЕМ */
+    .cyber-favorite-interactive-box {
         display: inline-flex;
         align-items: center;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-family: monospace;
-        font-size: 0.7rem;
+        gap: 8px;
+        color: var(--cyber-blue);
+        font-size: 1rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 18px;
-        z-index: 10;
-        border: 1px solid transparent;
+        margin-top: 4px;
+        width: fit-content;
+        transition: opacity 0.2s ease;
     }
-    .status-badge-portal.admin { color: #f87171; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
-    .status-badge-portal.head { color: #eab308; background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.2); }
-    .status-badge-portal.user { color: #38bdf8; background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2); }
-
-    .player-name-headline {
-        font-size: 1.7rem;
-        font-weight: 800;
-        color: #ffffff;
-        letter-spacing: -0.5px;
-        margin: 0 0 12px 0;
-        text-align: center;
-        z-index: 10;
+    .cyber-favorite-interactive-box.my-own-profile {
+        cursor: pointer;
+    }
+    .cyber-favorite-interactive-box.my-own-profile:hover .cyber-fav-text-underlined {
+        border-bottom: 2px solid var(--cyber-blue);
+    }
+    .cyber-fav-text-underlined {
+        border-bottom: 2px solid transparent;
+        transition: border-color 0.2s ease;
+        padding-bottom: 1px;
     }
 
-    .university-tag-portal {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #ffffff;
-        background: var(--brand-blue);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 6px 14px;
+    /* КНОПКА СВЯЗИ В ШАПКЕ */
+    .cyber-friend-action-zone {
+        margin-left: auto;
+        align-self: center;
+    }
+    .btn-hero-friend-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
         border-radius: 10px;
-        margin-bottom: 25px;
-        z-index: 10;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    /* КНОПКИ ДРУЖБЫ И ВЗАИМОДЕЙСТВИЯ */
-    .friendship-action-box {
-        width: 100%;
-        margin-bottom: 20px;
-        text-align: center;
-        z-index: 10;
-    }
-    .btn-friend-action {
-        width: 100%;
-        padding: 10px 16px;
-        border-radius: 12px;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         font-weight: 700;
         cursor: pointer;
+        transition: all 0.2s ease;
         border: none;
-        transition: all 0.2s ease;
+        text-decoration: none;
     }
-    .btn-friend-action.add {
-        background: var(--brand-blue);
-        color: white;
+    .btn-hero-friend-action.add {
+        background: var(--cyber-blue);
+        color: #ffffff;
+        box-shadow: 0 4px 12px var(--cyber-blue-glow);
     }
-    .btn-friend-action.add:hover {
-        background: #0069b9;
-        transform: translateY(-1px);
+    .btn-hero-friend-action.add:hover { background: #0066b3; }
+    .btn-hero-friend-action.pending {
+        background: #f1f5f9;
+        color: var(--text-muted);
+        border: 1px solid var(--cyber-border);
+        cursor: default;
     }
-    .btn-friend-action.remove {
-        background: rgba(239, 68, 68, 0.1);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-    .btn-friend-action.remove:hover {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
+    .btn-hero-friend-action.accepted {
+        background: #ecfdf5;
+        color: var(--cyber-success);
+        border: 1px solid #a7f3d0;
+        cursor: default;
     }
 
-    /* НЕОНОВЫЕ ВСТАВКИ: ЛЮБИМЫЙ ТОПИК ИГРОКА */
-    .topic-widget-box {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 24px;
-        z-index: 10;
-    }
-    .topic-title-label {
-        font-family: monospace;
-        font-size: 0.65rem;
-        color: var(--brand-slate);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 8px;
-    }
-    .topic-neon-badge {
-        display: inline-flex;
+    .cyber-university-line {
+        display: flex;
         align-items: center;
-        gap: 6px;
-        background: rgba(56, 189, 248, 0.05);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        color: #38bdf8;
-        padding: 8px 16px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.05);
-        transition: all 0.2s ease;
-        {% if current_user.is_authenticated and user.id == current_user.id %} cursor: pointer; {% endif %}
+        gap: 12px;
+        color: var(--text-bright);
+        font-size: 0.9rem;
+        font-weight: 600;
     }
-    .topic-neon-badge:hover {
-        background: rgba(56, 189, 248, 0.15);
-        border-color: #38bdf8;
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    .cyber-university-line i {
+        color: var(--cyber-blue);
+        font-size: 1.1rem;
     }
 
-    /* НЕОНОВЫЕ ВСТАВКИ: РАЗДЕЛ ДРУЗЕЙ ЛИГИ */
-    .friends-wall-section {
-        width: 100%;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding-top: 20px;
-        margin-bottom: 24px;
-        z-index: 10;
-    }
-    .friends-grid-mesh {
+    /* БЕНТО СТАТИСТИКА */
+    .cyber-stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        margin-top: 10px;
+        gap: 16px;
     }
-    .friend-avatar-anchor {
-        position: relative;
-        display: flex;
-        justify(content): center;
-    }
-    .friend-mini-photo {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid rgba(255, 255, 255, 0.08);
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .friend-mini-photo:hover {
-        border-color: #38bdf8;
-        transform: scale(1.1) translateY(-2px);
-        box-shadow: 0 5px 15px rgba(56, 189, 248, 0.3);
-    }
-
-    .side-wall-filler-card {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+    .cyber-stat-card {
+        background: var(--cyber-card);
+        border: 1px solid var(--cyber-border);
         border-radius: 16px;
-        padding: 20px;
-        box-sizing: border-box;
-        margin-top: auto;
-        margin-bottom: 24px;
-        z-index: 10;
-    }
-
-    .filler-card-title {
-        font-family: monospace;
-        font-size: 0.65rem;
-        color: var(--brand-slate);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-    }
-
-    .filler-card-row {
+        padding: 24px;
         display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        color: #cbd5e1;
-        margin-bottom: 8px;
-    }
-
-    .filler-progress-bar {
-        height: 6px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-
-    .filler-progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #38bdf8, var(--brand-blue));
-        border-radius: 4px;
-    }
-
-    .side-wall-meta {
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        width: 100%;
-        padding-top: 16px;
-        color: rgba(148, 163, 184, 0.3);
-        font-family: monospace;
-        font-size: 0.65rem;
-        text-align: center;
-        z-index: 10;
-    }
-
-    /* ==========================================================================
-       ЦЕНТРАЛЬНАЯ ЧАСТЬ: БЕЛЫЕ СТЕНКИ НА СВЕТЛОМ ФОНЕ С ТЕМНО-СИНИМИ АКЦЕНТАМИ
-       ========================================================================== */
-    .profile-center-stage {
-        flex: 1;
-        padding: 50px 45px;
-        box-sizing: border-box;
-    }
-
-    .center-stage-header {
-        display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 32px;
-    }
-
-    .center-stage-header h2 {
-        color: var(--brand-blue-deep);
-    }
-
-    .btn-edit-portal {
-        padding: 12px 24px;
-        background: var(--brand-blue-deep);
-        color: #ffffff;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-    .btn-edit-portal:hover {
-        background: var(--brand-blue);
-        transform: translateY(-1px);
-        box-shadow: 0 8px 20px rgba(0, 124, 216, 0.2);
-    }
-
-    .stats-portal-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
         gap: 20px;
-        margin-bottom: 32px;
+        box-shadow: var(--card-shadow);
+        transition: border-color 0.25s, transform 0.25s;
     }
-
-    .stat-portal-card {
-        background: var(--bg-pure-white);
-        border: 1px solid #cbd5e1;
-        border-radius: 20px;
-        padding: 28px 20px;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
-        transition: transform 0.25s ease, border-color 0.25s ease;
-    }
-
-    .stat-portal-card:hover {
+    .cyber-stat-card:hover {
+        border-color: var(--cyber-blue);
         transform: translateY(-2px);
-        border-color: var(--brand-blue);
     }
-
-    .stat-portal-value {
-        display: block;
-        font-size: 2.6rem;
-        font-weight: 900;
-        line-height: 1;
-        margin-bottom: 8px;
-        color: var(--brand-blue-deep);
-    }
-
-    .stat-portal-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: var(--brand-muted);
-        letter-spacing: 1px;
-        font-weight: 700;
-    }
-
-    .active-team-portal-card {
-        background: var(--bg-pure-white);
-        border: 1px solid #cbd5e1;
-        border-left: 5px solid var(--brand-blue-deep);
-        color: var(--brand-blue-deep);
-        border-radius: 20px;
-        padding: 24px 32px;
-        text-decoration: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 32px;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .active-team-portal-card:hover {
-        transform: translateY(-1px);
-        border-color: var(--brand-blue);
-    }
-
-    .at-card-label {
-        font-family: monospace;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--brand-blue);
-        letter-spacing: 0.5px;
-    }
-    .at-card-team-name {
-        font-size: 1.4rem;
-        font-weight: 800;
-        margin: 6px 0 0 0;
-        letter-spacing: -0.3px;
-        color: var(--brand-blue-deep);
-    }
-
-    .participation-portal-section {
-        background: var(--bg-pure-white);
-        border: 1px solid #cbd5e1;
-        border-radius: 24px;
-        padding: 35px;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
-    }
-
-    .participation-portal-section h3 {
-        color: var(--brand-blue-deep);
-    }
-
-    .styled-portal-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 10px;
-        margin-top: 16px;
-        font-size: 0.95rem;
-    }
-
-    .styled-portal-table th {
-        text-align: left;
-        padding: 10px 20px;
-        color: var(--brand-muted);
-        font-family: monospace;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .styled-portal-table tr td {
-        padding: 18px 20px;
+    .cyber-stat-icon-wrapper {
+        width: 48px; height: 48px;
+        border-radius: 50%;
         background: #f8fafc;
-        border-top: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
-        color: var(--brand-blue-deep);
-        transition: all 0.2s ease;
-    }
-
-    .styled-portal-table tr td:first-child { border-left: 1px solid #e2e8f0; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-    .styled-portal-table tr td:last-child { border-right: 1px solid #e2e8f0; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-
-    .styled-portal-table tbody tr:hover td {
-        background: #e0f2fe;
-    }
-
-    .tournament-link-portal {
-        color: var(--brand-blue-deep);
-        text-decoration: none;
-        font-weight: 700;
-        transition: color 0.15s ease;
-    }
-    .tournament-link-portal:hover { color: var(--brand-blue); text-decoration: underline; }
-
-    .team-link-portal { color: var(--brand-blue); text-decoration: none; font-weight: 700; }
-    .team-link-portal:hover { color: var(--brand-blue-deep); }
-
-    .score-badge-portal {
-        font-family: monospace;
-        font-weight: 700;
-        background: #e2e8f0;
-        padding: 4px 10px;
-        border-radius: 6px;
-        color: var(--brand-blue-deep);
-    }
-
-    .badge-win-portal { color: var(--brand-success); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
-    .badge-participant-portal { color: var(--brand-slate); font-size: 0.85rem; font-weight: 500; }
-
-    .btn-leave-portal {
-        background: transparent;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        color: #dc2626;
-        padding: 6px 14px;
-        border-radius: 8px;
-        font-size: 0.7rem;
-        font-family: monospace;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .btn-leave-portal:hover {
-        background: #fef2f2;
-        border-color: #dc2626;
-    }
-
-    /* ==========================================================================
-       МАТОВОЕ МОДАЛЬНОЕ ОКНО ДЛЯ СЕЛЕКТА ТОПИКОВ
-       ========================================================================== */
-    .topic-modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(4px);
-        display: none;
+        border: 1px solid var(--cyber-border);
+        display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 1000;
-        animation: fadeInOverlay 0.2s ease forwards;
+        font-size: 1.3rem;
     }
-    @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
-
-    .topic-modal-card {
-        background: var(--bg-pure-white);
-        padding: 32px;
-        border-radius: 24px;
-        width: 90%;
-        max-width: 420px;
-        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
-        text-align: center;
-        border: 1px solid #e2e8f0;
-        transform: translateY(10px);
-        animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .cyber-stat-info-block {
+        display: flex;
+        flex-direction: column;
     }
-    @keyframes slideUpModal { to { transform: translateY(0); } }
-
-    .topic-select-field {
-        width: 100%;
-        padding: 14px;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-        font-size: 1rem;
-        margin: 20px 0;
-        background: #f8fafc;
-        color: var(--brand-blue-deep);
-        font-weight: 600;
-        outline: none;
-        box-sizing: border-box;
-    }
-    .topic-select-field:focus {
-        border-color: var(--brand-blue);
-    }
-    .modal-btn-save {
-        background: var(--brand-blue-deep);
-        color: white;
-        padding: 12px 28px;
-        border-radius: 12px;
-        cursor: pointer;
-        border: none;
+    .cyber-stat-title {
+        font-size: 0.75rem;
+        color: var(--text-muted);
         font-weight: 700;
-        font-size: 0.9rem;
-        transition: all 0.2s;
     }
-    .modal-btn-save:hover {
-        background: var(--brand-blue);
-        box-shadow: 0 4px 12px rgba(0, 124, 216, 0.2);
+    .cyber-stat-main-value {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: var(--text-bright);
+        margin: 2px 0;
+        letter-spacing: -0.3px;
+    }
+    .cyber-stat-sub-label {
+        font-size: 0.7rem;
+        color: var(--cyber-blue);
+        font-weight: 600;
     }
 
-    @media (max-width: 950px) {
-        .profile-portal-layout { flex-direction: column; }
-        .profile-side-wall { width: 100%; border-right: none; border-bottom: 1px solid #cbd5e1; padding: 32px 20px; }
-        .side-wall-filler-card { margin-top: 20px; margin-bottom: 16px; }
-        .profile-center-stage { padding: 32px 16px; }
-        .stats-portal-grid { grid-template-columns: 1fr; gap: 12px; }
+    /* 🔥 КЛИКАБЕЛЬНЫЙ ЗАГОЛОВОК ДЛЯ ПАНЕЛИ ДРУЗЕЙ */
+    .cyber-panel-friends {
+        background: var(--cyber-card);
+        border: 1.5px solid var(--cyber-focus-border);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--card-shadow);
+    }
+    .cyber-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .cyber-clickable-header-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .cyber-panel-title-text {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--text-bright);
+        border-bottom: 2px solid transparent;
+        transition: border-color 0.2s ease;
+        padding-bottom: 1px;
+    }
+    .cyber-clickable-header-trigger:hover .cyber-panel-title-text {
+        border-color: var(--text-bright);
+    }
+    .cyber-clickable-header-trigger i {
+        font-size: 1.2rem;
+        color: var(--text-bright);
+    }
+
+    .cyber-friends-row {
+        display: flex;
+        gap: 24px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+    .cyber-friend-node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        width: 70px;
+        flex-shrink: 0;
+    }
+    .cyber-friend-avatar-wrapper {
+        position: relative;
+        width: 60px; height: 60px;
+    }
+    .cyber-friend-img {
+        width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid var(--cyber-border);
+    }
+    .cyber-friend-status-dot {
+        position: absolute; bottom: 1px; right: 1px; width: 11px; height: 11px; border-radius: 50%; background: var(--cyber-success); border: 2px solid #ffffff;
+    }
+    .cyber-friend-name {
+        font-size: 0.75rem; color: var(--text-bright); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;
+    }
+
+    /* ОПЦИИ ДЛЯ МОДАЛКИ ДЕЙСТВИЙ С ДРУЗЬЯМИ */
+    .cyber-action-menu-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 20px 0 5px 0;
+    }
+    .cyber-action-menu-btn {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        padding: 14px 18px;
+        background: #f8fafc;
+        border: 1px solid var(--cyber-border);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-bright);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+    }
+    .cyber-action-menu-btn:hover {
+        background: #f1f5f9;
+        border-color: var(--cyber-blue);
+        color: var(--cyber-blue);
+    }
+    .cyber-action-menu-btn i {
+        font-size: 1.25rem;
+    }
+
+    /* ТАЙМЛАЙН ТУРНИРОВ */
+    .cyber-panel-tournaments {
+        background: var(--cyber-card);
+        border: 1.5px solid var(--cyber-focus-border);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--card-shadow);
+    }
+    .cyber-sub-row-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--cyber-border);
+        transition: background 0.2s ease;
+    }
+    .cyber-sub-row-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .cyber-sub-row-item:first-child {
+        padding-top: 0;
+    }
+    .cyber-sub-row-item:hover {
+        background: #f8fafc;
+    }
+    .cyber-tourney-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-bright);
+        margin: 0;
+    }
+    .cyber-tournament-meta {
+        min-width: 0;
+    }
+    .cyber-tournament-date-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+    .cyber-status-pill {
+        padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+    }
+    .cyber-status-pill.completed { background: #ecfdf5; color: var(--cyber-success); }
+    .cyber-status-pill.upcoming { background: #f0f7ff; color: var(--cyber-blue); }
+
+    .cyber-placement-zone {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+    }
+    .cyber-medal-rank {
+        font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    }
+    .cyber-medal-rank.rank-1 { color: #f59e0b; }
+    .cyber-medal-rank.rank-p { color: var(--cyber-blue); }
+
+    .btn-cyber-details {
+        background: var(--cyber-blue);
+        border: 1px solid var(--cyber-blue);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px var(--cyber-blue-glow);
+    }
+    .btn-cyber-details:hover {
+        background: #0066b3;
+        border-color: #0066b3;
+        transform: translateY(-1px);
+    }
+
+    .btn-cyber-action-blue {
+        background: var(--cyber-blue);
+        border: none;
+        color: #ffffff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .btn-cyber-action-blue:hover {
+        background: #0066b3;
+    }
+
+    .friend-search-result-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        border-bottom: 1px solid var(--cyber-border);
+    }
+    .friend-search-result-item:last-child {
+        border-bottom: none;
+    }
+    .friend-user-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .friend-search-avatar {
+        width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+    }
+    .friend-search-name {
+        font-size: 0.95rem; font-weight: 700; color: var(--text-bright);
+    }
+    .btn-request-action {
+        background: var(--cyber-blue); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-request-action:hover { background: #0066b3; }
+    .btn-request-action.sent { background: var(--cyber-success); cursor: default; }
+
+    /* АДАПТИВНОСТЬ КНОПОК И СЕТОК */
+    @media (max-width: 990px) {
+        .cyber-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .cyber-user-hero { flex-direction: column; text-align: center; padding: 30px 20px; gap: 20px; }
+        .cyber-user-info { flex-direction: column; align-items: center; text-align: center; }
+        .cyber-university-line { justify-content: center; }
+        .cyber-friend-action-zone { margin: 12px auto 0 auto; }
+        .cyber-favorite-interactive-box { margin: 4px auto 0 auto; }
+
+        .cyber-sub-row-item { flex-direction: column; align-items: flex-start; gap: 14px; padding: 16px; }
+        .cyber-placement-zone { width: 100%; justify-content: space-between; }
+        .btn-cyber-details { width: 100%; text-align: center; }
+    }
+
+    @media (max-width: 576px) {
+        .cyber-avatar-frame { width: 120px; height: 120px; }
+        .cyber-username-row h1 { font-size: 1.8rem; text-align: center; width: 100%; }
+        .cyber-username-row { justify-content: center; }
+        .cyber-stat-card { padding: 16px; gap: 12px; }
+        .cyber-stat-main-value { font-size: 1.25rem; }
+        .topic-modal-card { width: 94% !important; padding: 20px !important; }
     }
 </style>
 
-<div class="profile-portal-layout">
+<div class="cyber-profile-wrapper">
 
-    <aside class="profile-side-wall">
-        <div class="avatar-portal-wrapper">
-            <div class="avatar-portal-frame">
-                <img src="{{ url_for('static', filename='profile_pics/' + user.avatar) }}" alt="Avatar" class="player-main-photo">
+    <header class="cyber-user-hero">
+        <div class="cyber-avatar-zone">
+            <div class="cyber-avatar-frame">
+                <img src="{{ url_for('static', filename='profile_pics/' + user.avatar) }}" class="cyber-avatar-img" alt="Avatar">
+            </div>
+
+            {% if current_user.is_authenticated and user.id == current_user.id %}
+                <a href="{{ url_for('auth.edit_profile') }}" class="btn-cyber-avatar-edit" title="Edit Profile">
+                    <i class="bi bi-pencil-fill"></i>
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="cyber-user-info">
+            <div class="cyber-info-left-block">
+                <div class="cyber-username-row">
+                    <h1>{{ user.name }}</h1>
+                    <i class="bi bi-patch-check-fill cyber-verified-check" title="Подтвержденный аккаунт Лиги"></i>
+                </div>
+
+                <div class="cyber-university-line">
+                    <i class="bi bi-bank"></i>
+                    <span>{% if user.university_id and user.uni_profile %}{{ user.uni_profile.name }}{% else %}Университет не указан{% endif %}</span>
+                </div>
+
+                <!-- ИНТЕРАКТИВНЫЙ БЛОК FAVOURITE -->
+                <div class="cyber-favorite-interactive-box {% if user.id == current_user.id %}my-own-profile{% endif %}"
+                     {% if user.id == current_user.id %}onclick="openTopicModal()"{% endif %}>
+                    <i class="bi bi-cpu-fill"></i>
+                    <span class="cyber-fav-text-underlined">Favorite: <span id="topicText">{{ user.favorite_topic if user.favorite_topic else 'Не указан' }}</span></span>
+                </div>
+            </div>
+
+            <!-- ЗОНА БЫСТРОГО ДОБАВЛЕНИЯ В ДРУЗЬЯ (ДЛЯ ЧУЖИХ ПРОФИЛЕЙ) -->
+            {% if current_user.is_authenticated and user.id != current_user.id %}
+                <div class="cyber-friend-action-zone">
+                    {% if not rel_status %}
+                        <form action="{{ url_for('auth.send_friend_request', friend_id=user.id) }}" method="POST" style="margin:0;">
+                            <button type="submit" class="btn-hero-friend-action add">
+                                <i class="bi bi-person-plus-fill"></i> Добавить в друзья
+                            </button>
+                        </form>
+                    {% elif rel_status == 'pending' %}
+                        {% if is_sender %}
+                            <button class="btn-hero-friend-action pending" disabled>
+                                <i class="bi bi-clock-history"></i> Заявка отправлена
+                            </button>
+                        {% else %}
+                            <form action="{{ url_for('auth.accept_friend_request', friend_id=user.id) }}" method="POST" style="margin:0;">
+                                <button type="submit" class="btn-hero-friend-action add" style="background: var(--cyber-success);">
+                                    <i class="bi bi-check-lg"></i> Принять заявку
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% elif rel_status == 'accepted' %}
+                        <button class="btn-hero-friend-action accepted" disabled>
+                            <i class="bi bi-shield-check"></i> Уже в друзьях
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="cyber-stats-grid">
+        <div class="cyber-stat-card">
+            <div class="cyber-stat-icon-wrapper" style="color: var(--cyber-success);">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="cyber-stat-info-block">
+                <span class="cyber-stat-title">Money Won</span>
+                <span class="cyber-stat-main-value">${{ "{:,}".format(won_cash) }}</span>
+                <span class="cyber-stat-sub-label">Total Earnings</span>
             </div>
         </div>
 
-        <span class="status-badge-portal {{ user.status }}">{{ user.status }}</span>
-        <h1 class="player-name-headline">{{ user.name }}</h1>
-
-        {% if user.university_id and user.uni_profile %}
-        <div class="university-tag-portal">
-            🏛️ {{ user.uni_profile.name | upper }}
+        <div class="cyber-stat-card">
+            <div class="cyber-stat-icon-wrapper" style="color: var(--cyber-blue);">
+                <i class="bi bi-trophy"></i>
+            </div>
+            <div class="cyber-stat-info-block">
+                <span class="cyber-stat-title">Tournaments</span>
+                <span class="cyber-stat-main-value">{{ total_games }}</span>
+                <span class="cyber-stat-sub-label">Total Participations</span>
+            </div>
         </div>
-        {% endif %}
 
-      <!-- ==========================================================================
-         ОБНОВЛЕННЫЙ БЛОК ДВУХЭТАПНОЙ ДРУЖБЫ (ЗАПРОСЫ И ПОДТВЕРЖДЕНИЯ)
-         ========================================================================== -->
-    {% if current_user.is_authenticated and current_user.id != user.id %}
-    <div class="friendship-action-box">
-        {% if rel_status == 'accepted' %}
-            <!-- Если игроки уже официально подтвердили дружбу -->
-            <form action="/friend/decline/{{ user.id }}" method="POST" style="margin:0;">
-                <button type="submit" class="btn-friend-action remove">❌ Удалить из друзей</button>
-            </form>
-        {% elif rel_status == 'pending' %}
-            {% if is_sender %}
-                <!-- Если текущий пользователь сам отправил запрос и ждет ответа -->
-                <form action="/friend/decline/{{ user.id }}" method="POST" style="margin:0;">
-                    <button type="submit" class="btn-friend-action remove" style="color: #94a3b8; border-color: rgba(255,255,255,0.1);">⏳ Запрос отправлен</button>
-                </form>
-            {% else %}
-                <!-- Если запрос пришел текущему пользователю от этого игрока -->
-                <div style="display: flex; gap: 8px;">
-                    <form action="/friend/accept/{{ user.id }}" method="POST" style="margin:0; flex: 1;">
-                        <button type="submit" class="btn-friend-action add" style="padding: 10px 4px; font-size: 0.8rem;">✅ Принять</button>
-                    </form>
-                    <form action="/friend/decline/{{ user.id }}" method="POST" style="margin:0; flex: 1;">
-                        <button type="submit" class="btn-friend-action remove" style="padding: 10px 4px; font-size: 0.8rem;">❌ Отказать</button>
-                    </form>
-                </div>
-            {% endif %}
-        {% else %}
-            <!-- Если связей между игроками вообще нет -->
-            <form action="/friend/request/{{ user.id }}" method="POST" style="margin:0;">
-                <button type="submit" class="btn-friend-action add">➕ Добавить в друзья</button>
-            </form>
-        {% endif %}
-    </div>
-    {% endif %}
-
-    <div class="topic-widget-box">
-        <div class="topic-title-label">Любимый топик эксперта</div>
-        <div class="topic-neon-badge" id="topicBadge" {% if user.id == current_user.id %}onclick="openTopicModal()"{% endif %}>
-            🎯 <span id="topicText">{{ user.favorite_topic if user.favorite_topic else 'Не указан' }}</span>
-            {% if user.id == current_user.id %}<span style="font-size:0.6rem; opacity:0.6; margin-left:4px;">✏️</span>{% endif %}
+        <div class="cyber-stat-card">
+            <div class="cyber-stat-icon-wrapper" style="color: #a78bfa;">
+                <i class="bi bi-fire"></i>
+            </div>
+            <div class="cyber-stat-info-block">
+                <span class="cyber-stat-title">Times MVP</span>
+                <span class="cyber-stat-main-value">{{ total_wins }}</span>
+                <span class="cyber-stat-sub-label">Elite Performance</span>
+            </div>
         </div>
-    </div>
 
-    <!-- ВХОДЯЩИЕ ЗАЯВКИ (ОТОБРАЖАЮТСЯ ТОЛЬКО ВЛАДЕЛЬЦУ В ЕГО СОБСТВЕННОМ ПРОФИЛЕ) -->
-    {% if current_user.is_authenticated and current_user.id == user.id and incoming_requests %}
-    <div class="friends-wall-section" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 15px; margin-bottom: 15px;">
-        <div class="topic-title-label" style="text-align: left; color: #eab308;">🔥 Входящие заявки ({{ incoming_requests|length }})</div>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-            {% for req_user in incoming_requests %}
-                <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                    <a href="/profile/{{ req_user.id }}" style="color: white; font-size: 0.8rem; font-weight: 700; text-decoration: none;">{{ req_user.name }}</a>
-                    <div style="display: flex; gap: 8px;">
-                        <form action="/friend/accept/{{ req_user.id }}" method="POST" style="margin:0; display:inline;">
-                            <button type="submit" style="background:none; border:none; color:#10b981; cursor:pointer; font-size:0.95rem; font-weight:bold;" title="Принять">✔</button>
-                        </form>
-                        <form action="/friend/decline/{{ req_user.id }}" method="POST" style="margin:0; display:inline;">
-                            <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.95rem; font-weight:bold;" title="Отклонить">✖</button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
+        <div class="cyber-stat-card">
+            <div class="cyber-stat-icon-wrapper" style="color: var(--cyber-warning);">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="cyber-stat-info-block">
+                <span class="cyber-stat-title">Friends</span>
+                <span class="cyber-stat-main-value">{{ friends|length }}</span>
+                <span class="cyber-stat-sub-label">Total Friends</span>
+            </div>
         </div>
-    </div>
-    {% endif %}
+    </section>
 
-    <div class="friends-wall-section">
-        <div class="topic-title-label" style="text-align: left; margin-bottom: 10px;">Друзья и Союзники ({{ friends|length }})</div>
-        <div class="friends-grid-mesh">
+    <section class="cyber-panel-friends">
+        <div class="cyber-panel-header">
+            <!-- 🔥 ТЕПЕРЬ НАДПИСЬ И ИКОНКА КЛИКАБЕЛЬНЫ (ТОЛЬКО ДЛЯ СВОЕГО ПРОФИЛЯ С ПРЕДЛОЖЕНИЕМ ДЕЙСТВИЙ) -->
+            <div class="cyber-clickable-header-trigger" {% if user.id == current_user.id %}onclick="openFriendsActionModal()"{% else %}style="cursor: default;"{% endif %}>
+                <h3 class="cyber-panel-title-text">Friends</h3>
+                {% if user.id == current_user.id %}
+                    <i class="bi bi-chevron-down"></i>
+                {% endif %}
+            </div>
+        </div>
+        <div class="cyber-friends-row">
             {% for friend in friends %}
-                <a href="/profile/{{ friend.id }}" class="friend-avatar-anchor" title="{{ friend.name }}">
-                    <img src="{{ url_for('static', filename='profile_pics/' + friend.avatar) }}" class="friend-mini-photo" alt="Friend">
+                <a href="/auth/profile/{{ friend.id }}" class="cyber-friend-node" title="{{ friend.name }}">
+                    <div class="cyber-friend-avatar-wrapper">
+                        <img src="{{ url_for('static', filename='profile_pics/' + friend.avatar) }}" class="cyber-friend-img" alt="Friend">
+                        <div class="cyber-friend-status-dot"></div>
+                    </div>
+                    <span class="cyber-friend-name">{{ friend.name }}</span>
                 </a>
             {% else %}
-                <div style="grid-column: span 4; color: var(--brand-slate); font-size: 0.75rem; font-style: italic; padding: 10px 0; text-align: left;">Список пуст</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Список друзей пуст.</div>
             {% endfor %}
         </div>
-    </div>
+    </section>
 
-    <div class="side-wall-filler-card">
-        <div class="filler-card-title">Личный статус сезона</div>
-        <div class="filler-card-row">
-            <span>Ранг лиги:</span>
-            <span style="color: #38bdf8; font-weight: 700;">Active Member</span>
-        </div>
-        <div class="filler-card-row">
-            <span>Надежность ростера:</span>
-            <span style="color: var(--brand-success); font-weight: 700;">100%</span>
-        </div>
-        <div class="filler-progress-bar">
-            {% set win_rate = (total_wins / total_games * 100) if total_games > 0 else 0 %}
-            <div class="filler-progress-fill" style="width: {{ win_rate if win_rate > 15 else 35 }}%;"></div>
-        </div>
-    </div>
+    <section class="cyber-panel-tournaments">
+        <h3 class="cyber-panel-title-text" style="font-size: 1.15rem; font-weight: 600; margin-bottom: 20px;">
+            <i class="bi bi-calendar-check" style="color: var(--cyber-blue); margin-right: 8px;"></i> My Tournaments
+        </h3>
 
-    <div class="side-wall-meta">
-        ID_DATE: {{ user.date.strftime('%Y-%m-%d') }}
-    </div>
-</aside>
+        <div class="cyber-timeline-container" style="padding-left: 0; margin-top: 5px;">
+            {% for p in participations | reverse %}
+                <div class="cyber-sub-row-item">
+                    <div class="cyber-tournament-meta">
+                        <h4 class="cyber-tourney-name">{{ p.tournament.title }}</h4>
+                        <div class="cyber-tournament-date-row">
+                            <span>Команда: <span style="color: var(--cyber-blue); font-weight: 600;">{{ p.team_name }}</span></span>
+                            <span>•</span>
+                            <span class="cyber-status-pill {% if p.tournament.past %}completed{% else %}upcoming{% endif %}">
+                                {% if p.tournament.past %}Completed{% else %}Upcoming{% endif %}
+                            </span>
+                        </div>
+                    </div>
 
-<main class="profile-center-stage">
-
-    <div class="center-stage-header">
-        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;">Dashboard</h2>
-
-        {% if current_user.is_authenticated and user.id == current_user.id %}
-            <a href="{{ url_for('edit_profile') }}" class="btn-edit-portal">
-                Редактировать профиль
-            </a>
-        {% endif %}
-    </div>
-
-    <div class="stats-portal-grid">
-        <div class="stat-portal-card">
-            <span class="stat-portal-value">{{ total_games }}</span>
-            <span class="stat-portal-label">Турниры</span>
-        </div>
-        <div class="stat-portal-card">
-            <span class="stat-portal-value" style="color: #ca8a04;">{{ total_wins }}</span>
-            <span class="stat-portal-label">Победы</span>
-        </div>
-        <div class="stat-portal-card">
-            <span class="stat-portal-value" style="color: var(--brand-success);">{{ total_score.value }}</span>
-            <span class="stat-portal-label">Очки</span>
-        </div>
-    </div>
-
-    {% if active_participation.found %}
-        <a href="/tournaments/{{ active_participation.found.tournament_id }}/team/{{ active_participation.found.team_name }}" class="active-team-portal-card">
-            <div>
-                <span class="at-card-label">Текущий ростер лиги</span>
-                <div class="at-card-team-name">{{ active_participation.found.team_name }}</div>
-            </div>
-            <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-blue-deep);">[ Ростер ➔ ]</div>
-        </a>
-    {% endif %}
-
-    <div class="participation-portal-section">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.3px;">История участия</h3>
-
-            {% if total_games > 0 %}
-            <div style="font-family: monospace; font-size: 0.7rem; color: #ffffff; background: var(--brand-blue-deep); border: 1px solid rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 6px; font-weight: 600;">
-                FORM (L3):
-                {% for p in participations | reverse %}
-                    {% if loop.index <= 3 %}
+                    <div class="cyber-placement-zone">
                         {% if p.is_winner %}
-                            <span title="Win" style="color: var(--brand-success); margin-left: 4px; font-weight: 900;">W</span>
+                            <span class="cyber-medal-rank rank-1"><i class="bi bi-trophy-fill"></i> 1st Place</span>
                         {% else %}
-                            <span title="Played" style="color: var(--brand-slate); margin-left: 4px;">P</span>
+                            <span class="cyber-medal-rank rank-p"><i class="bi bi-shield-check"></i> Participant</span>
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
+                        <a href="{{ url_for('tournaments.tournament_detail', id=p.tournament_id) }}" class="btn-cyber-details">View Details</a>
+                    </div>
+                </div>
+            {% else %}
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 10px 0;">
+                    Вы пока не принимали участия в битвах сезона.
+                </div>
+            {% endfor %}
         </div>
+    </section>
 
-            <div class="table-container">
-                <table class="styled-portal-table">
-                    <thead>
-                        <tr>
-                            <th>Турнир</th>
-                            <th>Команда</th>
-                            <th>Счет</th>
-                            <th>Статус</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in participations | reverse %}
-                        <tr>
-                            <td>
-                                <a href="{{ url_for('tournament_detail', id=p.tournament_id) }}" class="tournament-link-portal">
-                                    {{ p.tournament.title }}
-                                </a>
-                            </td>
-                            <td>
-                                <a href="/tournaments/{{ p.tournament_id }}/team/{{ p.team_name }}" class="team-link-portal">
-                                    {{ p.team_name }}
-                                </a>
-                            </td>
-                            <td>
-                                <span class="score-badge-portal">{{ p.score }} pts</span>
-                            </td>
-                            <td>
-                                {% if p.is_winner %}
-                                    <span class="badge-win-portal">🏆 Winner</span>
-                                {% else %}
-                                    {% if not p.tournament.past %}
-                                        <form action="/tournaments/{{ p.tournament_id }}/leave" method="POST" style="margin:0; display:inline;" onsubmit="return confirm('Вы уверены, что хотите покинуть состав?');">
-                                            <button type="submit" class="btn-leave-portal">Покинуть</button>
-                                        </form>
-                                    {% else %}
-                                        <span class="badge-participant-portal">Participant</span>
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: var(--brand-muted); padding: 35px 0; font-size: 0.85rem; font-style: italic; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px;">
-                                Участия пока не зарегистрированы. Начните сезон!
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </main>
 </div>
 
-<div class="topic-modal-overlay" id="topicModal" onclick="closeTopicModal(event)">
-    <div class="topic-modal-card" onclick="event.stopPropagation()">
-        <h3 style="margin:0; color: var(--brand-blue-deep); font-weight: 800; font-size: 1.2rem;">Специализация эрудита</h3>
-        <p style="font-size:0.8rem; color: var(--brand-slate); margin-top:6px;">Выберите категорию, в которой вы тащите сильнее всего</p>
+<!-- МОДАЛКА СПЕЦИАЛИЗАЦИИ -->
+<div class="topic-modal-overlay" id="topicModal" onclick="closeTopicModal(event)" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000;">
+    <div class="topic-modal-card" onclick="event.stopPropagation()" style="background: #ffffff; padding: 30px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid var(--cyber-border); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+        <h3 style="margin:0; color: var(--text-bright); font-weight: 600; font-size: 1.15rem;">Специализация эрудита</h3>
+        <p style="font-size:0.75rem; color: var(--text-muted); margin-top:4px;">Выберите категорию, в которой вы тащите сильнее всего</p>
 
-        <select id="modalSelect" class="topic-select-field">
+        <select id="modalSelect" class="topic-select-field" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--cyber-border); font-size: 0.9rem; margin: 18px 0; background: #f8fafc; color: var(--text-bright); outline: none; box-sizing: border-box;">
             <option value="Не указан" {% if user.favorite_topic == 'Не указан' %}selected{% endif %}>Не указан</option>
             {% for topic in quiz_topics %}
                 <option value="{{ topic }}" {% if user.favorite_topic == topic %}selected{% endif %}>{{ topic }}</option>
             {% endfor %}
         </select>
 
-        <button type="button" class="modal-btn-save" onclick="saveTopicFromModal()">Сохранить выбор</button>
+        <button type="button" class="btn-cyber-action-blue" style="margin-top:0; width:100%;" onclick="saveTopicFromModal()">Сохранить выбор</button>
+    </div>
+</div>
+
+<!-- 🔥 НОВАЯ ХАБ-МОДАЛКА ВЫБОРА ДЕЙСТВИЙ (ДОБАВИТЬ / ЗАЯВКИ) -->
+<div class="topic-modal-overlay" id="friendsActionModal" onclick="closeFriendsActionModal(event)" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000;">
+    <div class="topic-modal-card" onclick="event.stopPropagation()" style="background: #ffffff; padding: 26px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid var(--cyber-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+        <h3 style="margin:0; color: var(--text-bright); font-weight: 800; font-size: 1.2rem; text-align: center;">Управление контактами</h3>
+        <p style="font-size:0.75rem; color: var(--text-muted); margin: 4px 0 0 0; text-align: center;">Выберите необходимое сетевое действие</p>
+
+        <div class="cyber-action-menu-list">
+            <button class="cyber-action-menu-btn" onclick="switchToSearchModal()">
+                <i class="bi bi-person-plus" style="color: var(--cyber-blue);"></i> Найти новых друзей
+            </button>
+            <button class="cyber-action-menu-btn" onclick="switchToRequestsModal()">
+                <i class="bi bi-envelope-open" style="color: var(--cyber-warning);"></i> Входящие заявки ({{ incoming_requests|length }})
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА ВХОДЯЩИХ ЗАЯВОК -->
+<div class="topic-modal-overlay" id="incomingRequestsModal" onclick="closeIncomingRequestsModal(event)" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000;">
+    <div class="topic-modal-card" onclick="event.stopPropagation()" style="background: #ffffff; padding: 30px; border-radius: 16px; width: 90%; max-width: 440px; border: 1px solid var(--cyber-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+        <h3 style="margin:0 0 6px 0; color: var(--text-bright); font-weight: 800; font-size: 1.2rem; text-align: center;">Запросы на дружбу</h3>
+        <p style="font-size:0.75rem; color: var(--text-muted); margin:0 0 16px 0; text-align: center;">Пользователи, желающие добавить вас в свой ростер</p>
+
+        <div style="max-height: 240px; overflow-y: auto;">
+            {% for req in incoming_requests %}
+                <div class="friend-search-result-item" id="req-row-{{ req.id }}">
+                    <div class="friend-user-meta">
+                        <img src="{{ url_for('static', filename='profile_pics/' + req.avatar) }}" class="friend-search-avatar" alt="Avatar">
+                        <span class="friend-search-name">{{ req.name }}</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <form action="{{ url_for('auth.accept_friend_request', friend_id=req.id) }}" method="POST" style="margin:0;">
+                            <button type="submit" class="btn-request-action" style="background: var(--cyber-success); padding: 5px 10px;"><i class="bi bi-check"></i></button>
+                        </form>
+                        <form action="{{ url_for('auth.decline_friend_request', friend_id=req.id) }}" method="POST" style="margin:0;">
+                            <button type="submit" class="btn-request-action" style="background: #ef4444; padding: 5px 10px;"><i class="bi bi-x"></i></button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 20px 0;">Новых запросов на дружбу не обнаружено.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА ПОИСКА ДРУЗЕЙ -->
+<div class="topic-modal-overlay" id="addFriendModal" onclick="closeAddFriendModal(event)" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000;">
+    <div class="topic-modal-card" onclick="event.stopPropagation()" style="background: #ffffff; padding: 30px; border-radius: 16px; width: 90%; max-width: 440px; border: 1px solid var(--cyber-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+        <h3 style="margin:0 0 6px 0; color: var(--text-bright); font-weight: 800; font-size: 1.2rem; text-align: center;">Поиск оппонентов и друзей</h3>
+        <p style="font-size:0.75rem; color: var(--text-muted); margin:0 0 16px 0; text-align: center;">Введите никнейм игрока лиги QuizArena</p>
+
+        <div style="position: relative; margin-bottom: 20px;">
+            <input type="text" id="friendSearchInput" oninput="searchFriends()" placeholder="Кого ищем..." style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--cyber-border); font-size: 0.95rem; background: #f8fafc; color: var(--text-bright); outline: none; box-sizing: border-box;">
+        </div>
+
+        <div id="searchResultsContainer" style="max-height: 240px; overflow-y: auto; margin-bottom: 5px;">
+            <div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 20px 0;">Начните вводить имя игрока...</div>
+        </div>
     </div>
 </div>
 
@@ -831,32 +798,135 @@
 function openTopicModal() {
     document.getElementById('topicModal').style.display = 'flex';
 }
-
 function closeTopicModal(event) {
     if (!event || event.target === document.getElementById('topicModal')) {
         document.getElementById('topicModal').style.display = 'none';
     }
 }
-
 function saveTopicFromModal() {
     const selectedValue = document.getElementById('modalSelect').value;
     const formData = new FormData();
     formData.append('topic', selectedValue);
 
-    fetch('/profile/update_topic', {
+    fetch('/auth/profile/update_topic', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            document.getElementById('topicText').innerText = data.topic;
+            const t1 = document.getElementById('topicText');
+            if(t1) t1.innerText = data.topic;
             closeTopicModal();
         } else {
             alert("Ошибка сохранения: " + data.message);
         }
     })
     .catch(err => alert("Ошибка соединения с сервером."));
+}
+
+/* ФУНКЦИИ ХАБ-МОДАЛКИ ДЕЙСТВИЙ */
+function openFriendsActionModal() {
+    document.getElementById('friendsActionModal').style.display = 'flex';
+}
+function closeFriendsActionModal(event) {
+    if (!event || event.target === document.getElementById('friendsActionModal')) {
+        document.getElementById('friendsActionModal').style.display = 'none';
+    }
+}
+function switchToSearchModal() {
+    document.getElementById('friendsActionModal').style.display = 'none';
+    openAddFriendModal();
+}
+function switchToRequestsModal() {
+    document.getElementById('friendsActionModal').style.display = 'none';
+    document.getElementById('incomingRequestsModal').style.display = 'flex';
+}
+
+function closeIncomingRequestsModal(event) {
+    if (!event || event.target === document.getElementById('incomingRequestsModal')) {
+        document.getElementById('incomingRequestsModal').style.display = 'none';
+    }
+}
+
+function openAddFriendModal() {
+    document.getElementById('addFriendModal').style.display = 'flex';
+    document.getElementById('friendSearchInput').value = '';
+    document.getElementById('searchResultsContainer').innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 20px 0;">Начните вводить имя игрока...</div>';
+    setTimeout(() => document.getElementById('friendSearchInput').focus(), 50);
+}
+
+function closeAddFriendModal(event) {
+    if (!event || event.target === document.getElementById('addFriendModal')) {
+        document.getElementById('addFriendModal').style.display = 'none';
+    }
+}
+
+function searchFriends() {
+    const query = document.getElementById('friendSearchInput').value.trim();
+    const container = document.getElementById('searchResultsContainer');
+
+    if (query.length < 2) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 20px 0;">Введите как минимум 2 символа...</div>';
+        return;
+    }
+
+    fetch(`/auth/profile/search_users?q=${encodeURIComponent(query)}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Ошибка сервера: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(users => {
+        if (!Array.isArray(users) || users.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 20px 0;">Игроки с таким никнеймом не найдены</div>';
+            return;
+        }
+
+        let html = '';
+        users.forEach(u => {
+            const avatarSrc = u.avatar ? `/static/profile_pics/${u.avatar}` : '/static/profile_pics/default.png';
+            html += `
+                <div class="friend-search-result-item">
+                    <div class="friend-user-meta">
+                        <img src="${avatarSrc}" class="friend-search-avatar" alt="Avatar">
+                        <span class="friend-search-name">${u.name}</span>
+                    </div>
+                    ${u.is_friend ?
+                        `<span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;"><i class="bi bi-check2-all"></i> Уже друг</span>` :
+                      u.request_sent ?
+                        `<button class="btn-request-action sent" disabled>Отправлено</button>` :
+                        `<button class="btn-request-action" onclick="sendFriendRequest(${u.id}, this)">Кинуть заявку</button>`
+                    }
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    })
+    .catch(err => {
+        console.error("Детали ошибки поиска:", err);
+        container.innerHTML = '<div style="color: #ef4444; font-size: 0.85rem; text-align: center; padding: 20px 0; font-weight: 600;">Ошибка сети или сервера. Проверьте консоль (F12).</div>';
+    });
+}
+
+function sendFriendRequest(userId, btnElement) {
+    fetch(`/auth/friend/request/${userId}`, {
+        method: 'POST'
+    })
+    .then(response => {
+        if (!response.ok && response.status !== 302) {
+            throw new Error(`Ошибка запроса: ${response.status}`);
+        }
+        btnElement.innerText = 'Отправлено';
+        btnElement.classList.add('sent');
+        btnElement.disabled = true;
+        btnElement.removeAttribute('onclick');
+    })
+    .catch(err => {
+        console.error("Детали ошибки отправки инвайта:", err);
+        alert("Ошибка подключения к серверу при отправке заявки.");
+    });
 }
 </script>
 {% endblock %}

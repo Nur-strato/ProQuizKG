@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+{% block title %}Predict Matrix | ProQuiz.kg{% endblock %}
+
+{% block body %}
+<style>
+    .predict-layout {
+        padding: 40px 0 60px 0;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .hub-title-block {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+    .hub-main-title {
+        font-size: 2.4rem;
+        font-weight: 900;
+        color: #0f172a;
+        letter-spacing: -0.03em;
+        margin: 0;
+    }
+    .hub-subtitle {
+        color: #64748b;
+        font-size: 1.05rem;
+        max-width: 500px;
+        margin: 10px auto 0 auto;
+        font-weight: 500;
+    }
+
+    .tournament-brand-monolith {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-left: 6px solid #0284c7;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06);
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tournament-brand-monolith:hover {
+        background: #fafafa;
+        border-color: rgba(2, 132, 199, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.1);
+    }
+
+    .tournament-identity-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .tournament-meta-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tournament-huge-title {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .tournament-mini-stats {
+        display: flex;
+        gap: 12px;
+        margin-top: 4px;
+    }
+    .stat-pill-mini {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stat-pill-mini.total { background: #f1f5f9; color: #475569; }
+    .stat-pill-mini.active-live { background: #dcfce7; color: #15803d; animation: pulseLive 2s infinite; }
+
+    .tournament-toggle-arrow {
+        font-size: 1.4rem;
+        color: #94a3b8;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tournament-brand-monolith.open .tournament-toggle-arrow {
+        transform: rotate(180deg);
+        color: #0284c7;
+    }
+
+    .expandable-stages-wrapper {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .tournament-brand-monolith.open + .expandable-stages-wrapper {
+        max-height: 2500px;
+        opacity: 1;
+        margin-bottom: 35px;
+    }
+
+    .stage-switcher-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background: #f1f5f9;
+        padding: 6px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        gap: 6px;
+    }
+    @media (max-width: 600px) {
+        .stage-switcher-tabs { grid-template-columns: 1fr; }
+    }
+
+    .stage-tab-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        background: transparent;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        position: relative;
+    }
+    .stage-tab-btn:hover:not(.active) { background: rgba(255, 255, 255, 0.5); }
+    .stage-tab-btn.active { background: #0f172a; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); }
+
+    .stage-tab-title { font-size: 0.85rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stage-tab-btn.active .stage-tab-title { color: #ffffff; }
+    .stage-tab-desc { font-size: 0.75rem; font-weight: 600; color: #64748b; }
+    .stage-tab-btn.active .stage-tab-desc { color: #94a3b8; }
+
+    .tab-status-pill { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+    .tab-status-pill.archive { background: #e2e8f0; color: #475569; }
+    .tab-status-pill.live { background: #dcfce7; color: #15803d; }
+    .tab-status-pill.lock { background: rgba(15, 23, 42, 0.05); color: #94a3b8; }
+    .stage-tab-btn.active .tab-status-pill.live { background: #15803d; color: #ffffff; }
+
+    .predict-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+    @media (max-width: 900px) { .predict-grid { grid-template-columns: 1fr; } }
+
+    .match-card { background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    .match-card.stage-section-block { display: none; }
+    .match-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 20px; }
+    .match-title { font-size: 1.2rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .match-date { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+
+    .stats-container {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px dashed #e2e8f0;
+    }
+    .stats-headline {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .matrix-stats-table-wrapper {
+        overflow-x: auto;
+        margin-top: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.85rem;
+    }
+    .matrix-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 800;
+        padding: 12px 14px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .matrix-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #0f172a;
+        font-weight: 600;
+    }
+    .matrix-table tr:last-child td {
+        border-bottom: none;
+    }
+    .cell-percent-badge {
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        display: inline-block;
+        text-align: center;
+        min-width: 45px;
+    }
+    .cell-percent-badge.gold-cell { background: rgba(234, 179, 8, 0.1); color: #b45309; }
+    .cell-percent-badge.silver-cell { background: rgba(148, 163, 184, 0.1); color: #475569; }
+    .cell-percent-badge.bronze-cell { background: rgba(180, 83, 9, 0.1); color: #78350f; }
+    .cell-percent-badge.fourth-cell { background: #f1f5f9; color: #64748b; }
+
+    .podium-selection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .podium-select-group { display: flex; flex-direction: column; gap: 6px; }
+    .podium-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .podium-label.gold { color: #eab308; }
+    .podium-label.silver { color: #94a3b8; }
+    .podium-label.bronze { color: #b45309; }
+    .podium-label.fourth { color: #64748b; }
+
+    .matrix-dropdown { background: #f8fafc; border: 2px solid #e2e8f0; color: #0f172a; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer; }
+    .matrix-dropdown:focus { border-color: #0ea5e9; }
+    .btn-submit-bet { background: #0f172a; color: white; padding: 12px 28px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+
+    .mini-place-badge { font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-right: 8px; display: inline-block; min-width: 20px; text-align: center; }
+    .mini-place-badge.gold { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+    .mini-place-badge.silver { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+    .mini-place-badge.bronze { background: rgba(180, 83, 9, 0.1); color: #b45309; }
+    .mini-place-badge.fourth { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+    .stage-badge { background: #f0f9ff; color: #0ea5e9; border: 1px solid #b3e0ff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+
+    @keyframes pulseLive { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+</style>
+
+<section class="predict-layout">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 24px;">
+
+        <div class="hub-title-block">
+            <h1 class="hub-main-title">МАТРИЦА ПРЕДСКАЗАНИЙ СЕЗОНА</h1>
+            <p class="hub-subtitle">Выбирайте активные лиги, отслеживайте цепочки стадий и фиксируйте конфигурации турнирных таблиц.</p>
+        </div>
+
+        <div class="tournament-brand-monolith {% if current_stage in [1, 2, 3] %}open{% endif %}" onclick="toggleTournamentContainer()">
+            <div class="tournament-identity-row">
+                <div class="tournament-meta-info">
+                    <h1 class="tournament-huge-title">
+                        <i class="bi bi-trophy-fill" style="color: #eab308;"></i> University League 2026
+                    </h1>
+                    <div class="tournament-mini-stats">
+                        <span class="stat-pill-mini total">Всего: 3 стадии</span>
+                        <span class="stat-pill-mini active-live">Выбрана: Стадия 0{{ current_stage|default(2) }}</span>
+                    </div>
+                </div>
+                <div>
+                    <i class="bi bi-chevron-down tournament-toggle-arrow"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="expandable-stages-wrapper" id="stagesWrapper">
+            <div class="stage-switcher-tabs">
+                <div class="stage-tab-btn {% if current_stage == 1 %}active{% endif %}" onclick="switchStageView(1)">
+                    <span class="tab-status-pill archive">Архив</span>
+                    <span class="stage-tab-title">Стадия 01</span>
+                    <span class="stage-tab-desc">Playoff Stage</span>
+                </div>
+                <div class="stage-tab-btn {% if current_stage == 2 %}active{% endif %}" onclick="switchStageView(2)">
+                    <span class="tab-status-pill live">Live</span>
+                    <span class="stage-tab-title">Стадия 02</span>
+                    <span class="stage-tab-desc">Pre-Final</span>
+                </div>
+                <div class="stage-tab-btn {% if current_stage == 3 %}active{% endif %}" onclick="switchStageView(3)">
+                    <span class="tab-status-pill lock">Блок</span>
+                    <span class="stage-tab-title">Финал</span>
+                    <span class="stage-tab-desc">Grand Final</span>
+                </div>
+            </div>
+
+            <div class="predict-grid">
+                <div>
+                    <div class="match-card stage-section-block" id="panel-stage-1" {% if current_stage == 1 %}style="display: block;"{% endif %}>
+                        <div class="match-header">
+                            <span class="match-title"><span class="stage-badge" style="background:#e6f4ea; color:#137333; border-color:#ceead6;">СТАДИЯ 1</span> Playoff Stage</span>
+                            <span class="match-date"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> Расчет завершен</span>
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; color: #64748b; font-size: 0.9rem;">
+                            Прием прогнозов на первую стадию плей-офф успешно закрыт. Стадия рассчитана системой.
+                        </div>
+                    </div>
+
+                    <div class="match-card stage-section-block" id="panel-stage-2" {% if current_stage == 2 %}style="display: block;"{% endif %}>
+                        <div class="match-header">
+                            <span class="match-title"><span class="stage-badge">СТАДИЯ 2</span> Pre-Final Stage</span>
+                            <span class="match-date"><i class="bi bi-clock-history"></i> Прием открыт</span>
+                        </div>
+
+                        {% if user_bet_stage2 %}
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <span style="font-size: 0.85rem; color: #64748b; font-weight: bold;">Твой зафиксированный Топ-4 на эту стадию:</span>
+                                    <span class="status-badge pending" style="background: #fef3c7; color: #b45309; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold;">OPEN</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div><span class="mini-place-badge gold">1</span> <strong style="color: #0f172a;">{{ user_bet_stage2.team_1 }}</strong></div>
+                                    <div><span class="mini-place-badge silver">2</span> <strong style="color: #0f172a;">{{ user_bet_stage2.team_2 }}</strong></div>
+                                    <div><span class="mini-place-badge bronze">3</span> <strong style="color: #0f172a;">{{ user_bet_stage2.team_3 }}</strong></div>
+                                    <div><span class="mini-place-badge fourth">4</span> <strong style="color: #0f172a;">{{ user_bet_stage2.team_4 }}</strong></div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <form action="{{ url_for('predict.place_bet') }}" method="POST" onsubmit="return validateLeagueTop4('stage2')" style="margin-bottom: 25px;">
+                                <input type="hidden" name="tournament_id" value="1">
+                                <input type="hidden" name="stage_id" value="{{ current_stage|default(2) }}">
+
+                                <div class="podium-selection-grid">
+                                    <div class="podium-select-group">
+                                        <label class="podium-label gold">🥇 1st Place</label>
+                                        <select name="team_1" id="p1-stage2" class="matrix-dropdown" required>
+                                            <option value="" disabled selected>Выбрать...</option>
+                                            {% for team in teams %}
+                                                <option value="{{ team }}">{{ team }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="podium-select-group">
+                                        <label class="podium-label silver">🥈 2nd Place</label>
+                                        <select name="team_2" id="p2-stage2" class="matrix-dropdown" required>
+                                            <option value="" disabled selected>Выбрать...</option>
+                                            {% for team in teams %}
+                                                <option value="{{ team }}">{{ team }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="podium-select-group">
+                                        <label class="podium-label bronze">🥉 3rd Place</label>
+                                        <select name="team_3" id="p3-stage2" class="matrix-dropdown" required>
+                                            <option value="" disabled selected>Выбрать...</option>
+                                            {% for team in teams %}
+                                                <option value="{{ team }}">{{ team }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="podium-select-group">
+                                        <label class="podium-label fourth">🏅 4th Place</label>
+                                        <select name="team_4" id="p4-stage2" class="matrix-dropdown" required>
+                                            <option value="" disabled selected>Выбрать...</option>
+                                            {% for team in teams %}
+                                                <option value="{{ team }}">{{ team }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;"><button type="submit" class="btn-submit-bet">Сохранить для Stage 0{{ current_stage|default(2) }}</button></div>
+                            </form>
+                        {% endif %}
+
+                        <!-- ГЛОБАЛЬНАЯ МАТРИЦА СТАТИСТИКИ (ВИДНА ВСЕГДА) -->
+                        <div class="stats-container">
+                            <div class="stats-headline">
+                                <i class="bi bi-grid-3x3-gap-fill" style="color: #0284c7;"></i> Матрица распределения мест (% голосов комьюнити)
+                            </div>
+
+                            <div class="matrix-stats-table-wrapper">
+                                <table class="matrix-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Университет</th>
+                                            <th>🥇 1 место</th>
+                                            <th>🥈 2 место</th>
+                                            <th>🥉 3 место</th>
+                                            <th>🏅 4 место</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for team in teams %}
+                                        <tr>
+                                            <td>{{ team }}</td>
+                                            <td><span class="cell-percent-badge gold-cell">{{ matrix_stats[team]['p1'] }}%</span></td>
+                                            <td><span class="cell-percent-badge silver-cell">{{ matrix_stats[team]['p2'] }}%</span></td>
+                                            <td><span class="cell-percent-badge bronze-cell">{{ matrix_stats[team]['p3'] }}%</span></td>
+                                            <td><span class="cell-percent-badge fourth-cell">{{ matrix_stats[team]['p4'] }}%</span></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {% if current_user.status in ['admin', 'head'] %}
+                            <div style="margin-top: 24px; padding-top: 15px; border-top: 1px dashed #e2e8f0; background: rgba(239,68,68,0.02); padding: 14px; border-radius: 8px;">
+                                <span style="font-size: 0.8rem; font-weight: 800; color: #ef4444; display: block; margin-bottom: 10px;">[ADMIN PANEL] Утвердить итог Pre-Final (Стадия {{ current_stage|default(2) }}):</span>
+                                <form action="{{ url_for('predict.settle_match', tournament_id=1) }}" method="POST" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                    <input type="hidden" name="stage_id" value="{{ current_stage|default(2) }}">
+
+                                    {% for idx in ['1', '2', '3', '4'] %}
+                                    <select name="win_{{ idx }}" style="padding: 6px; border-radius: 6px; font-size: 0.8rem; font-weight: bold;">
+                                        {% for team in teams %}
+                                            <option value="{{ team }}">{{ team }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% endfor %}
+
+                                    <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">Рассчитать стадию {{ current_stage|default(2) }}</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="match-card stage-section-block" id="panel-stage-3" {% if current_stage == 3 %}style="display: block;"{% endif %}>
+                        <div class="match-header">
+                            <span class="match-title"><span class="stage-badge" style="background:#fef3c7; color:#b45309; border-color:#fde8e8;">ФИНАЛ</span> Grand Final</span>
+                            <span class="match-date"><i class="bi bi-lock-fill"></i> Заблокировано</span>
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; color: #64748b; font-size: 0.9rem;">
+                            Прием прогнозов на Гранд-Финал будет активирован системой автоматически после завершения Pre-Final стадии турнира.
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px; color: #64748b;"><i class="bi bi-clock-history"></i> Твой архив</h3>
+                    <div style="background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; padding: 20px;">
+                        {% if not history %}
+                            <p style="color: #64748b; font-size: 0.9rem; text-align: center; margin: 20px 0;">История глобальных прогнозов пуста.</p>
+                        {% endif %}
+
+                        {% for bet in history %}
+                            <div style="border-bottom: 1px solid #f1f5f9; padding: 14px 0; display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <span style="font-size: 0.75rem; color: #0ea5e9; font-weight: bold; display: block; margin-bottom: 6px;">Стадия // 0{{ bet.stage_id }}</span>
+                                    <div style="font-size: 0.8rem; margin-bottom: 4px;"><span class="mini-place-badge gold">1</span>{{ bet.team_1 }}</div>
+                                    <div style="font-size: 0.8rem; margin-bottom: 4px;"><span class="mini-place-badge silver">2</span>{{ bet.team_2 }}</div>
+                                    <div style="font-size: 0.8rem; margin-bottom: 4px;"><span class="mini-place-badge bronze">3</span>{{ bet.team_3 }}</div>
+                                    <div style="font-size: 0.8rem; margin-bottom: 4px;"><span class="mini-place-badge fourth">4</span>{{ bet.team_4 }}</div>
+                                </div>
+                                <div>
+                                    {% if not bet.is_processed %}
+                                        <span class="status-badge pending" style="background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">OPEN</span>
+                                    {% elif bet.is_correct %}
+                                        <span class="status-badge win" style="background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">MATCH</span>
+                                    {% else %}
+                                        <span class="status-badge lose" style="background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">MISSED</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script>
+function toggleTournamentContainer() {
+    const monolith = document.querySelector('.tournament-brand-monolith');
+    monolith.classList.toggle('open');
+}
+
+function switchStageView(stageNum) {
+    event.stopPropagation();
+    window.location.search = '?stage=' + stageNum;
+}
+
+function validateLeagueTop4(suffix) {
+    const p1 = document.getElementById('p1-' + suffix).value;
+    const p2 = document.getElementById('p2-' + suffix).value;
+    const p3 = document.getElementById('p3-' + suffix).value;
+    const p4 = document.getElementById('p4-' + suffix).value;
+
+    const selectedTeams = [p1, p2, p3, p4];
+    const uniqueTeams = new Set(selectedTeams);
+
+    if (uniqueTeams.size !== selectedTeams.length) {
+        alert("Ошибка: Одна и та же команда не может занимать несколько позиций на подиуме. Распределите места с 1 по 4 уникально!");
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock %}

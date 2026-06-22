@@ -39,11 +39,22 @@ def get_engine_url():
 config.set_main_option('sqlalchemy.url', get_engine_url())
 target_db = current_app.extensions['migrate'].db
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# ... Твой код из env.py выше ...
 
+config.set_main_option('sqlalchemy.url', get_engine_url())
+target_db = current_app.extensions['migrate'].db
+
+# ====== ВОТ СЮДА ДОБАВЬ ЭТИ ИМПОРТЫ ======
+import sys
+import os
+# Добавляем корень проекта в пути импорта (на всякий случай)
+sys.path.insert(0, os.getcwd())
+
+# Импортируем твои модели, чтобы Python загрузил их в память
+from models import User, Tournament, PredictionBet, Participation
+# ========================================
+
+# ... Твой код из env.py идет дальше (def get_metadata(): и т.д.) ...
 
 def get_metadata():
     if hasattr(target_db, 'metadatas'):

@@ -33,7 +33,7 @@
         font-size: 1.05rem;
     }
 
-    /* PREMIUM СТРОКА ПОИСКА */
+    /* PREMIUM SEARCH BOX */
     .search-box {
         margin-bottom: 35px;
     }
@@ -86,7 +86,7 @@
         color: var(--brand-dark);
     }
 
-    /* БЛОК РЕЗУЛЬТАТОВ ПОИСКА */
+    /* SEARCH RESULTS CONTAINER */
     .search-results {
         background: rgba(248, 250, 252, 0.8);
         border: 1px dashed #cbd5e1;
@@ -159,7 +159,7 @@
         text-decoration: none;
     }
 
-    /* ТАБЛИЦА ЛИДЕРБОРДА */
+    /* LEADERBOARD TABLE GRID */
     .table-container {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -212,45 +212,45 @@
 
 <div class="leaderboard-page">
     <div class="leaderboard-header">
-        <h1>Рейтинг Эрудитов</h1>
+        <h1>League Leaderboard</h1>
         <p>Our champions ranked by total points and recent shifts</p>
     </div>
 
-    <!-- ФОРМА ПОИСКА -->
+    <!-- SEARCH INPUT FORM -->
     <div class="search-box">
-        <form action="{{ url_for('leaderboard') }}" method="GET" class="search-bar-form">
-            <input type="text" name="search" class="search-input" placeholder="Найти игрока лиги по имени..." value="{{ search_query or '' }}" autocomplete="off" required>
-            <button type="submit" class="search-btn">Найти</button>
+        <form action="{{ url_for('auth.leaderboard') }}" method="GET" class="search-bar-form">
+            <input type="text" name="search" class="search-input" placeholder="Search league player by name..." value="{{ search_query or '' }}" autocomplete="off" required>
+            <button type="submit" class="search-btn">Search</button>
             {% if search_query %}
-                <a href="{{ url_for('leaderboard') }}" class="clear-search-btn">Сбросить</a>
+                <a href="{{ url_for('auth.leaderboard') }}" class="clear-search-btn">Reset</a>
             {% endif %}
         </form>
     </div>
 
-    <!-- РЕЗУЛЬТАТЫ ПОИСКА -->
+    <!-- SEARCH FILTER RESULTS SECTION -->
     {% if search_query %}
         <div class="search-results">
-            <h3>🔍 Результаты поиска:</h3>
+            <h3>🔍 Search Results:</h3>
             <div class="search-results-list">
                 {% for player in search_results %}
                     <div class="search-item">
                         <div class="player-meta">
                             <img src="{{ url_for('static', filename='profile_pics/' + player.avatar) if player.avatar else 'https://ui-avatars.com/api/?name=' + player.name }}" class="player-avatar" alt="A">
                             <div>
-                                <a href="{{ url_for('profile', user_id=player.id) }}" class="player-name-link">{{ player.name }}</a>
-                                <div class="player-sub-uni">🏛️ {{ player.uni_profile.name if player.uni_profile else 'Лига свободных агентов' }}</div>
+                                <a href="{{ url_for('auth.profile', user_id=player.id) }}" class="player-name-link">{{ player.name }}</a>
+                                <div class="player-sub-uni">🏛_ {{ player.uni_profile.name if player.uni_profile else 'Free Agents League' }}</div>
                             </div>
                         </div>
-                        <a href="{{ url_for('profile', user_id=player.id) }}" class="profile-badge">Профиль ➔</a>
+                        <a href="{{ url_for('auth.profile', user_id=player.id) }}" class="profile-badge">View Profile ➔</a>
                     </div>
                 {% else %}
-                    <p style="text-align: center; color: var(--text-muted); font-style: italic; margin: 10px 0;">Игроки с таким именем не найдены.</p>
+                    <p style="text-align: center; color: var(--text-muted); font-style: italic; margin: 10px 0;">No active league players found with that name.</p>
                 {% endfor %}
             </div>
         </div>
     {% endif %}
 
-    <!-- ОСНОВНОЙ ЛИДЕРБОРД -->
+    <!-- MAIN LEADERBOARD GRID -->
     <div class="table-container">
         <table class="leaderboard-table">
             <thead>
@@ -286,14 +286,14 @@
                     <td>
                         <div class="player-meta">
                             <img src="{{ url_for('static', filename='profile_pics/' + item.user.avatar) if item.user.avatar else 'https://ui-avatars.com/api/?name=' + item.user.name }}" class="player-avatar" alt="A">
-                            <a href="{{ url_for('profile', user_id=item.user.id) }}" style="color: var(--brand-dark); font-weight: 700; text-decoration: none;">
+                           <a href="{{ url_for('auth.profile', user_id=item.user.id) }}" style="color: var(--brand-dark); font-weight: 700; text-decoration: none;">
                                 {{ item.user.name }}
                             </a>
                         </div>
                     </td>
                     <td>
                         <span class="uni-badge">
-                            {{ item.user.uni_profile.name if item.user.uni_profile else 'Свободный агент' }}
+                            {{ item.user.uni_profile.name if item.user.uni_profile else 'Free Agent' }}
                         </span>
                     </td>
                     <td class="score-cell" style="text-align: right;"><strong>{{ item.total_score }}</strong> <span style="font-size: 0.8rem; color: var(--text-muted);">pts</span></td>

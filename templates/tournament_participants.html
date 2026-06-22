@@ -3,23 +3,27 @@
 {% block title %}Participants | {{ tournament.title if tournament.title else tournament.name }} | ProQuiz.kg{% endblock %}
 
 {% block body %}
-<!-- Кардинально новый Cyber-Bento UI с интерактивной распашкой -->
+<!-- Light Cyber-Bento UI с эффектом плавно загорающегося неонового ободка -->
 <style>
     :root {
-        --brand-blue: #0ea5e9;
+        --brand-blue: #0ea5e9;            /* Голубой акцент со скриншотов */
         --brand-blue-hover: #0284c7;
-        --brand-dark: #0f172a;
+        --brand-dark: #0f172a;            /* Фирменный темно-синий для кнопок/активов */
         --brand-slate: #1e293b;
         --text-muted: #64748b;
-        --border-color: #e2e8f0;
-        --glass-panel: rgba(255, 255, 255, 0.85);
-        --glass-border: rgba(226, 232, 240, 0.95);
+        --border-color: #e2e8f0;          /* Тонкая аккуратная рамка */
+        --bg-main: #f8fafc;               /* Чистый светлый фон страницы */
+        --card-bg: #ffffff;               /* Белоснежные bento-панели */
         --transition-premium: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+        background-color: var(--bg-main) !important;
     }
 
     .participants-layout {
         padding: 40px 0 60px 0;
-        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        background: var(--bg-main) !important;
         min-height: calc(100vh - 70px);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
@@ -30,18 +34,38 @@
         padding: 0 24px;
     }
 
-    /* GLASS BENTO КАРТОЧКИ */
+    /* СВЕТЛЫЕ BENTO КАРТОЧКИ С ЗАГОРАЮЩИМСЯ ОБОДКОМ */
     .glass-card {
-        background: var(--glass-panel);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
         border-radius: 20px;
         padding: 32px;
-        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
-        transition: var(--transition-premium);
+        box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.04);
         position: relative;
         overflow: hidden;
+        z-index: 1;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Маска для создания эффекта зажигания на общих Bento-карточках */
+    .glass-card::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 20px;
+        padding: 1.1px;
+        background: linear-gradient(135deg, #0ea4e7 0%, #005191 50%, #0ea4e7 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover::after {
+        opacity: 0.5; /* Включение неона при наведении */
     }
 
     /* СЕТКА ПАНЕЛИ УПРАВЛЕНИЯ */
@@ -79,7 +103,7 @@
         font-size: 2.5rem;
         font-weight: 900;
         margin: 0 0 6px 0;
-        color: var(--brand-dark);
+        color: var(--brand-dark) !important;
         letter-spacing: -0.03em;
         line-height: 1.1;
     }
@@ -104,7 +128,7 @@
     }
 
     .tab-btn-modern.inactive {
-        background: #f8fafc;
+        background: #ffffff;
         color: #475569;
         border-color: var(--border-color);
     }
@@ -116,15 +140,26 @@
     }
 
     .tab-btn-modern.active {
-        background: var(--brand-dark);
-        color: white;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+        background: var(--brand-dark) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+    }
+
+    .tab-badge-lock {
+        background: #f1f5f9;
+        border: 1px dashed #cbd5e1;
+        color: #64748b;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 700;
     }
 
     /* ПОИСК */
     .search-input-wrapper {
         position: relative;
         width: 100%;
+        margin-bottom: 14px;
     }
 
     .search-field {
@@ -142,7 +177,7 @@
 
     .search-field:focus {
         border-color: var(--brand-blue);
-        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
     }
 
     .search-icon-placeholder {
@@ -154,8 +189,15 @@
         font-size: 1.05rem;
     }
 
+    .layout-controls-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
     .layout-trigger {
-        background: #f1f5f9;
+        background: #ffffff;
         color: #475569;
         border: 1px solid #cbd5e1;
         padding: 8px 14px;
@@ -165,15 +207,19 @@
         cursor: pointer;
         transition: all 0.2s ease;
     }
+    .layout-trigger:hover {
+        background: #f8fafc;
+        color: var(--brand-dark);
+    }
 
     .layout-trigger.active {
-        background: #e0f2fe;
-        color: #0369a1;
-        border-color: #7dd3fc;
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        border-color: #7dd3fc !important;
         font-weight: 700;
     }
 
-    /* МЕТРИКИ ЗАПОЛНЕННОСТИ */
+    /* ПРОГРЕСС-БАР ЛОББИ */
     .lobby-status-title {
         display: flex;
         justify-content: space-between;
@@ -195,7 +241,7 @@
     }
 
     .progress-bar-fill {
-        background: linear-gradient(90deg, var(--brand-blue), var(--brand-blue-hover));
+        background: var(--brand-blue);
         height: 100%;
         border-radius: 6px;
     }
@@ -205,29 +251,32 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
         gap: 24px;
-        align-items: start; /* Важно: предотвращает деформацию соседей при раскрытии аккордеона */
+        align-items: start;
     }
 
-    /* КАРДИНАЛЬНО НОВАЯ КАРТОЧКА С АППАРАТНЫМ СВЕЧЕНИЕМ */
+    /* КАРТОЧКИ КОМАНД С ИСХОДНОЙ ЛОГИКОЙ НЕОНА */
     .premium-team-card {
-        background: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: 20px;
+        background: #ffffff !important;
+        border: 1px solid var(--border-color) !important;
+        border-top: 4px solid var(--brand-dark) !important;
+        border-radius: 16px;
         padding: 24px;
         display: flex;
         flex-direction: column;
-        transition: var(--transition-premium);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
-        cursor: pointer; /* Вся карточка теперь открывает распашку */
+        cursor: pointer;
+        z-index: 1;
+        box-shadow: 0 4px 15px -3px rgba(15, 23, 42, 0.03);
     }
 
     .premium-team-card::before {
         content: '';
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: radial-gradient(320px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.06), transparent 50%);
-        border-radius: 20px;
+        background: radial-gradient(320px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.05), transparent 50%);
+        border-radius: 16px;
         opacity: 0;
         transition: opacity 0.3s ease;
         pointer-events: none;
@@ -238,10 +287,16 @@
         opacity: 1;
     }
 
+    /* Исходная анимация включения неона без принудительного opacity: 0 на старте */
     .premium-team-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(14, 165, 233, 0.35);
-        box-shadow: 0 20px 35px -15px rgba(14, 165, 233, 0.15);
+        border-color: transparent !important;
+        border-top-color: var(--brand-blue) !important;
+        box-shadow: 0 15px 30px -10px rgba(14, 165, 233, 0.12), 0 0 20px 2px rgba(14, 165, 233, 0.2);
+    }
+
+    .premium-team-card:hover::after {
+        opacity: 1;
     }
 
     /* ШАПКА КАРТОЧКИ КОМАНДЫ */
@@ -250,65 +305,68 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        z-index: 2;
+        z-index: 3;
     }
 
     .team-main-clickable-info {
         display: flex;
         align-items: center;
         gap: 16px;
+        min-width: 0;
     }
 
     .team-avatar-box {
         width: 50px;
         height: 50px;
-        background: #f0f9ff;
-        color: #0369a1;
+        background: #f1f5f9;
+        color: var(--brand-dark);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.35rem;
         font-weight: 900;
-        border: 1px solid #e0f2fe;
+        border: 1px solid var(--border-color);
         transition: var(--transition-premium);
         flex-shrink: 0;
     }
 
     .premium-team-card:hover .team-avatar-box {
-        background: var(--brand-blue);
-        color: white;
-        border-color: var(--brand-blue);
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+        background: var(--brand-dark);
+        color: #ffffff;
+        border-color: var(--brand-dark);
     }
 
     .team-title-text {
-        margin: 0 0 3px 0;
-        font-size: 1.15rem;
+        margin: 0 0 4px 0;
+        font-size: 1.2rem;
         font-weight: 800;
         color: var(--brand-dark);
         letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* Кнопка перехода в профиль (изолированная) */
     .go-to-profile-btn {
         font-size: 0.75rem;
         color: var(--brand-blue);
         font-weight: 700;
         background: rgba(14, 165, 233, 0.05);
-        padding: 4px 8px;
+        padding: 4px 10px;
         border-radius: 6px;
         text-decoration: none;
         transition: all 0.2s;
-        display: inline-inline-flex;
+        display: inline-flex;
         align-items: center;
+        border: 1px solid rgba(14, 165, 233, 0.1);
     }
     .go-to-profile-btn:hover {
-        background: var(--brand-blue);
-        color: white;
+        background: var(--brand-dark);
+        color: #ffffff;
+        border-color: var(--brand-dark);
     }
 
-    /* Стрелка аккордеона */
     .accordion-toggle-arrow {
         width: 32px;
         height: 32px;
@@ -328,17 +386,16 @@
     .premium-team-card.active-accordion .accordion-toggle-arrow {
         transform: rotate(180deg);
         background: var(--brand-dark);
-        color: white;
+        color: #ffffff;
         border-color: var(--brand-dark);
     }
 
-    /* АППАРАТНАЯ РАСПАШКА ОКНА ИГРОКОВ (ACCORDION ACTION) */
     .team-accordion-content {
         max-height: 0;
         overflow: hidden;
         width: 100%;
         transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        z-index: 2;
+        z-index: 3;
         will-change: max-height;
     }
 
@@ -360,6 +417,7 @@
         padding: 12px 14px;
         border-radius: 12px;
         transition: all 0.2s;
+        gap: 12px;
     }
 
     .player-row:hover {
@@ -367,10 +425,9 @@
         border-color: #cbd5e1;
     }
 
-    /* Капитанский маркер */
     .captain-row-highlight {
-        border-left: 3px solid var(--brand-blue) !important;
-        background: rgba(14, 165, 233, 0.01);
+        border-left: 3px solid var(--brand-dark) !important;
+        background: rgba(15, 23, 42, 0.01);
     }
 
     .player-left-meta {
@@ -378,6 +435,8 @@
         align-items: center;
         gap: 12px;
         text-decoration: none;
+        min-width: 0;
+        flex: 1;
     }
 
     .player-avatar-mini {
@@ -386,12 +445,16 @@
         border-radius: 50%;
         object-fit: cover;
         border: 1px solid #cbd5e1;
+        flex-shrink: 0;
     }
 
     .player-name-text {
         font-weight: 600;
         font-size: 0.9rem;
         color: var(--brand-slate);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .player-left-meta:hover .player-name-text {
@@ -406,35 +469,47 @@
         background: #e2e8f0;
         padding: 3px 8px;
         border-radius: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px; /* Оптимизация переполнения длинных имен вузов */
     }
 
-    /* Layout View: Strict List */
     .flat-list-view {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
     }
 
-    /* ПУСТЫЕ СОСТОЯНИЯ */
     .empty-state-card {
         text-align: center;
         padding: 60px 24px;
         color: var(--text-muted);
         font-size: 1rem;
-        border: 1px dashed #cbd5e1;
-        border-radius: 16px;
-        background: rgba(248, 250, 252, 0.5);
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        background: #ffffff;
         font-weight: 600;
     }
 
-    @media (max-width: 900px) {
-        .dashboard-split-grid { grid-template-columns: 1fr; gap: 20px; }
+    /* МОБИЛЬНЫЙ РЕФАКТОРИНГ */
+    @media (max-width: 768px) {
+        .participants-layout { padding: 20px 0 40px 0; }
+        .participants-container { padding: 0 16px; }
+        .glass-card { padding: 24px 16px; border-radius: 16px; }
+        .header-main-title { font-size: 1.8rem; }
+        .dashboard-split-grid { grid-template-columns: 1fr; gap: 16px; }
+        .teams-display-grid { grid-template-columns: 1fr; gap: 16px; }
+        .tabs-nav-group { width: 100%; }
+        .tab-btn-modern { width: 100%; justify-content: center; box-sizing: border-box; }
+        .tab-badge-lock { width: 100%; text-align: center; box-sizing: border-box; }
+        .player-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .player-uni-tag { max-width: 100%; width: auto; align-self: flex-start; }
     }
 </style>
 
 <section class="participants-layout">
     <div class="participants-container">
 
-        <!-- ГЛАВНАЯ ПАНЕЛЬ ТУРНИРА -->
         <div class="glass-card" style="margin-bottom: 24px;">
             <div class="header-flex-wrapper">
                 <div>
@@ -442,20 +517,20 @@
                     <h1 class="header-main-title">
                         {{ tournament.title if tournament.title else tournament.name }}
                     </h1>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; font-weight: 500;">
-                        Event Date: <strong style="color: var(--brand-slate); font-weight: 600;">{{ formatted_date_str if formatted_date_str else 'To be announced soon' }}</strong>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0; font-weight: 500;">
+                        Event Date: <strong style="color: var(--brand-dark); font-weight: 600;">{{ formatted_date_str if formatted_date_str else 'To be announced soon' }}</strong>
                     </p>
                 </div>
 
                 <nav class="tabs-nav-group">
-                    <a href="{{ url_for('tournament_detail', id=tournament.id) }}" class="tab-btn-modern inactive">Overview</a>
-                    <a href="{{ url_for('tournament_participants', id=tournament.id) }}" class="tab-btn-modern active">Participants</a>
+                    <a href="{{ url_for('tournaments.tournament_detail', id=tournament.id) }}" class="tab-btn-modern inactive">Overview</a>
+                    <a href="{{ url_for('tournaments.tournament_participants', id=tournament.id) }}" class="tab-btn-modern active">Participants</a>
 
                     {% if tournament.past or tournament.status == 'completed' %}
-                        <a href="{{ url_for('tournament_results', id=tournament.id) }}" class="tab-btn-modern inactive">Leaderboard</a>
+                        <a href="{{ url_for('tournaments.tournament_results', id=tournament.id) }}" class="tab-btn-modern inactive">Results</a>
                     {% else %}
                         {% if tournament.league_type == 'open' %}
-                            <a href="{{ url_for('tournament_register', id=tournament.id) }}" class="tab-btn-modern" style="background: var(--brand-blue); color: white; font-weight:700;">Register Now</a>
+                            <a href="{{ url_for('tournaments.tournament_register', id=tournament.id) }}" class="tab-btn-modern" style="background: var(--brand-dark); color: white; font-weight:700;">Register Now</a>
                         {% elif tournament.league_type == 'qualification' %}
                             <span class="tab-badge-lock">🔒 By Qualification</span>
                         {% else %}
@@ -467,7 +542,6 @@
         </div>
 
         {% if teams %}
-            <!-- ПАНЕЛЬ ФИЛЬТРОВ И МЕТРИК ЛОББИ -->
             <div class="dashboard-split-grid">
                 <div class="glass-card" style="padding: 20px 24px !important; display: flex; flex-direction: column; justify-content: center;">
                     <div class="search-input-wrapper">
@@ -487,31 +561,27 @@
                     {% set percentage = (teams|length / max_teams) * 100 %}
                     <div class="lobby-status-title">
                         <span>Lobby Teams Filled:</span>
-                        <span style="color: var(--brand-blue); font-family: monospace; font-size: 0.95rem;">{{ teams|length }} / {{ max_teams }}</span>
+                        <span style="color: var(--brand-blue); font-family: monospace; font-size: 0.95rem; font-weight: 800;">{{ teams|length }} / {{ max_teams }}</span>
                     </div>
                     <div class="progress-bar-track">
                         <div class="progress-bar-fill" style="width: {{ percentage }}%;"></div>
                     </div>
-                    <small style="color: #94a3b8; font-size: 0.775rem; font-weight: 500;">Remaining team slots: <strong>{{ max_teams - teams|length if max_teams - teams|length >= 0 else 0 }}</strong></small>
+                    <small style="color: #94a3b8; font-size: 0.775rem; font-weight: 600;">Remaining team slots: <strong style="color: var(--brand-dark);">{{ max_teams - teams|length if max_teams - teams|length >= 0 else 0 }}</strong></small>
                 </div>
             </div>
 
-            <!-- СЕТКА С КОМАНДНЫМИ КАРТОЧКАМИ С РАСПАШКОЙ -->
             <div id="teams-grid" class="teams-display-grid">
                 {% for team in teams %}
-                    <!-- Клик по карточке плавно раскрывает игроков внутри неё -->
                     <div class="premium-team-card" data-team-card onclick="toggleTeamAccordion(this)">
 
-                        <!-- Шапка карточки -->
                         <div class="team-card-header">
                             <div class="team-main-clickable-info">
                                 <div class="team-avatar-box">
                                     {{ team.name[:1]|upper if team.name else '?' }}
                                 </div>
-                                <div>
+                                <div style="min-width: 0;">
                                     <h3 class="team-title-text" data-search-target>{{ team.name }}</h3>
-                                    <!-- Ссылка на профиль изолирована и не мешает открытию спойлера -->
-                                    <a href="/tournaments/{{ tournament.id }}/team/{{ team.name }}" class="go-to-profile-btn" onclick="event.stopPropagation();">
+                                    <a href="{{ url_for('tournaments.team_profile', tournament_id=tournament.id, team_name=team.name) }}" class="go-to-profile-btn" onclick="event.stopPropagation();">
                                         Профиль ➔
                                     </a>
                                 </div>
@@ -519,13 +589,11 @@
                             <div class="accordion-toggle-arrow">▼</div>
                         </div>
 
-                        <!-- РАСПАХИВАЮЩЕЕСЯ ОКНО С ИГРОКАМИ КОМАНДЫ -->
                         <div class="team-accordion-content">
                             <div class="roster-inner-box">
                                 {% for p in team.players %}
                                     <div class="player-row {% if loop.first %}captain-row-highlight{% endif %}">
-                                        <!-- Клик по игроку ведёт на его страницу и изолирован от карточки -->
-                                        <a href="{{ url_for('profile', user_id=p.user_id) }}" class="player-left-meta" onclick="event.stopPropagation();">
+                                        <a href="{{ url_for('auth.profile', user_id=p.user_id) }}" class="player-left-meta" onclick="event.stopPropagation();">
                                             <img src="{% if p.user and p.user.avatar and p.user.avatar != 'default.png' %}{{ url_for('static', filename='profile_pics/' + p.user.avatar) }}{% else %}https://ui-avatars.com/api/?name={{ p.user.name if p.user else 'Unknown' }}&background=f1f5f9&color=475569{% endif %}" class="player-avatar-mini" alt="User">
                                             <span class="player-name-text">
                                                 {{ p.user.name if p.user else "Unknown Player" }}
@@ -544,45 +612,33 @@
                 {% endfor %}
             </div>
 
-            <!-- Заглушка при неудачном поиске -->
             <div id="no-search-results" class="empty-state-card" style="display: none; padding: 40px 20px;">
                 🔍 No registered teams found matching that criteria.
             </div>
 
         {% else %}
-            <!-- ПУСТОЕ СОСТОЯНИЕ ТУРНИРА -->
             <div class="empty-state-card">
                 <div style="font-size: 2.5rem; margin-bottom: 16px;">👥</div>
                 <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: var(--brand-dark); font-weight: 800;">Roster is Currently Empty</h4>
                 <p style="color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.95rem; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500;">No teams have secured their entry slots for this tournament track segment yet.</p>
-                <a href="{{ url_for('tournament_register', id=tournament.id) }}" class="tab-btn-modern" style="background: var(--brand-blue); color: white; padding: 12px 24px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); text-decoration: none;">Be the First to Register</a>
+                <a href="{{ url_for('tournaments.tournament_register', id=tournament.id) }}" class="tab-btn-modern" style="background: var(--brand-dark); color: white; padding: 12px 24px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); text-decoration: none;">Be the First to Register</a>
             </div>
         {% endif %}
 
     </div>
 </section>
 
-<!-- Фронтенд-логика аппаратной распашки и фильтрации -->
 <script>
-    // Высокопроизводительный трекинг мыши для эффекта неонового Glow
-    function initRevealTracking() {
-        document.querySelectorAll('[data-team-card]').forEach(card => {
-            card.removeEventListener('mousemove', trackMouse);
-            card.addEventListener('mousemove', trackMouse);
+    document.querySelectorAll('[data-team-card]').forEach(card => {
+        card.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            this.style.setProperty('--x', `${x}px`);
+            this.style.setProperty('--y', `${y}px`);
         });
-    }
+    });
 
-    function trackMouse(e) {
-        const rect = this.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        this.style.setProperty('--x', `${x}px`);
-        this.style.setProperty('--y', `${y}px`);
-    }
-
-    initRevealTracking();
-
-    // Функция плавной распашки окна игроков
     function toggleTeamAccordion(cardElement) {
         cardElement.classList.toggle('active-accordion');
         const content = cardElement.querySelector('.team-accordion-content');
@@ -594,7 +650,6 @@
         }
     }
 
-    // Живой поиск и переключение макетов вида
     const searchInput = document.getElementById('team-search');
     const teamsGrid = document.getElementById('teams-grid');
     const noResults = document.getElementById('no-search-results');
@@ -623,15 +678,16 @@
             noResults.style.display = hasVisibleCards ? 'none' : 'block';
         });
 
-        // Переключения Grid / List с мгновенным перерасчетом раскрытых окон
         gridBtn.addEventListener('click', function() {
             teamsGrid.classList.remove('flat-list-view');
             gridBtn.classList.add('active');
             listBtn.classList.remove('active');
 
-            document.querySelectorAll('.premium-team-card.active-accordion .team-accordion-content').forEach(c => {
-                c.style.maxHeight = c.scrollHeight + "px";
-            });
+            setTimeout(() => {
+                document.querySelectorAll('.premium-team-card.active-accordion .team-accordion-content').forEach(c => {
+                    c.style.maxHeight = c.scrollHeight + "px";
+                });
+            }, 50);
         });
 
         listBtn.addEventListener('click', function() {
@@ -639,9 +695,11 @@
             listBtn.classList.add('active');
             gridBtn.classList.remove('active');
 
-            document.querySelectorAll('.premium-team-card.active-accordion .team-accordion-content').forEach(c => {
-                c.style.maxHeight = c.scrollHeight + "px";
-            });
+            setTimeout(() => {
+                document.querySelectorAll('.premium-team-card.active-accordion .team-accordion-content').forEach(c => {
+                    c.style.maxHeight = c.scrollHeight + "px";
+                });
+            }, 50);
         });
     }
 </script>

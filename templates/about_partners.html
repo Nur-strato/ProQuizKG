@@ -2,51 +2,54 @@
 {% block title %}Partners | ProQuiz.kg{% endblock %}
 
 {% block body %}
-<!-- Ультимативный Neo-Bento UI для бренд-хаба партнёров -->
 <style>
     :root {
         --brand-blue: #0ea5e9;
         --brand-blue-hover: #0284c7;
-        --brand-dark: #0f172a;
-        --brand-slate: #1e293b;
         --text-muted: #64748b;
-        --border-color: #e2e8f0;
-        --glass-panel: rgba(255, 255, 255, 0.85);
-        --glass-border: rgba(226, 232, 240, 0.95);
-        --transition-premium: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        --border-color: rgba(0, 0, 0, 0.08);
+        --transition-premium: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+        background: #f8fafc !important;
     }
 
     .partners-layout {
-        padding: 40px 0 60px 0;
-        background: radial-gradient(60% 40% at 50% 0%, rgba(14, 165, 233, 0.04), transparent);
+        padding: 50px 0 60px 0;
+        background: #f8fafc !important;
         min-height: calc(100vh - 70px);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .partners-container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto;
         padding: 0 24px;
     }
 
-    /* GLASS BENTO КАРТОЧКИ */
+    /* GLASS-CARD В СТИЛЕ СТРАНИЦЫ ОРГАНИЗАТОРОВ */
     .glass-card {
-        background: var(--glass-panel);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 32px;
-        box-shadow: 0 10px 40px -15px rgba(15, 23, 42, 0.05);
-        transition: var(--transition-premium);
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 40px;
         position: relative;
         overflow: hidden;
     }
 
-    /* ЗАГЛОВОК ХАБА */
     .partners-header-block {
         text-align: center;
-        margin-bottom: 32px;
+        margin-bottom: 50px;
+    }
+
+    .header-top-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 16px;
     }
 
     .partners-badge {
@@ -60,34 +63,51 @@
         letter-spacing: 0.05em;
         border: 1px solid rgba(14, 165, 233, 0.15);
         display: inline-block;
-        margin-bottom: 12px;
+    }
+
+    /* УПРАВЛЯЮЩАЯ КНОПКА */
+    .admin-upload-trigger {
+        background: var(--navy) !important;
+        color: #ffffff !important;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        transition: var(--transition-premium);
+        cursor: pointer;
+    }
+
+    .admin-upload-trigger:hover {
+        background: #1e293b !important;
     }
 
     .partners-main-title {
-        font-size: 2.5rem;
-        font-weight: 900;
-        margin: 0 0 12px 0;
-        color: var(--brand-dark);
-        letter-spacing: -0.03em;
+        font-size: 2.3rem;
+        font-weight: 800;
+        margin: 0 0 20px 0;
+        color: var(--navy);
+        text-align: center;
+        width: 100%;
     }
 
     .partners-subtitle {
-        color: var(--text-muted);
+        color: var(--text-color);
         font-size: 1.1rem;
-        line-height: 1.6;
-        max-width: 720px;
+        line-height: 1.8;
+        max-width: 800px;
         margin: 0 auto;
         font-weight: 500;
     }
 
-    /* СЕКЦИОННЫЕ ЗАГОЛОВКИ */
     .tier-section-title {
-        font-size: 0.85rem;
+        font-size: 1.5rem;
         font-weight: 800;
-        color: var(--brand-blue);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin: 0 0 20px 0;
+        color: var(--navy);
+        margin: 0 0 25px 0;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -97,67 +117,62 @@
         content: '';
         flex-grow: 1;
         height: 1px;
-        background: linear-gradient(90deg, #cbd5e1, transparent);
+        background: var(--border-color);
     }
 
-    /* ГЕНЕРАЛЬНЫЙ ТИР (БОЛЬШИЕ КАРТОЧКИ) */
     .premium-partner-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
+        gap: 25px;
     }
 
     .premium-partner-card {
-        background: #ffffff;
+        background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 24px;
+        border-radius: var(--radius);
+        padding: 30px 25px;
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 20px;
         transition: var(--transition-premium);
         position: relative;
-        overflow: hidden;
+        cursor: pointer;
     }
-
-    .premium-partner-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: radial-gradient(240px circle at var(--x, 0px) var(--y, 0px), rgba(14, 165, 233, 0.05), transparent 50%);
-        border-radius: 16px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-    }
-
-    .premium-partner-card:hover::before { opacity: 1; }
 
     .premium-partner-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(14, 165, 233, 0.35);
-        box-shadow: 0 12px 24px -10px rgba(14, 165, 233, 0.15);
+        border-color: rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
     }
 
     .partner-logo-frame {
-        width: 52px;
-        height: 52px;
+        width: 60px;
+        height: 60px;
         background: #f8fafc;
         border: 1px solid var(--border-color);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.4rem;
         flex-shrink: 0;
-        transition: var(--transition-premium);
+        overflow: hidden;
     }
 
-    .premium-partner-card:hover .partner-logo-frame {
-        background: #f0f9ff;
-        border-color: #7dd3fc;
-        color: var(--brand-blue);
+    .partner-logo-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 4px;
+    }
+
+    .partner-logo-frame.avatar-mode {
+        border-radius: 50% !important;
+        border: 2px solid var(--navy);
+        background: #ffffff;
+    }
+
+    .partner-logo-frame.avatar-mode img {
+        object-fit: cover;
+        padding: 0;
     }
 
     .partner-info-meta {
@@ -165,41 +180,36 @@
     }
 
     .partner-name-text {
-        margin: 0 0 2px 0;
-        font-size: 1.1rem;
+        margin: 0 0 4px 0;
+        font-size: 1.2rem;
         font-weight: 800;
-        color: var(--brand-dark);
-        letter-spacing: -0.01em;
+        color: var(--navy);
     }
 
     .partner-status-pill {
-        font-size: 0.65rem;
-        font-weight: 800;
-        background: #e0f2fe;
-        color: #0369a1;
-        padding: 2px 6px;
-        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #0083e4;
         text-transform: uppercase;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.05em;
     }
 
-    /* АКАДЕМИЧЕСКИЙ ТИР (КОМПАКТНЫЙ ГРИД) */
+    /* АКАДЕМИЧЕСКИЙ ТИР ВУЗОВ */
     .eco-partner-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 14px;
-        margin-bottom: 40px;
+        gap: 15px;
     }
 
     .eco-partner-chip {
-        background: #ffffff;
+        background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 14px;
+        border-radius: var(--radius);
+        padding: 16px;
         text-align: center;
         font-weight: 700;
-        font-size: 0.925rem;
-        color: var(--brand-slate);
+        font-size: 0.95rem;
+        color: var(--text-color);
         transition: var(--transition-premium);
         display: flex;
         align-items: center;
@@ -207,182 +217,576 @@
         min-height: 54px;
     }
 
-    .eco-partner-chip:hover {
-        transform: translateY(-2px);
-        border-color: #cbd5e1;
-        color: var(--brand-dark);
-        box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.08);
-        background: #f8fafc;
-    }
-
-    /* НЕОНОВЫЙ CTA-БЛОК ДЛЯ ИНВЕСТОРОВ */
+    /* СТИЛИЗАЦИЯ ИНВЕСТ-БАННЕРА */
     .sponsor-pitch-banner {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        background: var(--card-bg) !important;
         padding: 40px;
-        border-radius: 20px;
+        border-radius: var(--radius);
         text-align: center;
-        position: relative;
+        border: 1px solid var(--border-color);
     }
 
     .pitch-highlight-title {
-        color: #ffffff;
+        color: var(--navy);
         font-size: 1.4rem;
-        font-weight: 900;
-        margin: 0 0 10px 0;
-        letter-spacing: -0.02em;
+        font-weight: 800;
+        margin-bottom: 12px;
     }
 
     .pitch-desc-text {
-        color: #94a3b8;
+        color: var(--text-color);
         font-size: 0.95rem;
         line-height: 1.6;
-        max-width: 600px;
-        margin: 0 auto 24px auto;
-        font-weight: 500;
-    }
-
-    .pitch-benefits-list {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-bottom: 28px;
-    }
-
-    .benefit-tag-item {
-        font-size: 0.75rem;
-        font-weight: 700;
-        background: rgba(255, 255, 255, 0.04);
-        color: #cbd5e1;
-        padding: 6px 14px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        max-width: 650px;
+        margin: 0 auto 25px auto;
     }
 
     .pitch-connect-btn {
-        background: var(--brand-blue);
+        background: #0083e4;
         color: white;
-        padding: 12px 28px;
-        border-radius: 10px;
+        padding: 12px 30px;
+        border-radius: 6px;
         font-weight: 700;
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+        display: inline-block;
+        box-shadow: 0 4px 6px rgba(0,131,228,0.15);
+    }
+
+    /* СЕТКА ДЛЯ СЛИТНОГО БАННЕРА СОТРУДНИЧЕСТВА */
+    .collab-bento-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+        text-align: left;
+    }
+
+    .collab-bento-card {
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
         transition: var(--transition-premium);
     }
 
-    .pitch-connect-btn:hover {
-        background: var(--brand-blue-hover);
+    .collab-bento-card:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.15);
         transform: translateY(-2px);
-        box-shadow: 0 6px 24px rgba(14, 165, 233, 0.45);
     }
 
+    .collab-card-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--navy);
+        margin: 0 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .collab-card-desc {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    /* СТИЛЬ МОДАЛЬНЫХ ОКОН */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0; pointer-events: none;
+        transition: all 0.3s ease;
+    }
+    .modal-overlay.active {
+        opacity: 1; pointer-events: auto;
+    }
+
+    .upload-modal {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 35px;
+        width: 100%;
+        max-width: 440px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* ДВУХКОЛОНОЧНАЯ КАРТОЧКА ИНФОРМАЦИИ */
+    .info-modal {
+        max-width: 625px;
+        width: 90%;
+    }
+
+    .info-modal-layout {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .info-modal-img-frame {
+        width: 130px;
+        height: 145px;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        overflow: hidden;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* ПРЕМИУМ-ЭЛЛИПС ДЛЯ ФИЗ. ЛИЦ */
+    .info-modal-img-frame.ellipse-mode {
+        border-radius: 50% / 35% !important;
+        border: 3px solid var(--navy);
+        height: 175px;
+    }
+
+    .info-modal-img-frame img {
+        width: 100%; height: 100%; object-fit: contain;
+    }
+    .info-modal-img-frame.ellipse-mode img {
+        object-fit: cover;
+    }
+
+    .info-modal-content {
+        flex-grow: 1;
+    }
+    .info-modal-title {
+        font-size: 1.6rem; font-weight: 800; color: var(--navy); margin: 0 0 4px 0;
+    }
+    .info-modal-subtitle {
+        color: #0083e4; font-weight: 700; font-size: 0.9rem; margin: 0 0 16px 0; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .info-modal-bio {
+        font-size: 1rem; line-height: 1.7; color: var(--text-color); margin-bottom: 20px;
+    }
+
+    .info-modal-meta-footer {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--border-color);
+        padding-top: 20px;
+        margin-top: 10px;
+    }
+    .meta-footer-item {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .meta-footer-item strong {
+        color: var(--navy);
+    }
+    .meta-footer-item a {
+        color: #0083e4;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-premium);
+    }
+    .meta-footer-item a:hover {
+        text-decoration: underline;
+    }
+
+    .modal-title { font-size: 1.3rem; font-weight: 800; color: var(--navy); margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-color); }
+    .form-control { padding: 11px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 0.95rem; outline: none; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { background: #f1f5f9; color: #475569; padding: 10px 18px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; }
+
     @media (max-width: 768px) {
-        .glass-card { padding: 24px; }
-        .sponsor-pitch-banner { padding: 32px 20px; }
+        .collab-bento-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .info-modal-layout { flex-direction: column; align-items: center; text-align: center; }
+        .info-modal-meta-footer { flex-direction: column; gap: 10px; align-items: center; }
     }
 </style>
 
 <section class="partners-layout">
     <div class="partners-container">
 
-        <!-- PREMIUM HEADER CARD -->
         <div class="glass-card partners-header-block">
-            <span class="partners-badge">Ecosystem Partners</span>
-            <h1 class="partners-main-title">🤝 Партнёры Лиги</h1>
+            <div class="header-top-flex">
+                <span class="partners-badge">Ecosystem Partners</span>
+
+                {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
+                    <button class="admin-upload-trigger" onclick="openUploadModal()">
+                        Управление медиа
+                    </button>
+                {% endif %}
+            </div>
+            <h1 class="partners-main-title">Партнёры Лиги</h1>
             <p class="partners-subtitle">
-                Мы активно сотрудничаем с передовыми университетами, брендами и молодёжными организациями, которые инвестируют в развитие студенческого потенциала и поддерживают интеллектуальные инициативы Кыргызстана.
+                Мы активно сотрудничаем с передовыми университетами, брендами и молодёжными организациями, которые поддерживают интеллектуальные инициативы Кыргызстана.
             </p>
         </div>
 
-        <!-- КАТЕГОРИЯ 1: ГЕНЕРАЛЬНЫЕ ПАРТНЕРЫ -->
-        <div class="glass-card" style="padding: 24px !important; margin-bottom: 24px;">
+        <div class="glass-card" style="padding: 40px !important; margin-bottom: 50px;">
             <h3 class="tier-section-title">
-                👑 Генеральные институциональные партнеры
+                General Institutional Partners
             </h3>
 
             <div class="premium-partner-grid">
-                <div class="premium-partner-card" data-partner-hover-card>
-                    <div class="partner-logo-frame">🏛️</div>
-                    <div class="partner-info-meta">
-                        <h4 class="partner-name-text">AUCA Quiz Club</h4>
-                        <span class="partner-status-pill">Founding Member</span>
+                <!-- AUCA -->
+                <div class="premium-partner-card" onclick="openInfoModal(this)"
+                     data-name="AUCA"
+                     data-status="General Anchor"
+                     data-img="/static/images/partners/auca_logo.png"
+                     data-type="brand"
+                     data-email="{{ saved_data.get('auca', {}).get('email', 'auca@auca.kg') }}"
+                     data-site="{{ saved_data.get('auca', {}).get('site', 'https://auca.kg') }}"
+                     data-bio="Американский Университет в Центральной Азии (АУЦА) — ведущий инновационный вуз региона, предоставляющий образование мирового уровня по системе Либеральных Искусств. Является ключевой площадкой и генеральным партнером всех флагманских мероприятий нашей лиги.">
+                    <div class="partner-logo-frame">
+                        <img src="/static/images/partners/auca_logo.png" alt="" onerror="this.style.display='none';">
                     </div>
-                </div>
-
-                <div class="premium-partner-card" data-partner-hover-card>
-                    <div class="partner-logo-frame">🎓</div>
                     <div class="partner-info-meta">
                         <h4 class="partner-name-text">AUCA</h4>
                         <span class="partner-status-pill">General Anchor</span>
                     </div>
                 </div>
 
-                <div class="premium-partner-card" data-partner-hover-card>
-                    <div class="partner-logo-frame">⚡</div>
+                <!-- SIDP -->
+                <div class="premium-partner-card" onclick="openInfoModal(this)"
+                     data-name="SIDP"
+                     data-status="Student Initiative"
+                     data-img="/static/images/partners/sidp_logo.png"
+                     data-type="brand"
+                     data-email="{{ saved_data.get('sidp', {}).get('email', 'sidp@auca.kg') }}"
+                     data-site="{{ saved_data.get('sidp', {}).get('site', 'https://auca.kg/en/sidp/') }}"
+                     data-bio="Student Initiatives Development Program (SIDP) — уникальная программа поддержки молодежных проектов в АУЦА. Офис SIDP содействует в административной, financial и логистической организации турниров лиги.">
+                    <div class="partner-logo-frame">
+                        <img src="/static/images/partners/sidp_logo.png" alt="" onerror="this.style.display='none';">
+                    </div>
                     <div class="partner-info-meta">
-                        <h4 class="partner-name-text">ProQuiz Tech Team</h4>
-                        <span class="partner-status-pill">Core Engine</span>
+                        <h4 class="partner-name-text">SIDP</h4>
+                        <span class="partner-status-pill">Student Initiative</span>
+                    </div>
+                </div>
+
+                <!-- AUCA Advising Center -->
+                <div class="premium-partner-card" onclick="openInfoModal(this)"
+                     data-name="AUCA Advising Center"
+                     data-status="Academic Guide"
+                     data-img="/static/images/partners/advising_logo.png"
+                     data-type="brand"
+                     data-email="{{ saved_data.get('advising', {}).get('email', 'advising@auca.kg') }}"
+                     data-site="{{ saved_data.get('advising', {}).get('site', '') }}"
+                     data-bio="Академический консультационный центр университета, помогающий студентам выстраивать индивидуальные траектории обучения и поддерживающий интеллектуальные клубы как важнейшую часть внеучебного развития.">
+                    <div class="partner-logo-frame">
+                        <img src="/static/images/partners/advising_logo.png" alt="" onerror="this.style.display='none';">
+                    </div>
+                    <div class="partner-info-meta">
+                        <h4 class="partner-name-text">AUCA Advising Center</h4>
+                        <span class="partner-status-pill">Academic Guide</span>
+                    </div>
+                </div>
+
+                <!-- Formula Math -->
+                <div class="premium-partner-card" onclick="openInfoModal(this)"
+                     data-name="Formula Math"
+                     data-status="Tutoring Center"
+                     data-img="/static/images/partners/formula_logo.png"
+                     data-type="brand"
+                     data-email="{{ saved_data.get('formula', {}).get('email', 'info@formulamath.kg') }}"
+                     data-site="{{ saved_data.get('formula', {}).get('site', '') }}"
+                     data-bio="Профессиональный центр обучения математике и точным наукам. Formula Math выступает составителем и контент-партнером специализированных математических и логических раундов в рамках межвузовских соревнований.">
+                    <div class="partner-logo-frame">
+                        <img src="/static/images/partners/formula_logo.png" alt="" onerror="this.style.display='none';">
+                    </div>
+                    <div class="partner-info-meta">
+                        <h4 class="partner-name-text">Formula Math</h4>
+                        <span class="partner-status-pill">Tutoring Center</span>
+                    </div>
+                </div>
+
+                <!-- AUCA Quiz Club -->
+                <div class="premium-partner-card" onclick="openInfoModal(this)"
+                     data-name="AUCA Quiz Club"
+                     data-status="Founding Member"
+                     data-img="/static/images/partners/quiz_logo.png"
+                     data-type="brand"
+                     data-email="{{ saved_data.get('quiz_club', {}).get('email', 'quizclub@auca.kg') }}"
+                     data-site="{{ saved_data.get('quiz_club', {}).get('site', '') }}"
+                     data-bio="Студенческий клуб, ставший первоисточником и ядром лиги ProQuiz.kg. Команда клуба пишет уникальные базы вопросов, настраивает серверы и координирует игровое комьюнити.">
+                    <div class="partner-logo-frame">
+                        <img src="/static/images/partners/quiz_logo.png" alt="" onerror="this.style.display='none';">
+                    </div>
+                    <div class="partner-info-meta">
+                        <h4 class="partner-name-text">AUCA Quiz Club</h4>
+                        <span class="partner-status-pill">Founding Member</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- КАТЕГОРИЯ 2: АКАДЕМИЧЕСКАЯ ЭКОСИСТЕМА -->
-        <div class="glass-card" style="padding: 24px !important; margin-bottom: 24px;">
-            <h3 class="tier-section-title" style="color: var(--brand-dark);">
-                🏛️ Академическая экосистема лиги
+        <div class="glass-card" style="padding: 40px !important; margin-bottom: 50px;">
+            <h3 class="tier-section-title">
+                Генеральные амбассадоры и меценаты
             </h3>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin: -8px 0 16px 0; font-weight: 500;">
+
+            <div class="premium-partner-grid">
+                <!-- Uulkan Kambarlieva -->
+                <div class="premium-partner-card partner-personal" onclick="openInfoModal(this)"
+                     data-name="Uulkan Kambarlieva"
+                     data-status="Honorary Partner"
+                     data-img="/static/images/partners/uulkan_avatar.jpg"
+                     data-type="personal"
+                     data-email="{{ saved_data.get('uulkan', {}).get('email', 'uulkan.k@proquiz.kg') }}"
+                     data-site="{{ saved_data.get('uulkan', {}).get('site', '') }}"
+                     data-bio="Почетный патрон и генеральный амбассадор лиги. Оказывает неоценимую личную и стратегическую поддержку интеллектуальному движению, финансирует призовые фонды ключевых турниров и развивает образовательные гранты для талантливой молодежи.">
+                    <div class="partner-logo-frame avatar-mode">
+                        <img src="/static/images/partners/uulkan_avatar.jpg" alt="" onerror="this.style.display='none';">
+                    </div>
+                    <div class="partner-info-meta">
+                        <h4 class="partner-name-text">Uulkan Kambarlieva</h4>
+                        <span class="partner-status-pill">Honorary Partner</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card" style="padding: 40px !important; margin-bottom: 50px;">
+            <h3 class="tier-section-title">
+                Академическая экосистема лиги
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); margin: -10px 0 20px 0; font-weight: 500;">
                 Официальные площадки проведения очных туров и вузы-участники межвузовского чемпионата:
             </p>
 
             <div class="eco-partner-grid">
-                <div class="eco-partner-chip">КРСУ</div>
-                <div class="eco-partner-chip">МУК</div>
-                <div class="eco-partner-chip">КНУ</div>
-                <div class="eco-partner-chip">Университет Манас</div>
-                <div class="eco-partner-chip">Ала-Тоо</div>
-                <div class="eco-partner-chip">БГУ</div>
+                <div class="eco-partner-chip">Ala-Too</div>
+                <div class="eco-partner-chip">AUCA</div>
+                <div class="eco-partner-chip">BSU</div>
+                <div class="eco-partner-chip">IUK</div>
+                <div class="eco-partner-chip">KNU</div>
+                <div class="eco-partner-chip">KRSU</div>
+                <div class="eco-partner-chip">Manas</div>
+                <div class="eco-partner-chip">OSCE</div>
+                <div class="eco-partner-chip">Salymbekov</div>
             </div>
         </div>
 
-        <!-- НЕОНОВЫЙ ИНВЕСТ-БЛОК ДЛЯ НОВЫХ БРЕНДОВ -->
-        <div class="glass-card sponsor-pitch-banner">
-            <h3 class="pitch-highlight-title">Хотите поддержать интеллектуальное движение?</h3>
-            <p class="pitch-desc-text">
-                Мы предлагаем спонсорам и брендам широкие возможности интеграции в экосистему: от нативного присутствия в соцсетях лиги до брендирования игровых раундов, размещения логотипов на платформе и интеграции на Гранд-финале.
+        <!-- НОВЫЙ ИНТЕРАКТИВНЫЙ БАННЕР СОТРУДНИЧЕСТВА (BENTO-ВАРИАНТ) -->
+        <div class="glass-card sponsor-pitch-banner" style="padding: 45px 40px !important;">
+            <h3 class="pitch-highlight-title" style="font-size: 1.8rem; letter-spacing: -0.02em;">
+                Развивайте экосистему интеллекта вместе с нами
+            </h3>
+            <p class="pitch-desc-text" style="max-width: 750px; font-size: 1rem; color: var(--text-color);">
+                Лига ProQuiz.kg — это концентрация самых сильных, амбициозных и перспективных студентов Кыргызстана. Выберите свой формат участия в проекте:
             </p>
 
-            <div class="pitch-benefits-list">
-                <span class="benefit-tag-item">🎯 Целевая аудитория</span>
-                <span class="benefit-tag-item">📢 Брендинг раундов</span>
-                <span class="benefit-tag-item">🏆 Спец-номинации</span>
-                <span class="benefit-tag-item">📊 Трафик на платформе</span>
+            <div class="collab-bento-grid">
+                <!-- Карточка для Вузов -->
+                <div class="collab-bento-card">
+                    <h4 class="collab-card-title">
+                        <span style="color: var(--brand-blue);">01.</span> Университетам
+                    </h4>
+                    <p class="collab-card-desc">
+                        Принимайте межвузовские турниры в <strong>вашем университете</strong>. Повышайте престиж и узнаваемость университета среди студентов и абитуриентов. Развивайте эрудицию студентов и давайте им возможность участвовать в турнирах за призы.
+                    </p>
+                </div>
+
+                <!-- Карточка для Брендов -->
+                <div class="collab-bento-card">
+                    <h4 class="collab-card-title">
+                        <span style="color: var(--brand-blue);">02.</span> Споносорам и брендам
+                    </h4>
+                    <p class="collab-card-desc">
+                        Получите прямой доступ к активной студенческой аудитории. <strong>Брендируйте игровые раунды</strong>, интегрируйте свой продукт в экосистему лиги и награждайте финалистов фирменным мерчем.
+                    </p>
+                </div>
+
+                <!-- Карточка для Меценатов -->
+                <div class="collab-bento-card">
+                    <h4 class="collab-card-title">
+                        <span style="color: var(--brand-blue);">03.</span> Меценатам 
+                    </h4>
+                    <p class="collab-card-desc">
+                       <strong>Поддержите</strong> интеллектуальное движение в <strong>Кыргызстане</strong>. Финансируйте гранты, формируйте призовые фонды или создавайте авторские пакеты вопросов.
+                    </p>
+                </div>
             </div>
 
-            <a href="https://t.me/NurRay0" target="_blank" class="pitch-connect-btn">
-                <span>🚀</span> Стать партнёром проекта
-            </a>
+            <div style="margin-top: 15px;">
+                <a href="https://t.me/NurRay0" target="_blank" class="pitch-connect-btn" style="transition: var(--transition-premium);">
+                    Обсудить партнерство или интеграцию
+                </a>
+            </div>
         </div>
 
     </div>
 </section>
 
-<!-- Интерактивный JS-контроллер Glow-эффекта для карточек -->
+<div id="infoModal" class="modal-overlay" onclick="closeInfoModal(event)">
+    <div class="upload-modal info-modal" onclick="event.stopPropagation()">
+
+        <div class="info-modal-layout">
+            <div id="modalImgFrame" class="info-modal-img-frame">
+                <img id="modalPartnerImg" src="" alt="">
+            </div>
+
+            <div class="info-modal-content">
+                <h3 id="modalPartnerName" class="info-modal-title">Название</h3>
+                <p id="modalPartnerStatus" class="info-modal-subtitle">Статус</p>
+                <div id="modalPartnerBio" class="info-modal-bio">Биография</div>
+            </div>
+        </div>
+
+        <div class="info-modal-meta-footer">
+            <div id="modalEmailContainer" class="meta-footer-item">
+                <strong>Email:</strong> <span id="modalPartnerEmail"></span>
+            </div>
+            <div id="modalSiteContainer" class="meta-footer-item">
+                <strong>Сайт:</strong> <a id="modalPartnerSite" href="" target="_blank">перейти</a>
+            </div>
+        </div>
+
+        <div style="text-align: right; margin-top: 25px;">
+            <button class="btn-cancel" onclick="document.getElementById('infoModal').classList.remove('active')">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<div id="uploadModal" class="modal-overlay" onclick="closeUploadModal(event)">
+    <div class="upload-modal" onclick="event.stopPropagation()">
+        <h3 class="modal-title">Управление данными партнёра</h3>
+
+        <form id="partnerUploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="partner_select">Выберите партнёра / Офис</label>
+                <select name="partner_id" id="partner_select" class="form-control">
+                    <option value="auca">AUCA</option>
+                    <option value="sidp">SIDP</option>
+                    <option value="advising">AUCA Advising Center</option>
+                    <option value="formula">Formula Math Center</option>
+                    <option value="quiz_club">AUCA Quiz Club</option>
+                    <option value="uulkan">Uulkan Kambarlieva</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="file_input">Обновить изображение (PNG или JPG)</label>
+                <input type="file" name="file" id="file_input" class="form-control" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label for="email_input">Контактный Email</label>
+                <input type="email" name="partner_email" id="email_input" class="form-control" placeholder="example@domain.com">
+            </div>
+
+            <div class="form-group">
+                <label for="site_input">Ссылка на официальный сайт</label>
+                <input type="url" name="partner_site" id="site_input" class="form-control" placeholder="https://example.com">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="document.getElementById('uploadModal').classList.remove('active')">Отмена</button>
+                <button type="submit" class="pitch-connect-btn" style="padding: 10px 20px; font-size: 0.85rem; box-shadow: none;">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    document.querySelectorAll('[data-partner-hover-card]').forEach(card => {
-        card.addEventListener('mousemove', e => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--x', `${x}px`);
-            card.style.setProperty('--y', `${y}px`);
+    function openInfoModal(cardElement) {
+        const name = cardElement.getAttribute('data-name');
+        const status = cardElement.getAttribute('data-status');
+        const imgPath = cardElement.getAttribute('data-img');
+        const type = cardElement.getAttribute('data-type');
+        const bio = cardElement.getAttribute('data-bio');
+        const email = cardElement.getAttribute('data-email');
+        const site = cardElement.getAttribute('data-site');
+
+        document.getElementById('modalPartnerName').innerText = name;
+        document.getElementById('modalPartnerStatus').innerText = status;
+        document.getElementById('modalPartnerBio').innerText = bio;
+        document.getElementById('modalPartnerImg').src = imgPath;
+
+        const frame = document.getElementById('modalImgFrame');
+        if (type === 'personal') {
+            frame.classList.add('ellipse-mode');
+        } else {
+            frame.classList.remove('ellipse-mode');
+        }
+
+        const emailContainer = document.getElementById('modalEmailContainer');
+        if (email && email.trim() !== "") {
+            document.getElementById('modalPartnerEmail').innerText = email;
+            emailContainer.style.display = "flex";
+        } else {
+            emailContainer.style.display = "none";
+        }
+
+        const siteContainer = document.getElementById('modalSiteContainer');
+        if (site && site.trim() !== "") {
+            const siteLink = document.getElementById('modalPartnerSite');
+            siteLink.href = site;
+            siteLink.innerText = site.replace('https://', '').replace('http://', '').split('/')[0];
+            siteContainer.style.display = "flex";
+        } else {
+            siteContainer.style.display = "none";
+        }
+
+        document.getElementById('infoModal').classList.add('active');
+    }
+
+    function closeInfoModal(e) {
+        if(e.target.classList.contains('modal-overlay')) {
+            document.getElementById('infoModal').classList.remove('active');
+        }
+    }
+
+    function openUploadModal() {
+        document.getElementById('uploadModal').classList.add('active');
+    }
+    function closeUploadModal(e) {
+        if(e.target.classList.contains('modal-overlay')) {
+            document.getElementById('uploadModal').classList.remove('active');
+        }
+    }
+
+    const uploadForm = document.getElementById('partnerUploadForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch("{{ url_for('tournaments.upload_partner_logo') }}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP status ' + response.status);
+                }
+                return response.json().catch(() => ({}));
+            })
+            .then(data => {
+                alert('Данные успешно сохранены!');
+                document.getElementById('uploadModal').classList.remove('active');
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error Details:', error);
+                alert('Ошибка при сохранении данных на сервере. Подробности в консоли (F12).');
+            });
         });
-    });
+    }
 </script>
 {% endblock %}

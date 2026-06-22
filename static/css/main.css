@@ -2608,3 +2608,172 @@ h1, h2, h3, .card-title, .winner-name-big, .hero-title, .group-title, .auth-head
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ИНЦЕПШН ТЕРМИНАЛ (ФУТЕР) */
+.inception-terminal {
+    background: #090d16 !important;
+    color: #4ade80 !important; /* Хакерский зеленый для базовых элементов */
+    padding: 40px 0 20px 0;
+    font-family: 'Courier New', Courier, monospace;
+    border-top: 2px solid #1e293b;
+    position: relative;
+}
+
+.terminal-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 12px;
+    margin-bottom: 25px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.terminal-dot {
+    width: 8px; height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ef4444;
+    animation: blink 1.5s infinite;
+}
+
+.terminal-date { margin-left: auto; }
+
+/* BENTO GRID */
+.terminal-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 900px) {
+    .terminal-bento-grid {
+        grid-template-columns: 1.5fr 1fr 1fr;
+    }
+    .widget-logs { grid-column: span 3; } /* Логи во всю ширину снизу сетки */
+}
+
+.terminal-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.widget-title {
+    margin: 0 0 15px 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+}
+
+/* ДРЕНВО ТУРНИРОВ */
+.tree-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.tree-node {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 2px solid #334155;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: bold; color: #475569;
+    background: #0f172a;
+    transition: all 0.3s ease;
+}
+
+.tree-line {
+    flex-grow: 1; height: 2px;
+    background: #334155;
+    max-width: 60px;
+}
+
+/* Свечение нод по статусу из БД */
+.tree-node.ongoing { border-color: #0ea5e9; color: #0ea5e9; box-shadow: 0 0 12px rgba(14, 165, 233, 0.4); }
+.tree-node.completed { border-color: #10b981; color: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+.tree-line.completed, .tree-line.ongoing { background: #10b981; }
+
+.tree-meta-text { font-size: 0.7rem; color: #475569; margin: 10px 0 0 0; text-align: center; }
+
+/* ТЕНЕВОЙ ПРОГНОЗ */
+.predict-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; color: #cbd5e1; }
+.predict-vs { text-align: center; color: #475569; font-size: 0.75rem; margin: 8px 0; font-style: italic; }
+.cyan { color: #0ea5e9 !important; }
+
+/* БИО-СТАТУС */
+.bio-welcome { font-size: 1rem; margin: 0 0 8px 0; }
+.bio-status { font-size: 0.85rem; color: #cbd5e1; }
+.status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.status-badge.admin, .status-badge.head { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+.status-badge.user { background: rgba(14, 165, 233, 0.15); color: #0ea5e9; }
+.bio-alert { font-size: 0.8rem; color: #f59e0b; margin-bottom: 12px; }
+.terminal-btn {
+    display: inline-block; background: #1e293b; color: #cbd5e1; padding: 6px 12px;
+    border-radius: 4px; text-decoration: none; font-size: 0.8rem; border: 1px solid #334155;
+    transition: all 0.2s ease;
+}
+.terminal-btn:hover { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+
+/* БЕГУЩАЯ СТРОКА ЛОГОВ */
+.logs-ticker-container {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px; padding: 10px;
+    height: 32px; overflow: hidden; position: relative;
+}
+.logs-ticker { position: absolute; width: 100%; animation: tickerScroll 12s infinite linear; }
+.log-item { font-size: 0.8rem; line-height: 32px; height: 32px; color: #4ade80; white-space: nowrap; }
+
+/* СИСТЕМНЫЙ ПОДВАЛ */
+.terminal-bottom {
+    border-top: 1px solid #1e293b; padding-top: 15px; margin-top: 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+}
+.terminal-copy { font-size: 0.7rem; color: #475569; margin: 0; }
+.terminal-socials a { color: #64748b; text-decoration: none; font-size: 0.8rem; margin-left: 15px; transition: color 0.2s; }
+.terminal-socials a:hover { color: #4ade80; }
+
+/* АНИМАЦИИ */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes tickerScroll {
+    0% { top: 0px; }
+    25% { top: 0px; }
+    30% { top: -32px; }
+    55% { top: -32px; }
+    60% { top: -64px; }
+    85% { top: -64px; }
+    90% { top: 0px; }
+    100% { top: 0px; }
+}

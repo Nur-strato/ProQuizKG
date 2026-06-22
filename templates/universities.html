@@ -3,7 +3,6 @@
 {% block title %}Universities | ProQuiz.kg{% endblock %}
 
 {% block body %}
-<!-- Neo-Bento UI Межвузовского Зачета Лиги -->
 <style>
     :root {
         --brand-blue: #0ea5e9;
@@ -105,7 +104,12 @@
     /* МОДЕРНОВАЯ ТАБЛИЦА СЕЗОНА */
     .leaderboard-table-wrapper {
         margin-bottom: 40px;
+    }
+
+    .leaderboard-scroll-area {
+        width: 100%;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .cyber-uni-table {
@@ -113,6 +117,7 @@
         border-collapse: separate;
         border-spacing: 0 8px;
         text-align: left;
+        min-width: 600px;
     }
 
     .cyber-uni-table th {
@@ -199,7 +204,7 @@
     /* ГРИД КАРТОЧЕК ПРОФИЛЕЙ */
     .uni-display-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 24px;
     }
 
@@ -301,80 +306,85 @@
     }
 
     @media (max-width: 768px) {
-        .glass-card { padding: 20px; }
+        .uni-layout { padding: 20px 0 40px 0; }
+        .uni-container { padding: 0 16px; }
+        .glass-card { padding: 24px 16px; border-radius: 16px; }
+        .uni-main-title { font-size: 1.8rem; }
+        .uni-subtitle { font-size: 0.95rem; }
+        .cyber-uni-table th, .cyber-uni-table td { padding: 12px 10px; font-size: 0.85rem; }
+        .admin-action-btn { width: 100%; justify-content: center; box-sizing: border-box; }
     }
 </style>
 
 <section class="uni-layout">
     <div class="uni-container">
 
-        <!-- PREMIUM HEADER CARD -->
         <div class="glass-card uni-header">
-            <span class="uni-badge">Лиговый Зачёт</span>
-            <h1 class="uni-main-title">🏛️ Межвузовский Зачёт Лиги</h1>
-            <p class="uni-subtitle">Общий рейтинг университетов по сумме набранных баллов всех их команд</p>
+            <span class="uni-badge">League Standings</span>
+            <h1 class="uni-main-title">Institutional Leaderboard</h1>
+            <p class="uni-subtitle">Overall university rankings based on the total score accumulated by all their rosters</p>
 
-            <!-- ИСПРАВЛЕНО: Безопасные права доступа — и admin, и head могут добавлять вузы -->
             {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
-                <a href="{{ url_for('admin_add_university') }}" class="admin-action-btn">
-                    ➕ Добавить новый университет
+                <a href="{{ url_for('admin.admin_add_university') }}" class="admin-action-btn">
+                    ✚ Add New University
                 </a>
             {% endif %}
         </div>
 
-        <!-- ТАБЛИЦА ЛИДЕРБОРДА СЕЗОНА -->
         <div class="glass-card leaderboard-table-wrapper">
             <h2 style="font-size: 1.35rem; color: var(--brand-dark); font-weight: 800; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
-                🏆 Текущий зачет сезона
+                🏆 Current Season Standings
             </h2>
 
-            <table class="cyber-uni-table">
-                <thead>
-                    <tr>
-                        <th style="width: 100px;">Место</th>
-                        <th>Университет</th>
-                        <th style="width: 150px;">Город</th>
-                        <th style="width: 180px; text-align: right;">Сумма баллов</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in universities %}
-                    {% set u_obj = item.object %}
-                    <tr class="table-row-item {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
+            <div class="leaderboard-scroll-area">
+                <table class="cyber-uni-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Rank</th>
+                            <th>University Name</th>
+                            <th style="width: 150px;">Location</th>
+                            <th style="width: 180px; text-align: right;">Total Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in universities %}
+                        {% set u_obj = item.object %}
+                        <tr class="table-row-item {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
 
-                        <td class="rank-cell">
-                            {% if loop.index == 1 %}🥇 1{% elif loop.index == 2 %}🥈 2{% elif loop.index == 3 %}🥉 3{% else %}{{ loop.index }}{% endif %}
-                        </td>
+                            <td class="rank-cell">
+                                {% if loop.index == 1 %}🥇 1{% elif loop.index == 2 %}🥈 2{% elif loop.index == 3 %}🥉 3{% else %}{{ loop.index }}{% endif %}
+                            </td>
 
-                        <td>
-                            <a href="{{ url_for('university_detail', id=u_obj.id) }}" class="uni-link-title">
-                                {{ u_obj.name }}
-                            </a>
-                            {% if u_obj.is_host %}
-                                <span class="status-tag tag-host">HOST</span>
-                            {% endif %}
-                            {% if u_obj.is_sponsor %}
-                                <span class="status-tag tag-sponsor">SPONSOR</span>
-                            {% endif %}
-                        </td>
+                            <td>
+                                <a href="{{ url_for('auth.university_detail', id=u_obj.id) }}" class="uni-link-title">
+                                    <!-- 🔥 СИНХРОНИЗИРОВАНО: Прямой вывод оригинального латинского имени из СУБД -->
+                                    {{ u_obj.name }}
+                                </a>
+                                {% if u_obj.is_host %}
+                                    <span class="status-tag tag-host">HOST</span>
+                                {% endif %}
+                                {% if u_obj.is_sponsor %}
+                                    <span class="status-tag tag-sponsor">SPONSOR</span>
+                                {% endif %}
+                            </td>
 
-                        <td style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">
-                            📍 {{ u_obj.city }}
-                        </td>
+                            <td style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">
+                                📍 {{ u_obj.city }}
+                            </td>
 
-                        <td style="text-align: right; font-weight: 900; color: var(--brand-blue); font-family: monospace; font-size: 1.15rem;">
-                            {{ item.total_score }}
-                        </td>
+                            <td style="text-align: right; font-weight: 900; color: var(--brand-blue); font-family: monospace; font-size: 1.15rem;">
+                                {{ item.total_score }} pts
+                            </td>
 
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- ГРИД ТЕХНОЛОГИЧНЫХ КАРТОЧЕК УНИВЕРСИТЕТОВ -->
         <h2 style="font-size: 1.5rem; color: var(--brand-dark); font-weight: 900; margin-bottom: 20px; letter-spacing: -0.01em;">
-            🏛️ Профили Университетов
+            🏛️ University Profiles
         </h2>
 
         <div class="uni-display-grid">
@@ -385,7 +395,7 @@
                 <div>
                     <div class="card-top-identity">
                         <h3 class="card-title-text">
-                            <a href="{{ url_for('university_detail', id=univ.id) }}" class="uni-link-title">
+                            <a href="{{ url_for('auth.university_detail', id=univ.id) }}" class="uni-link-title">
                                 {{ univ.name }}
                             </a>
                         </h3>
@@ -400,13 +410,12 @@
                     </div>
 
                     <p class="card-description">
-                        {{ univ.short_description if univ.short_description else "Короткое описание структуры вуза ещё не заполнено администрацией лиги." }}
+                        {{ univ.short_description if univ.short_description else "Short description for this university structure has not been filled yet by the league administration." }}
                     </p>
 
-                    <!-- ИСПРАВЛЕНО: Ролевая проверка для ссылки быстрого редактирования -->
                     {% if current_user.is_authenticated and current_user.status in ['admin', 'head'] %}
-                        <a href="{{ url_for('admin_quick_edit_university', id=univ.id) }}" class="quick-edit-link">
-                            ✏️ Быстрая правка
+                        <a href="{{ url_for('admin.admin_quick_edit_university', id=univ.id) }}" class="quick-edit-link">
+                            ✏️ Quick Edit
                         </a>
                     {% endif %}
                 </div>
@@ -414,7 +423,7 @@
                 <div class="card-footer-meta">
                     <span>📍 {{ univ.city }}</span>
                     {% if univ.is_sponsor %}
-                        <span style="color: var(--brand-blue); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Генеральный партнер</span>
+                        <span style="color: var(--brand-blue); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">General Partner</span>
                     {% else %}
                         <span style="color: var(--text-muted); font-family: monospace; font-weight: 800;">{{ item.total_score }} pts</span>
                     {% endif %}
@@ -422,12 +431,11 @@
             </div>
             {% endfor %}
 
-            <!-- ПЛИТКА-ПРИЗЫВ К ДЕЙСТВИЮ -->
             <div class="invite-dashed-card">
                 <div style="font-size: 2.5rem; margin-bottom: 12px; filter: drop-shadow(0 4px 10px rgba(14,165,233,0.1));">🚀</div>
-                <h3 style="color: var(--brand-dark); font-size: 1.2rem; font-weight: 800; margin: 0 0 6px 0;">Добавь свой вуз</h3>
+                <h3 style="color: var(--brand-dark); font-size: 1.2rem; font-weight: 800; margin: 0 0 6px 0;">Add Your University</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 240px; margin: 0; line-height: 1.5; font-weight: 500;">
-                    Собери команду своего университета и ворвись в общий зачет лиги!
+                    Assemble your varsity roster and conquer the overall league standings!
                 </p>
             </div>
 
@@ -436,7 +444,6 @@
     </div>
 </section>
 
-<!-- Интерактивный JS-трекинг свечения карт -->
 <script>
     document.querySelectorAll('[data-uni-hover-card]').forEach(card => {
         card.addEventListener('mousemove', e => {

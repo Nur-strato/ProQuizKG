@@ -1,34 +1,41 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit | Панель админа{% endblock %}
+{% block title %}Quick Edit | Admin Panel{% endblock %}
 
 {% block body %}
 <div style="max-width: 600px; margin: 40px auto; padding: 30px; background: var(--card-bg); border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.08);">
-    
+
+    <!-- NAVIGATION BACK LINK -->
     <div style="margin-bottom: 20px;">
-        <a href="{{ url_for('universities') }}" style="color: #0083e4; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
-            ← Отмена и назад к списку
+        <a href="{{ url_for('auth.universities') }}" style="color: #0083e4; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+            ← Cancel and back to leaderboard
         </a>
     </div>
 
-    <h1 style="color: var(--navy); font-size: 1.6rem; margin-bottom: 25px; font-weight: 800;">📝 Edit</h1>
-    
-    <form method="POST" action="{{ url_for('admin_quick_edit_university', id=university.id) }}">
+    <!-- MAIN HEADER -->
+    <h1 style="color: var(--navy); font-size: 1.6rem; margin-bottom: 25px; font-weight: 800;">📝 Quick Edit Card</h1>
+
+    <form method="POST" action="{{ url_for('admin.admin_quick_edit_university', id=university.id) }}">
+
+        <!-- UNIVERSITY NAME -->
         <div style="margin-bottom: 20px;">
             <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Name of the university:</label>
             <input type="text" name="name" value="{{ university.name }}" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
         </div>
 
+        <!-- LOCATION CITY -->
         <div style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Город:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">City / Location:</label>
             <input type="text" name="city" value="{{ university.city }}" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
         </div>
 
+        <!-- SHORT METADATA DESCRIPTION -->
        <div style="margin-bottom: 25px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Короткое описание для КАРТОЧКИ в списке:</label>
-            <textarea name="short_description" rows="3" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; resize: vertical; font-family: inherit;">{{ university.short_description if university.short_description else '' }}</textarea>
+            <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy);">Short description for list CARD view:</label>
+            <textarea name="short_description" rows="3" required placeholder="A brief one-liner summary displayed on the leaderboard catalog..." style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; resize: vertical; font-family: inherit;">{{ university.short_description if university.short_description else '' }}</textarea>
         </div>
 
+        <!-- STATUS CHECKBOXES -->
         <div style="margin-bottom: 25px; display: flex; gap: 20px;">
              <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--navy); cursor: pointer;">
                   <input type="checkbox" name="is_host" style="width: 18px; height: 18px; cursor: pointer;" {% if university.is_host %}checked{% endif %}>
@@ -41,8 +48,9 @@
             </label>
         </div>
 
+        <!-- ACTION SUBMIT BUTTON -->
         <button type="submit" style="background: #22c55e; color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 700; border-radius: 6px; cursor: pointer; width: 100%;">
-            Обновить карточку в списке
+            Update Catalog Card
         </button>
     </form>
 </div>
