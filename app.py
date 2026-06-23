@@ -160,7 +160,7 @@ def init_database():
                     date_str="5 – 25 April 2026",
                     bg_image="/static/img/uni2026.png",
                     team_format="Team Format (3 students)",
-                    prize_pool="51 000"
+                    prize_pool="75 000"
                 ),
                 Tournament(
                     id=2,
@@ -198,7 +198,7 @@ def init_database():
                 University(id=1, name="AUCA", city="Bishkek",
                            description="American University of Central Asia", is_host=True),
                 University(id=2, name="Salymbekov University", city="Bishkek",
-                           description="Salymbekov International University"),
+                           description="Salymbekov International University", is_sponsor=True),
                 University(id=3, name="KRSU", city="Bishkek",
                            description="Kyrgyz-Russian Slavic University")
             ]
