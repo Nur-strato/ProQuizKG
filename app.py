@@ -160,7 +160,7 @@ def init_database():
                     date_str="5 – 25 April 2026",
                     bg_image="/static/img/uni2026.png",
                     team_format="Team Format (3 students)",
-                    prize_pool="75 000"
+                    prize_pool="51 000"
                 ),
                 Tournament(
                     id=2,
@@ -198,7 +198,7 @@ def init_database():
                 University(id=1, name="AUCA", city="Bishkek",
                            description="American University of Central Asia", is_host=True),
                 University(id=2, name="Salymbekov University", city="Bishkek",
-                           description="Salymbekov International University", is_sponsor=True),
+                           description="Salymbekov International University"),
                 University(id=3, name="KRSU", city="Bishkek",
                            description="Kyrgyz-Russian Slavic University")
             ]
@@ -239,7 +239,9 @@ def init_database():
         print(f"❌ Ошибка инициализации базы: {e}")
 
 
+# --- РЕГИСТРАЦИЯ ИНИЦИАЛИЗАЦИИ БАЗЫ ДЛЯ ВСЕХ СРЕД (И ДЛЯ GUNICORN ТОЖЕ) ---
+with app.app_context():
+    init_database()
+
 if __name__ == '__main__':
-    with app.app_context():
-        init_database()
     app.run(debug=True, host='0.0.0.0', port=5000)
