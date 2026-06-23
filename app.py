@@ -239,7 +239,9 @@ def init_database():
         print(f"❌ Ошибка инициализации базы: {e}")
 
 
+# --- РЕГИСТРАЦИЯ ИНИЦИАЛИЗАЦИИ БАЗЫ ДЛЯ ВСЕХ СРЕД (И ДЛЯ GUNICORN ТОЖЕ) ---
+with app.app_context():
+    init_database()
+
 if __name__ == '__main__':
-    with app.app_context():
-        init_database()
     app.run(debug=True, host='0.0.0.0', port=5000)
